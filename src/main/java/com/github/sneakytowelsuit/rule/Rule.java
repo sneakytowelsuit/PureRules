@@ -11,6 +11,6 @@ public final class Rule<TInput, TValue> implements Evaluator<TInput> {
   private final Value<TValue> value;
 
   public boolean test(TInput input) {
-    return this.getOperator().test(this.getField(), this.getValue());
+    return this.getOperator().test(input, this.getField(), this.getValue());
   }
 }

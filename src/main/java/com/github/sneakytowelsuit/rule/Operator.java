@@ -1,8 +1,5 @@
 package com.github.sneakytowelsuit.rule;
 
-public final class Operator<TInput, TValue> {
-  public boolean test(Field<TInput, TValue> field, Value<TValue> value) {
-    // TODO: Implement
-    return false;
-  }
+public interface Operator<TInput, TValue> {
+  boolean test(TInput input, Field<TInput, TValue> field, Value<TValue> value);
 }
