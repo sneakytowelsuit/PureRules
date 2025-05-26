@@ -1,15 +1,13 @@
 plugins {
     id 'java'
-    id 'application'
+    id 'java-library'
+    id("com.diffplug.spotless") version "5.0.0"
 }
 
 ext {
    javaMainClass = "com.github.sneakytowelsuit.Main"
 }
 
-application {
-    mainClassName = javaMainClass
-}
 group = 'com.github.sneakytowelsuit'
 version = '1.0-SNAPSHOT'
 
