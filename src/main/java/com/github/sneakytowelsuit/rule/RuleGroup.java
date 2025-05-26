@@ -29,15 +29,11 @@ public final class RuleGroup<TInput> implements Evaluator<TInput> {
   @Builder.Default
   private final boolean isInverted = false;
   @Builder.Default
-  private final Bias bias = Bias.PESSIMISTIC;
+  private final Bias bias = Bias.EXCLUSIVE;
 
   public boolean evaluate(TInput input) {
     if(conditions.isEmpty()) {
-      boolean result = switch(this.getBias()) {
-        case OPTIMISTIC ->  true;
-        case PESSIMISTIC -> false;
-      };
-      return this.isInverted ^ result;
+      return this.isInverted ^ this.getBias().isBiasResult();
     }
     List<RuleGroup<TInput>> complexRules = new LinkedList<>();
     List<Rule<TInput, ?>> simpleRules = new LinkedList<>();
@@ -48,11 +44,11 @@ public final class RuleGroup<TInput> implements Evaluator<TInput> {
       }
     }
     boolean result = switch (Optional.ofNullable(this.getCombinator()).orElse(Combinator.AND)) {
-      case AND -> simpleRules.stream().allMatch(r ->
-              r.test(input)) &&  complexRules.stream().allMatch(r -> r.evaluate(input)
+      case AND -> simpleRules.stream().parallel().allMatch(r ->
+              r.test(input)) &&  complexRules.stream().parallel().allMatch(r -> r.evaluate(input)
       );
-      case OR -> simpleRules.stream().anyMatch(r ->
-              r.test(input)) ||   complexRules.stream().anyMatch(r -> r.evaluate(input)
+      case OR -> simpleRules.stream().parallel().anyMatch(r ->
+              r.test(input)) ||   complexRules.stream().parallel().anyMatch(r -> r.evaluate(input)
       );
     };
     return this.isInverted() ^ result;
