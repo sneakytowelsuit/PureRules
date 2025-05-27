@@ -1,11 +1,11 @@
 package com.github.sneakytowelsuit.rule;
 
+import lombok.Builder;
+import lombok.Getter;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-
-import lombok.Builder;
-import lombok.Getter;
 
 /**
  * An implementation of a Rule Group that has the following default opinions:

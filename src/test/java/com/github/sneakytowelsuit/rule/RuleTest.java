@@ -7,7 +7,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RuleTest {
     private static final InputUsernameField inputUsernameField = new InputUsernameField();
-    private static final MyUsernameValue myUsernameValue = new MyUsernameValue();
+    private static final String myUsernameValue = "some username";
+    private static final String myEmailValue = "some email";
     private static final StringEqualsOperator stringEqualsOperator = new StringEqualsOperator();
 
     @Test
@@ -17,7 +18,7 @@ class RuleTest {
                 .value(myUsernameValue)
                 .operator(stringEqualsOperator)
                 .build();
-        Input testInput = new Input(MyUsernameValue.VALUE, MyEmailValue.VALUE, new Preferences(true));
+        Input testInput = new Input(myUsernameValue, myEmailValue, new Preferences(true));
         boolean ruleResult = testRule.test(testInput);
         assertTrue(ruleResult);
     }
@@ -28,7 +29,7 @@ class RuleTest {
                 .value(myUsernameValue)
                 .operator(stringEqualsOperator)
                 .build();
-        Input testInput = new Input(MyUsernameValue.VALUE + "extra stuff", MyEmailValue.VALUE,  new Preferences(true));
+        Input testInput = new Input(myUsernameValue+ "extra stuff", myEmailValue,  new Preferences(true));
         boolean ruleResult = testRule.test(testInput);
         assertFalse(ruleResult);
     }
