@@ -31,9 +31,3 @@ dependencies {
 test {
     useJUnitPlatform()
 }
-
-spotless {
-    java {
-        googleJavaFormat()
-    }
-}
