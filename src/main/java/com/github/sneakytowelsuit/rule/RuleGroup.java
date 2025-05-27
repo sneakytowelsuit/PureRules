@@ -1,7 +1,9 @@
 package com.github.sneakytowelsuit.rule;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -20,6 +22,8 @@ import java.util.Optional;
  * @param <TInput> Type of the input that is being evaluated
  */
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 public final class RuleGroup<TInput> implements Evaluator<TInput> {
   @Builder.Default

@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 class RuleGroupSerdeTest {
     // Fields
     private static final InputUsernameField inputUsernameField = new InputUsernameField();
@@ -47,6 +50,9 @@ class RuleGroupSerdeTest {
                         nestedRuleGroup
                 ))
                 .build();
-        String v = RuleGroupSerde.serialize(ruleGroup);
+        RuleGroupSerde<Input> ruleGroupSerde = new RuleGroupSerde<Input>();
+        String serializedRuleGroup = ruleGroupSerde.serialize(ruleGroup);
+        RuleGroup<Input>  deserializedRuleGroup = ruleGroupSerde.deserialize(serializedRuleGroup);
+        assertFalse(serializedRuleGroup.isBlank());
     }
 }
