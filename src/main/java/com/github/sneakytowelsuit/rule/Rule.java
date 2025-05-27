@@ -7,6 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
+@EqualsAndHashCode
 public final class Rule<TInput, TValue> implements Evaluator<TInput> {
   private final Field<TInput, TValue> field;
   private final Operator<TInput, TValue> operator;

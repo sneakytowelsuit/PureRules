@@ -1,9 +1,6 @@
 package com.github.sneakytowelsuit.rule;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -25,6 +22,7 @@ import java.util.Optional;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@EqualsAndHashCode
 public final class RuleGroup<TInput> implements Evaluator<TInput> {
   @Builder.Default
   private final List<Evaluator<TInput>> conditions =  new LinkedList<>();

@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class RuleGroupSerdeTest {
     // Fields
@@ -54,5 +53,8 @@ class RuleGroupSerdeTest {
         String serializedRuleGroup = ruleGroupSerde.serialize(ruleGroup);
         RuleGroup<Input>  deserializedRuleGroup = ruleGroupSerde.deserialize(serializedRuleGroup);
         assertFalse(serializedRuleGroup.isBlank());
+        assertEquals(ruleGroup.getBias(), deserializedRuleGroup.getBias());
+        assertEquals(ruleGroup.getCombinator(), deserializedRuleGroup.getCombinator());
+        assertEquals(ruleGroup.isInverted(), deserializedRuleGroup.isInverted());
     }
 }
