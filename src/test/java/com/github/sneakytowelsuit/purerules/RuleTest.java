@@ -1,4 +1,4 @@
-package com.github.sneakytowelsuit.rule;
+package com.github.sneakytowelsuit.purerules;
 
 import com.github.sneakytowelsuit.sample.*;
 import org.junit.jupiter.api.Test;

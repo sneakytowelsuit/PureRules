@@ -1,4 +1,4 @@
-package com.github.sneakytowelsuit.rule;
+package com.github.sneakytowelsuit.purerules;
 
 import java.util.function.Function;
 

@@ -1,6 +1,6 @@
 package com.github.sneakytowelsuit.sample;
 
-import com.github.sneakytowelsuit.rule.Field;
+import com.github.sneakytowelsuit.purerules.Field;
 
 import java.util.function.Function;
 

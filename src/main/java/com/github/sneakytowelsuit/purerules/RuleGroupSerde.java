@@ -1,4 +1,4 @@
-package com.github.sneakytowelsuit.rule;
+package com.github.sneakytowelsuit.purerules;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -62,25 +62,25 @@ public class RuleGroupSerde<InputType> {
         }
     }
 
-    private List<Evaluator<InputType>> deserializeConditions(JsonNode jsonNode) {
-        List<Evaluator<InputType>> evaluators = new ArrayList<>();
+    private List<Condition<InputType>> deserializeConditions(JsonNode jsonNode) {
+        List<Condition<InputType>> conditions = new ArrayList<>();
         ArrayNode nodeConditions = (ArrayNode) jsonNode.get(RuleGroupJsonKeys.CONDITIONS.getKey());
         if (nodeConditions.isArray()) {
             for (JsonNode conditionNode : nodeConditions) {
                 if(isRuleGroup(conditionNode)){
                     try {
-                        evaluators.add(deserializeJsonNodeToRuleGroup(conditionNode));
+                        conditions.add(deserializeJsonNodeToRuleGroup(conditionNode));
                     } catch (JsonProcessingException e) {
                         throw new RuleGroupDeserializationException("Exception encountered deserializing RuleGroup conditions", e);
                     }
                 } else if (isRule(conditionNode)) {
-                   evaluators.add(deserializeRule(conditionNode));
+                   conditions.add(deserializeRule(conditionNode));
                 } else {
                     throw new RuleGroupDeserializationException("Unexpected node encountered in RuleGroup conditions");
                 }
             }
         }
-       return evaluators;
+       return conditions;
     }
 
     private Rule<InputType, ?> deserializeRule(JsonNode jsonNode) {

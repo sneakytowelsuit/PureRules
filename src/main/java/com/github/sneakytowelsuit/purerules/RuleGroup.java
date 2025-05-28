@@ -1,4 +1,4 @@
-package com.github.sneakytowelsuit.rule;
+package com.github.sneakytowelsuit.purerules;
 
 import lombok.*;
 
@@ -23,9 +23,9 @@ import java.util.Optional;
 @AllArgsConstructor
 @Getter
 @EqualsAndHashCode
-public final class RuleGroup<TInput> implements Evaluator<TInput> {
+public final class RuleGroup<TInput> implements Condition<TInput> {
   @Builder.Default
-  private final List<Evaluator<TInput>> conditions =  new LinkedList<>();
+  private final List<Condition<TInput>> conditions =  new LinkedList<>();
   @Builder.Default
   private final Combinator combinator = Combinator.AND;
   @Builder.Default
@@ -39,7 +39,7 @@ public final class RuleGroup<TInput> implements Evaluator<TInput> {
     }
     List<RuleGroup<TInput>> complexRules = new LinkedList<>();
     List<Rule<TInput, ?>> simpleRules = new LinkedList<>();
-    for (Evaluator<TInput> condition : this.getConditions()) {
+    for (Condition<TInput> condition : this.getConditions()) {
       switch (condition) {
         case RuleGroup<TInput> ruleGroup -> complexRules.add(ruleGroup);
         case Rule<TInput, ?>  rule -> simpleRules.add(rule);

@@ -1,4 +1,4 @@
-package com.github.sneakytowelsuit.rule;
+package com.github.sneakytowelsuit.purerules;
 
 import lombok.*;
 
@@ -8,7 +8,7 @@ import lombok.*;
 @Getter
 @Setter
 @EqualsAndHashCode
-public final class Rule<TInput, TValue> implements Evaluator<TInput> {
+public final class Rule<TInput, TValue> implements Condition<TInput> {
   private final Field<TInput, TValue> field;
   private final Operator<TInput, TValue> operator;
   private final TValue value;
