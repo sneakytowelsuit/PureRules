@@ -5,10 +5,10 @@ import com.github.sneakytowelsuit.purerules.Operator;
 
 import java.util.Locale;
 
-public class StringContainsCaseInsensitiveOperator implements Operator<Input, String> {
+public class StringContainsCaseInsensitiveOperator implements Operator<String> {
 
     @Override
-    public boolean test(Input input, Field<Input, String> field, String value) {
-        return field.getFieldValueFunction().apply(input).toLowerCase(Locale.ROOT).contains(value.toLowerCase(Locale.ROOT));
+    public boolean test(String input, String value) {
+        return input.toLowerCase(Locale.ROOT).contains(value.toLowerCase(Locale.ROOT));
     }
 }

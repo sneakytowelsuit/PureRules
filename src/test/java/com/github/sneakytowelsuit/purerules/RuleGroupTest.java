@@ -26,7 +26,7 @@ class RuleGroupTest {
 
     @Test
     public void noConditions_defaultPessimistic(){
-       Input input = new Input("", "", new Preferences(true));
+       Input input = new Input("", "", new Preferences(true, ""));
        RuleGroup<Input> ruleGroup = RuleGroup.<Input>builder()
                .build();
        boolean result = ruleGroup.evaluate(input);
@@ -35,7 +35,7 @@ class RuleGroupTest {
 
     @Test
     public void noConditions_defaultPessimisticInverted(){
-        Input input = new Input("", "", new Preferences(true));
+        Input input = new Input("", "", new Preferences(true, ""));
         RuleGroup<Input> ruleGroup = RuleGroup.<Input>builder()
                 .isInverted(true)
                .build();
@@ -45,7 +45,7 @@ class RuleGroupTest {
 
     @Test
     public void noConditions_optimisticBias() {
-        Input input = new Input("", "", new Preferences(true));
+        Input input = new Input("", "", new Preferences(true, ""));
         RuleGroup<Input> ruleGroup = RuleGroup.<Input>builder()
                 .bias(Bias.INCLUSIVE)
                 .build();
@@ -55,7 +55,7 @@ class RuleGroupTest {
 
     @Test
     public void noConditions_optimisticBiasInverted() {
-        Input input = new Input("", "", new Preferences(true));
+        Input input = new Input("", "", new Preferences(true, ""));
         RuleGroup<Input> ruleGroup = RuleGroup.<Input>builder()
                 .bias(Bias.INCLUSIVE)
                 .isInverted(true)
@@ -66,7 +66,7 @@ class RuleGroupTest {
 
     @Test
     public void singleCondition_passesRule() {
-        Input input = new Input(myUsernameValue, "", new Preferences(true));
+        Input input = new Input(myUsernameValue, "", new Preferences(true, ""));
         RuleGroup<Input> ruleGroup = RuleGroup.<Input>builder()
                 .conditions(List.of(
                         Rule.<Input, String>builder()
@@ -81,7 +81,7 @@ class RuleGroupTest {
 
     @Test
     public void singleCondition_passesRuleInverted() {
-        Input input = new Input(myUsernameValue + "something to fail", "", new Preferences(true));
+        Input input = new Input(myUsernameValue + "something to fail", "", new Preferences(true, ""));
         RuleGroup<Input> ruleGroup = RuleGroup.<Input>builder()
                 .conditions(List.of(
                         Rule.<Input, String>builder()
@@ -97,7 +97,7 @@ class RuleGroupTest {
 
     @Test
     public void singleCondition_deepInInputPassesRule() {
-        Input input = new Input("", "", new Preferences(myDarkModeValue));
+        Input input = new Input("", "", new Preferences(myDarkModeValue, ""));
         Rule<Input, Boolean> rule = Rule.<Input, Boolean>builder()
                 .value(myDarkModeValue)
                 .operator(booleanEqualsOperator)
@@ -111,7 +111,7 @@ class RuleGroupTest {
 
     @Test
     public void multipleConditions_passesRuleGroup() {
-        Input input = new Input(myUsernameValue, myEmailValue, new Preferences(myDarkModeValue));
+        Input input = new Input(myUsernameValue, myEmailValue, new Preferences(myDarkModeValue, ""));
         RuleGroup<Input> ruleGroup = RuleGroup.<Input>builder()
                 .conditions(List.of(
                         Rule.<Input, String>builder()
@@ -131,7 +131,7 @@ class RuleGroupTest {
 
     @Test
     public void multipleConditions_nestedConditionPassesRuleGroup() {
-        Input input = new Input(myUsernameValue, myEmailValue, new Preferences(myDarkModeValue));
+        Input input = new Input(myUsernameValue, myEmailValue, new Preferences(myDarkModeValue, ""));
         RuleGroup<Input> nestedRuleGroup = RuleGroup.<Input>builder()
                 .conditions(List.of(
                         Rule.<Input, String>builder()
@@ -161,7 +161,7 @@ class RuleGroupTest {
 
     @Test
     public void multipleConditions_nestedConditionFailsRuleGroup() {
-        Input input = new Input(myUsernameValue + "something to fail it", myEmailValue, new Preferences(myDarkModeValue));
+        Input input = new Input(myUsernameValue + "something to fail it", myEmailValue, new Preferences(myDarkModeValue, ""));
         RuleGroup<Input> nestedRuleGroup = RuleGroup.<Input>builder()
                 .conditions(List.of(
                         Rule.<Input, String>builder()
@@ -191,7 +191,7 @@ class RuleGroupTest {
 
     @Test
     public void multipleConditions_nestConditionsOrCombinatorPassesRuleGroup() {
-        Input input = new Input(myUsernameValue + "something to fail it", myEmailValue, new Preferences(myDarkModeValue));
+        Input input = new Input(myUsernameValue + "something to fail it", myEmailValue, new Preferences(myDarkModeValue, ""));
         RuleGroup<Input> nestedRuleGroup = RuleGroup.<Input>builder()
                 .conditions(List.of(
                         Rule.<Input, String>builder()
@@ -222,7 +222,7 @@ class RuleGroupTest {
 
     @Test
     public void multipleConditions_nestConditionsOrCombinatorFailsRuleGroupWithInversion() {
-        Input input = new Input(myUsernameValue + "something to fail it", myEmailValue, new Preferences(myDarkModeValue));
+        Input input = new Input(myUsernameValue + "something to fail it", myEmailValue, new Preferences(myDarkModeValue, ""));
         RuleGroup<Input> nestedRuleGroup = RuleGroup.<Input>builder()
                 .conditions(List.of(
                         Rule.<Input, String>builder()

@@ -10,10 +10,13 @@ import lombok.*;
 @EqualsAndHashCode
 public final class Rule<TInput, TValue> implements Condition<TInput> {
   private final Field<TInput, TValue> field;
-  private final Operator<TInput, TValue> operator;
+  private final Operator<TValue> operator;
   private final TValue value;
 
   public boolean test(TInput input) {
-    return this.getOperator().test(input, this.getField(), this.getValue());
+      assert this.getOperator() != null;
+      assert this.getField() != null;
+      assert this.getField().getFieldValueFunction() != null;
+      return this.getOperator().test(this.getField().getFieldValueFunction().apply(input), this.getValue());
   }
 }

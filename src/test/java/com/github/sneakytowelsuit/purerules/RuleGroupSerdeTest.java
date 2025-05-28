@@ -34,6 +34,11 @@ class RuleGroupSerdeTest {
                                 .field(inputEmailField)
                                 .operator(stringEqualsOperator)
                                 .value(myEmailValue)
+                                .build(),
+                        Rule.<Input, Preferences>builder()
+                                .field(new PreferencesField())
+                                .operator(new PreferencesEqualsOperator())
+                                .value(new Preferences(true, "someone"))
                                 .build()
                 ))
                 .combinator(Combinator.OR)

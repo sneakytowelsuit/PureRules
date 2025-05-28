@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 import lombok.Getter;
 
 import java.lang.reflect.InvocationTargetException;
@@ -22,7 +23,7 @@ public class RuleGroupSerde<InputType> {
     @Getter
     private final Map<String, Field<InputType, ?>> fieldCache = new HashMap<>();
     @Getter
-    private final Map<String, Operator<InputType, ?>> operatorCache = new HashMap<>();
+    private final Map<String, Operator<?>> operatorCache = new HashMap<>();
 
     public RuleGroup<InputType> deserialize(String json) {
         try {
@@ -86,7 +87,7 @@ public class RuleGroupSerde<InputType> {
     private Rule<InputType, ?> deserializeRule(JsonNode jsonNode) {
         return (Rule<InputType, ?>) Rule.builder()
                 .field((Field<Object, Object>) deserializeJsonNodeToField(jsonNode))
-                .operator((Operator<Object, Object>) deserializeJsonNodeToOperator(jsonNode))
+                .operator((Operator<Object>) deserializeJsonNodeToOperator(jsonNode))
                 .value(deserializeJsonNodeToValue(jsonNode))
                 .build();
     }
@@ -105,12 +106,12 @@ public class RuleGroupSerde<InputType> {
                );
     }
 
-    private Operator<InputType, ?> deserializeJsonNodeToOperator(JsonNode jsonNode) {
+    private Operator<?> deserializeJsonNodeToOperator(JsonNode jsonNode) {
         String operatorClassName = jsonNode.get(RuleGroupJsonKeys.OPERATOR.getKey()).asText();
         return this.getOperatorCache().computeIfAbsent(operatorClassName,
                 className -> {
                     try {
-                        return (Operator<InputType, ?>) Class.forName(className).getDeclaredConstructor().newInstance();
+                        return (Operator<?>) Class.forName(className).getDeclaredConstructor().newInstance();
                     } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
                     NoSuchMethodException | ClassNotFoundException | ClassCastException e) {
                         throw new RuleGroupDeserializationException("Exception encountered while deserializing RuleGroup Rule Operator: " + operatorClassName, e);
@@ -120,7 +121,17 @@ public class RuleGroupSerde<InputType> {
     }
 
     private <T> T deserializeJsonNodeToValue(JsonNode jsonNode) {
-        return ((T) jsonNode.get(RuleGroupJsonKeys.VALUE.getKey()));
+        JsonNode valueNode =  jsonNode.get(RuleGroupJsonKeys.VALUE.getKey());
+        String valueClassName = valueNode.get(RuleGroupJsonKeys.VALUE_CLASS.getKey()).asText();
+        JsonNode valueNodeValue = valueNode.get(RuleGroupJsonKeys.VALUE_VALUE.getKey());
+        try {
+            return (T) MAPPER.convertValue(
+                    valueNodeValue,
+                    Class.forName(valueClassName)
+            );
+        } catch (ClassNotFoundException | ClassCastException e) {
+            throw new RuleGroupDeserializationException("Exception encountered while deserializing RuleGroup Rule Value: " + valueClassName, e);
+        }
     }
 
     private boolean isRule(JsonNode jsonNode) {
