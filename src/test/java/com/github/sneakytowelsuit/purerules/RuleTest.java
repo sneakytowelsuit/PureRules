@@ -19,7 +19,7 @@ class RuleTest {
                 .operator(stringEqualsOperator)
                 .build();
         Input testInput = new Input(myUsernameValue, myEmailValue, new Preferences(true, ""));
-        boolean ruleResult = testRule.test(testInput);
+        boolean ruleResult = testRule.evaluate(testInput);
         assertTrue(ruleResult);
     }
     @Test
@@ -30,7 +30,7 @@ class RuleTest {
                 .operator(stringEqualsOperator)
                 .build();
         Input testInput = new Input(myUsernameValue+ "extra stuff", myEmailValue,  new Preferences(true, ""));
-        boolean ruleResult = testRule.test(testInput);
+        boolean ruleResult = testRule.evaluate(testInput);
         assertFalse(ruleResult);
     }
 }
