@@ -39,7 +39,6 @@ public final class RuleGroup<TInput> implements Condition<TInput> {
     private final boolean isInverted = false;
     @Builder.Default
     private final Bias bias = Bias.EXCLUSIVE;
-    private final static EngineContext EVALUATION_CONTEXT_CACHE = EngineContext.getInstance();
 
     public boolean evaluate(TInput input) {
         Long threadId = Thread.currentThread().threadId();
@@ -47,10 +46,11 @@ public final class RuleGroup<TInput> implements Condition<TInput> {
     }
 
     private boolean evaluateConditions(TInput input, Long threadId, List<String> parentIdPath) {
-        EVALUATION_CONTEXT_CACHE.instantiateDeterministicEvaluationContext(threadId);
+        EngineContext ctx = EngineContext.getInstance();
+        ctx.instantiateDeterministicEvaluationContext(threadId);
         if (conditions.isEmpty()) {
             boolean result = this.isInverted ^ this.getBias().isBiasResult();
-            EVALUATION_CONTEXT_CACHE.getDeterministicEvaluationContext(threadId).getConditionResults().putIfAbsent(parentIdPath, result);
+            ctx.getDeterministicEvaluationContext(threadId).getConditionResults().putIfAbsent(parentIdPath, result);
             return result;
         }
         List<RuleGroup<TInput>> complexRules = new LinkedList<>();
@@ -70,7 +70,7 @@ public final class RuleGroup<TInput> implements Condition<TInput> {
                     || complexRules.stream().anyMatch(r -> r.evaluateConditions(input, threadId, parentIdPath));
         };
         boolean finalResult = this.isInverted() ^ result;
-        EVALUATION_CONTEXT_CACHE.getDeterministicEvaluationContext(threadId).getConditionResults().putIfAbsent(parentIdPath, finalResult);
+        ctx.getDeterministicEvaluationContext(threadId).getConditionResults().putIfAbsent(parentIdPath, finalResult);
         return finalResult;
     }
 }
