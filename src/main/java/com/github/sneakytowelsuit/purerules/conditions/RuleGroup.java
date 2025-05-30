@@ -47,10 +47,10 @@ public final class RuleGroup<TInput> implements Condition<TInput> {
     }
 
     private boolean evaluateConditions(TInput input, Long threadId, List<String> parentIdPath) {
-        EVALUATION_CONTEXT_CACHE.instantiateEvaluationContext(threadId);
+        EVALUATION_CONTEXT_CACHE.instantiateDeterministicEvaluationContext(threadId);
         if (conditions.isEmpty()) {
             boolean result = this.isInverted ^ this.getBias().isBiasResult();
-            EVALUATION_CONTEXT_CACHE.getEvaluationContext(threadId).getConditionResults().putIfAbsent(parentIdPath, result);
+            EVALUATION_CONTEXT_CACHE.getDeterministicEvaluationContext(threadId).getConditionResults().putIfAbsent(parentIdPath, result);
             return result;
         }
         List<RuleGroup<TInput>> complexRules = new LinkedList<>();
@@ -70,7 +70,7 @@ public final class RuleGroup<TInput> implements Condition<TInput> {
                     || complexRules.stream().anyMatch(r -> r.evaluateConditions(input, threadId, parentIdPath));
         };
         boolean finalResult = this.isInverted() ^ result;
-        EVALUATION_CONTEXT_CACHE.getEvaluationContext(threadId).getConditionResults().putIfAbsent(parentIdPath, finalResult);
+        EVALUATION_CONTEXT_CACHE.getDeterministicEvaluationContext(threadId).getConditionResults().putIfAbsent(parentIdPath, finalResult);
         return finalResult;
     }
 }

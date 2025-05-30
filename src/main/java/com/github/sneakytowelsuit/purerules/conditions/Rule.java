@@ -30,7 +30,7 @@ public final class Rule<TInput, TValue> implements Condition<TInput> {
         List<String> idPath = ConditionUtils.getIdPath(this, parentIdPath);
         boolean result = this.getOperator().test(this.getField().getFieldValueFunction().apply(input), this.getValue());
         EngineContext.getInstance()
-                .getEvaluationContext(threadId)
+                .getDeterministicEvaluationContext(threadId)
                 .getConditionResults()
                 .put(idPath, result);
         return result;

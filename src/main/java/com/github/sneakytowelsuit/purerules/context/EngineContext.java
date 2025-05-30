@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class EngineContext {
     @Getter
-    public static class DeterministicEvaluationContext {
+    public final static class DeterministicEvaluationContext {
         private final Map<List<String>, Boolean> conditionResults;
         public DeterministicEvaluationContext() {
             this.conditionResults = new ConcurrentHashMap<>();
@@ -26,16 +26,16 @@ public class EngineContext {
     private EngineContext() {
         this.threadIdToContextMap = new ConcurrentHashMap<>();
     }
-    public void instantiateEvaluationContext(Long threadId) {
-       this.getThreadIdToContextMap().putIfAbsent(threadId, new DeterministicEvaluationContext());
+    public void instantiateDeterministicEvaluationContext(Long threadId) {
+       this.getThreadIdBoundDeterministicEvaluationContext().putIfAbsent(threadId, new DeterministicEvaluationContext());
     }
-    private Map<Long, DeterministicEvaluationContext> getThreadIdToContextMap() {
+    private Map<Long, DeterministicEvaluationContext> getThreadIdBoundDeterministicEvaluationContext() {
         return this.threadIdToContextMap;
     }
-    public DeterministicEvaluationContext getEvaluationContext(Long threadId) {
-        return this.getThreadIdToContextMap().computeIfAbsent(threadId, k -> new DeterministicEvaluationContext());
+    public DeterministicEvaluationContext getDeterministicEvaluationContext(Long threadId) {
+        return this.getThreadIdBoundDeterministicEvaluationContext().computeIfAbsent(threadId, k -> new DeterministicEvaluationContext());
     }
     public void clearContext(Long threadId) {
-        this.getThreadIdToContextMap().remove(threadId);
+        this.getThreadIdBoundDeterministicEvaluationContext().remove(threadId);
     }
 }
