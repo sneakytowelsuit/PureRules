@@ -23,7 +23,7 @@ class RuleTest {
                 .operator(stringEqualsOperator)
                 .build();
         Input testInput = new Input(myUsernameValue, myEmailValue, new Preferences(true, ""));
-        boolean ruleResult = testRule.evaluate(testInput);
+        boolean ruleResult = testRule.evaluate(testInput, null, Thread.currentThread().threadId());
         assertTrue(ruleResult);
     }
     @Test
@@ -34,7 +34,7 @@ class RuleTest {
                 .operator(stringEqualsOperator)
                 .build();
         Input testInput = new Input(myUsernameValue+ "extra stuff", myEmailValue,  new Preferences(true, ""));
-        boolean ruleResult = testRule.evaluate(testInput);
+        boolean ruleResult = testRule.evaluate(testInput, null, Thread.currentThread().threadId());
         assertFalse(ruleResult);
     }
 }

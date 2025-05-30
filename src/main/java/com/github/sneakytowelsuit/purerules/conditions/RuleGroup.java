@@ -1,6 +1,7 @@
 package com.github.sneakytowelsuit.purerules.conditions;
 
 import com.github.sneakytowelsuit.purerules.context.EngineContext;
+import com.github.sneakytowelsuit.purerules.utils.ConditionUtils;
 import lombok.*;
 
 import java.util.LinkedList;
@@ -42,14 +43,14 @@ public final class RuleGroup<TInput> implements Condition<TInput> {
 
     public boolean evaluate(TInput input) {
         Long threadId = Thread.currentThread().threadId();
-        return evaluateConditions(input, threadId);
+        return evaluateConditions(input, threadId, ConditionUtils.getIdPath(this,null));
     }
 
-    private boolean evaluateConditions(TInput input, Long threadId) {
+    private boolean evaluateConditions(TInput input, Long threadId, List<String> parentIdPath) {
         EVALUATION_CONTEXT_CACHE.instantiateEvaluationContext(threadId);
         if (conditions.isEmpty()) {
             boolean result = this.isInverted ^ this.getBias().isBiasResult();
-            EVALUATION_CONTEXT_CACHE.getEvaluationContext(threadId).getConditionResults().putIfAbsent(this.getId(), result);
+            EVALUATION_CONTEXT_CACHE.getEvaluationContext(threadId).getConditionResults().putIfAbsent(parentIdPath, result);
             return result;
         }
         List<RuleGroup<TInput>> complexRules = new LinkedList<>();
@@ -61,16 +62,15 @@ public final class RuleGroup<TInput> implements Condition<TInput> {
             }
         }
         boolean result = switch (Optional.ofNullable(this.getCombinator()).orElse(Combinator.AND)) {
-            case AND -> simpleRules.stream().allMatch(r -> r.evaluate(input))
-            && complexRules.stream().allMatch(r -> {
-                // Pass the thread ID to the rule group so it can cache results by the parent thread ID
-                return r.evaluateConditions(input, threadId);
-            });
-            case OR -> simpleRules.stream().anyMatch(r -> r.evaluate(input))
-                    || complexRules.stream().anyMatch(r -> r.evaluateConditions(input, threadId));
+            case AND ->
+                    simpleRules.stream().allMatch(r -> r.evaluate(input, parentIdPath, threadId))
+                    && complexRules.stream().allMatch(r -> r.evaluateConditions(input, threadId, parentIdPath));
+            case OR ->
+                    simpleRules.stream().anyMatch(r -> r.evaluate(input, parentIdPath, threadId))
+                    || complexRules.stream().anyMatch(r -> r.evaluateConditions(input, threadId, parentIdPath));
         };
         boolean finalResult = this.isInverted() ^ result;
-        EVALUATION_CONTEXT_CACHE.getEvaluationContext(threadId).getConditionResults().putIfAbsent(this.getId(), finalResult);
+        EVALUATION_CONTEXT_CACHE.getEvaluationContext(threadId).getConditionResults().putIfAbsent(parentIdPath, finalResult);
         return finalResult;
     }
 }

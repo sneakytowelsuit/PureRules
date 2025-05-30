@@ -3,13 +3,14 @@ package com.github.sneakytowelsuit.purerules.context;
 import com.github.sneakytowelsuit.purerules.conditions.Field;
 import lombok.Getter;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class EngineContext {
     @Getter
     public static class EvaluationContext {
-        private final Map<String, Boolean> conditionResults;
+        private final Map<List<String>, Boolean> conditionResults;
         public EvaluationContext() {
             this.conditionResults = new ConcurrentHashMap<>();
         }
@@ -34,7 +35,7 @@ public class EngineContext {
         return this.threadIdToContextMap;
     }
     public EvaluationContext getEvaluationContext(Long threadId) {
-        return this.getThreadIdToContextMap().get(threadId);
+        return this.getThreadIdToContextMap().computeIfAbsent(threadId, k -> new EvaluationContext());
     }
     public void clearContext(Long threadId) {
         this.getThreadIdToContextMap().remove(threadId);

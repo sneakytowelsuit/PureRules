@@ -1,7 +1,10 @@
 package com.github.sneakytowelsuit.purerules.conditions;
 
+import com.github.sneakytowelsuit.purerules.context.EngineContext;
+import com.github.sneakytowelsuit.purerules.utils.ConditionUtils;
 import lombok.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Builder
@@ -18,11 +21,18 @@ public final class Rule<TInput, TValue> implements Condition<TInput> {
     private final Operator<TValue> operator;
     private final TValue value;
 
-    public boolean evaluate(TInput input) {
+    public boolean evaluate(TInput input, List<String> parentIdPath, Long threadId) {
         assert this.getOperator() != null;
         assert this.getField() != null;
         assert this.getField().getFieldValueFunction() != null;
+        assert threadId != null;
 
-        return this.getOperator().test(this.getField().getFieldValueFunction().apply(input), this.getValue());
+        List<String> idPath = ConditionUtils.getIdPath(this, parentIdPath);
+        boolean result = this.getOperator().test(this.getField().getFieldValueFunction().apply(input), this.getValue());
+        EngineContext.getInstance()
+                .getEvaluationContext(threadId)
+                .getConditionResults()
+                .put(idPath, result);
+        return result;
     }
 }
