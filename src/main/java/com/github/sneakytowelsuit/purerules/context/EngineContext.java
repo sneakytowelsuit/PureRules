@@ -1,21 +1,18 @@
 package com.github.sneakytowelsuit.purerules.context;
 
-import lombok.Getter;
+import com.github.sneakytowelsuit.purerules.context.deterministic.DeterministicEvaluationContext;
+import com.github.sneakytowelsuit.purerules.context.probabilistic.ProbabilisticEvaluationContext;
+import com.github.sneakytowelsuit.purerules.engine.EngineMode;
 
-import java.util.List;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class EngineContext {
-    @Getter
-    public final static class DeterministicEvaluationContext {
-        private final Map<List<String>, Boolean> conditionResults;
-        public DeterministicEvaluationContext() {
-            this.conditionResults = new ConcurrentHashMap<>();
-        }
-    }
+    private final Map<Long, DeterministicEvaluationContext> threadIdToDeterministicEvaluationContext;
+    private final Map<Long, ProbabilisticEvaluationContext> threadIdToProbabilisticEvaluationContext;
+    private final EnumMap<EngineMode, EvaluationContext<?>> evaluationContexts = new EnumMap<>(EngineMode.class);
 
-    private final Map<Long, DeterministicEvaluationContext> threadIdToContextMap;
     private static EngineContext instance;
     public static EngineContext getInstance() {
         if (instance == null) {
@@ -24,18 +21,35 @@ public class EngineContext {
         return instance;
     }
     private EngineContext() {
-        this.threadIdToContextMap = new ConcurrentHashMap<>();
+        this.threadIdToDeterministicEvaluationContext = new ConcurrentHashMap<>();
+        this.threadIdToProbabilisticEvaluationContext = new ConcurrentHashMap<>();
+        this.evaluationContexts.put(EngineMode.DETERMINISTIC, new DeterministicEvaluationContext());
+        this.evaluationContexts.put(EngineMode.PROBABILISTIC, new ProbabilisticEvaluationContext());
     }
     public void instantiateDeterministicEvaluationContext(Long threadId) {
        this.getThreadIdBoundDeterministicEvaluationContext().putIfAbsent(threadId, new DeterministicEvaluationContext());
     }
+    public void instantiateProbabilisticEvaluationContext(Long threadId) {
+        this.threadIdToProbabilisticEvaluationContext.putIfAbsent(threadId, new ProbabilisticEvaluationContext());
+    }
     private Map<Long, DeterministicEvaluationContext> getThreadIdBoundDeterministicEvaluationContext() {
-        return this.threadIdToContextMap;
+        return this.threadIdToDeterministicEvaluationContext;
+    }
+    private Map<Long, ProbabilisticEvaluationContext> getThreadIdToProbabilisticEvaluationContext() {
+        return this.threadIdToProbabilisticEvaluationContext;
     }
     public DeterministicEvaluationContext getDeterministicEvaluationContext(Long threadId) {
         return this.getThreadIdBoundDeterministicEvaluationContext().computeIfAbsent(threadId, k -> new DeterministicEvaluationContext());
     }
-    public void clearContext(Long threadId) {
+    public ProbabilisticEvaluationContext getProbabilisticEvaluationContext(Long threadId) {
+        return this.getThreadIdToProbabilisticEvaluationContext().computeIfAbsent(threadId, k -> new ProbabilisticEvaluationContext());
+    }
+    public void flush(Long threadId) {
         this.getThreadIdBoundDeterministicEvaluationContext().remove(threadId);
+        this.getThreadIdToProbabilisticEvaluationContext().remove(threadId);
+    }
+    public void flushAll() {
+        this.getThreadIdBoundDeterministicEvaluationContext().clear();
+        this.getThreadIdToProbabilisticEvaluationContext().clear();
     }
 }
