@@ -1,6 +1,11 @@
 package com.github.sneakytowelsuit.purerules;
 
-import com.github.sneakytowelsuit.sample.*;
+import com.github.sneakytowelsuit.purerules.conditions.Combinator;
+import com.github.sneakytowelsuit.purerules.conditions.Rule;
+import com.github.sneakytowelsuit.purerules.conditions.RuleGroup;
+import com.github.sneakytowelsuit.purerules.example.*;
+import com.github.sneakytowelsuit.purerules.operators.EqualsOperator;
+import com.github.sneakytowelsuit.purerules.serialization.RuleGroupSerde;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -19,10 +24,10 @@ class RuleGroupSerdeTest {
     private static final Boolean myDarkModeValue = true;
 
     // Operators
-    private static final StringEqualsOperator stringEqualsOperator = new StringEqualsOperator();
-    private static final BooleanEqualsOperator booleanEqualsOperator = new BooleanEqualsOperator();
+    private static final EqualsOperator<String> stringEqualsOperator = new EqualsOperator<>();
+    private static final EqualsOperator<Boolean> booleanEqualsOperator = new EqualsOperator<>();
     @Test
-    void playground(){
+    void there_and_back_again(){
         RuleGroup<Input> nestedRuleGroup = RuleGroup.<Input>builder()
                 .conditions(List.of(
                         Rule.<Input, String>builder()

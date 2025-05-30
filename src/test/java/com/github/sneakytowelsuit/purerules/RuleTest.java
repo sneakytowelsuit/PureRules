@@ -1,6 +1,10 @@
 package com.github.sneakytowelsuit.purerules;
 
-import com.github.sneakytowelsuit.sample.*;
+import com.github.sneakytowelsuit.purerules.conditions.Rule;
+import com.github.sneakytowelsuit.purerules.example.Input;
+import com.github.sneakytowelsuit.purerules.example.InputUsernameField;
+import com.github.sneakytowelsuit.purerules.example.Preferences;
+import com.github.sneakytowelsuit.purerules.operators.EqualsOperator;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -9,7 +13,7 @@ class RuleTest {
     private static final InputUsernameField inputUsernameField = new InputUsernameField();
     private static final String myUsernameValue = "some username";
     private static final String myEmailValue = "some email";
-    private static final StringEqualsOperator stringEqualsOperator = new StringEqualsOperator();
+    private static final EqualsOperator<String> stringEqualsOperator = new EqualsOperator<>();
 
     @Test
     void testTrue(){

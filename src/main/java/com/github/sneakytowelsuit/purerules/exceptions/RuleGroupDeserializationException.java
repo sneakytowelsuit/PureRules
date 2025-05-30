@@ -1,4 +1,4 @@
-package com.github.sneakytowelsuit.purerules;
+package com.github.sneakytowelsuit.purerules.exceptions;
 
 public class RuleGroupDeserializationException extends RuntimeException {
     public RuleGroupDeserializationException(String message) {

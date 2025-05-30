@@ -1,13 +1,12 @@
-package com.github.sneakytowelsuit.purerules;
+package com.github.sneakytowelsuit.purerules.conditions;
 
+import com.github.sneakytowelsuit.purerules.context.EngineContext;
 import lombok.*;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 /**
  * An implementation of a Rule Group that has the following default opinions:
@@ -39,20 +38,18 @@ public final class RuleGroup<TInput> implements Condition<TInput> {
     private final boolean isInverted = false;
     @Builder.Default
     private final Bias bias = Bias.EXCLUSIVE;
-    private final static EvaluationContextCache EVALUATION_CONTEXT_CACHE = EvaluationContextCache.getInstance();
-    private final Function<TInput, Predicate<Condition<TInput>>> CONDITION_PREDICATE = input -> condition -> {
-        boolean conditionResult = condition.evaluate(input);
-        String id = condition.getId();
-        EVALUATION_CONTEXT_CACHE.getEvaluationContext().getConditionResults().putIfAbsent(id, conditionResult);
-        return conditionResult;
-    };
+    private final static EngineContext EVALUATION_CONTEXT_CACHE = EngineContext.getInstance();
 
     public boolean evaluate(TInput input) {
-        EVALUATION_CONTEXT_CACHE.instantiateContext();
+        Long threadId = Thread.currentThread().threadId();
+        return evaluateConditions(input, threadId);
+    }
+
+    private boolean evaluateConditions(TInput input, Long threadId) {
+        EVALUATION_CONTEXT_CACHE.instantiateEvaluationContext(threadId);
         if (conditions.isEmpty()) {
             boolean result = this.isInverted ^ this.getBias().isBiasResult();
-            String id = this.getId();
-            EVALUATION_CONTEXT_CACHE.getEvaluationContext().getConditionResults().putIfAbsent(id, result);
+            EVALUATION_CONTEXT_CACHE.getEvaluationContext(threadId).getConditionResults().putIfAbsent(this.getId(), result);
             return result;
         }
         List<RuleGroup<TInput>> complexRules = new LinkedList<>();
@@ -64,13 +61,16 @@ public final class RuleGroup<TInput> implements Condition<TInput> {
             }
         }
         boolean result = switch (Optional.ofNullable(this.getCombinator()).orElse(Combinator.AND)) {
-            case AND -> simpleRules.stream().allMatch(CONDITION_PREDICATE.apply(input))
-            && complexRules.stream().allMatch(CONDITION_PREDICATE.apply(input));
-            case OR -> simpleRules.stream().anyMatch(CONDITION_PREDICATE.apply(input))
-                    || complexRules.stream().anyMatch(CONDITION_PREDICATE.apply(input));
+            case AND -> simpleRules.stream().allMatch(r -> r.evaluate(input))
+            && complexRules.stream().allMatch(r -> {
+                // Pass the thread ID to the rule group so it can cache results by the parent thread ID
+                return r.evaluateConditions(input, threadId);
+            });
+            case OR -> simpleRules.stream().anyMatch(r -> r.evaluate(input))
+                    || complexRules.stream().anyMatch(r -> r.evaluateConditions(input, threadId));
         };
         boolean finalResult = this.isInverted() ^ result;
-        EVALUATION_CONTEXT_CACHE.getEvaluationContext().getConditionResults().putIfAbsent(id, finalResult);
+        EVALUATION_CONTEXT_CACHE.getEvaluationContext(threadId).getConditionResults().putIfAbsent(this.getId(), finalResult);
         return finalResult;
     }
 }

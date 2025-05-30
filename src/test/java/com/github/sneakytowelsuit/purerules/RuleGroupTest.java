@@ -1,6 +1,12 @@
 package com.github.sneakytowelsuit.purerules;
 
-import com.github.sneakytowelsuit.sample.*;
+import com.github.sneakytowelsuit.purerules.conditions.Bias;
+import com.github.sneakytowelsuit.purerules.conditions.Combinator;
+import com.github.sneakytowelsuit.purerules.conditions.Rule;
+import com.github.sneakytowelsuit.purerules.conditions.RuleGroup;
+import com.github.sneakytowelsuit.purerules.example.*;
+import com.github.sneakytowelsuit.purerules.operators.EqualsOperator;
+import com.github.sneakytowelsuit.purerules.operators.StringContainsCaseInsensitiveOperator;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -20,9 +26,9 @@ class RuleGroupTest {
     private static final Boolean myDarkModeValue = true;
 
     // Operators
-    private static final StringEqualsOperator stringEqualsOperator = new StringEqualsOperator();
+    private static final EqualsOperator<String> stringEqualsOperator = new EqualsOperator<>();
     private static final StringContainsCaseInsensitiveOperator stringContainsCaseInsensitiveOperator = new StringContainsCaseInsensitiveOperator();
-    private static final BooleanEqualsOperator booleanEqualsOperator = new BooleanEqualsOperator();
+    private static final EqualsOperator<Boolean> booleanEqualsOperator = new EqualsOperator<>();
 
     @Test
     public void noConditions_defaultPessimistic(){
@@ -200,6 +206,61 @@ class RuleGroupTest {
                                 .value(myUsernameValue)
                                 .build(),
                         Rule.<Input, String>builder()
+                                .field(inputUsernameField)
+                                .operator(stringEqualsOperator)
+                                .value(myUsernameValue)
+                                .build(),
+                        Rule.<Input, String>builder()
+                                .field(inputUsernameField)
+                                .operator(stringEqualsOperator)
+                                .value(myUsernameValue)
+                                .build(),
+                        Rule.<Input, String>builder()
+                                .field(inputUsernameField)
+                                .operator(stringEqualsOperator)
+                                .value(myUsernameValue)
+                                .build(),
+                        Rule.<Input, String>builder()
+                                .field(inputUsernameField)
+                                .operator(stringEqualsOperator)
+                                .value(myUsernameValue)
+                                .build(),
+                        Rule.<Input, String>builder()
+                                .field(inputUsernameField)
+                                .operator(stringEqualsOperator)
+                                .value(myUsernameValue)
+                                .build(),
+                        Rule.<Input, String>builder()
+                                .field(inputUsernameField)
+                                .operator(stringEqualsOperator)
+                                .value(myUsernameValue)
+                                .build(),
+                        Rule.<Input, String>builder()
+                                .field(inputUsernameField)
+                                .operator(stringContainsCaseInsensitiveOperator)
+                                .value(myUsernameValue)
+                                .build(),
+                        Rule.<Input, String>builder()
+                                .field(inputUsernameField)
+                                .operator(stringContainsCaseInsensitiveOperator)
+                                .value(myUsernameValue)
+                                .build(),
+                        Rule.<Input, String>builder()
+                                .field(inputUsernameField)
+                                .operator(stringContainsCaseInsensitiveOperator)
+                                .value(myUsernameValue)
+                                .build(),
+                        Rule.<Input, String>builder()
+                                .field(inputUsernameField)
+                                .operator(stringContainsCaseInsensitiveOperator)
+                                .value(myUsernameValue)
+                                .build(),
+                        Rule.<Input, String>builder()
+                                .field(inputUsernameField)
+                                .operator(stringContainsCaseInsensitiveOperator)
+                                .value(myUsernameValue)
+                                .build(),
+                        Rule.<Input, String>builder()
                                 .field(inputEmailField)
                                 .operator(stringEqualsOperator)
                                 .value(myEmailValue)
@@ -214,8 +275,14 @@ class RuleGroupTest {
                                 .field(inputDarkModePreferenceField)
                                 .value(myDarkModeValue)
                                 .build(),
+                        Rule.<Input, String>builder()
+                                .field(inputUsernameField)
+                                .operator(stringEqualsOperator)
+                                .value(myUsernameValue)
+                                .build(),
                         nestedRuleGroup
                 ))
+                .combinator(Combinator.OR)
                 .build();
         assertTrue(ruleGroup.evaluate(input));
     }

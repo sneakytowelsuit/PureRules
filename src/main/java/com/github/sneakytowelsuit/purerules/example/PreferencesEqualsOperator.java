@@ -1,6 +1,6 @@
-package com.github.sneakytowelsuit.sample;
+package com.github.sneakytowelsuit.purerules.example;
 
-import com.github.sneakytowelsuit.purerules.Operator;
+import com.github.sneakytowelsuit.purerules.conditions.Operator;
 
 public class PreferencesEqualsOperator implements Operator<Preferences> {
     @Override

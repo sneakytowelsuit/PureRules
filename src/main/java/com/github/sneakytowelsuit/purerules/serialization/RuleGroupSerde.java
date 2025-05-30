@@ -1,11 +1,12 @@
-package com.github.sneakytowelsuit.purerules;
+package com.github.sneakytowelsuit.purerules.serialization;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
+import com.github.sneakytowelsuit.purerules.conditions.*;
+import com.github.sneakytowelsuit.purerules.exceptions.RuleGroupDeserializationException;
 import lombok.Getter;
 
 import java.lang.reflect.InvocationTargetException;

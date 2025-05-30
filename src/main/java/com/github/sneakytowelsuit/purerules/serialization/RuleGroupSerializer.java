@@ -1,9 +1,11 @@
-package com.github.sneakytowelsuit.purerules;
+package com.github.sneakytowelsuit.purerules.serialization;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.github.sneakytowelsuit.purerules.conditions.Rule;
+import com.github.sneakytowelsuit.purerules.conditions.RuleGroup;
 
 import java.io.IOException;
 

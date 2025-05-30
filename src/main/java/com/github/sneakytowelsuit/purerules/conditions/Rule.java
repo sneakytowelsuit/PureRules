@@ -1,9 +1,7 @@
-package com.github.sneakytowelsuit.purerules;
+package com.github.sneakytowelsuit.purerules.conditions;
 
 import lombok.*;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.UUID;
 
 @Builder
@@ -24,6 +22,7 @@ public final class Rule<TInput, TValue> implements Condition<TInput> {
         assert this.getOperator() != null;
         assert this.getField() != null;
         assert this.getField().getFieldValueFunction() != null;
+
         return this.getOperator().test(this.getField().getFieldValueFunction().apply(input), this.getValue());
     }
 }

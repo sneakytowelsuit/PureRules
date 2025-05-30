@@ -1,4 +1,4 @@
-package com.github.sneakytowelsuit.purerules;
+package com.github.sneakytowelsuit.purerules.conditions;
 
 import java.util.function.Function;
 

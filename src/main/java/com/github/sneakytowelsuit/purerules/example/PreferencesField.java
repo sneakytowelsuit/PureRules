@@ -1,6 +1,6 @@
-package com.github.sneakytowelsuit.sample;
+package com.github.sneakytowelsuit.purerules.example;
 
-import com.github.sneakytowelsuit.purerules.Field;
+import com.github.sneakytowelsuit.purerules.conditions.Field;
 
 import java.util.function.Function;
 
