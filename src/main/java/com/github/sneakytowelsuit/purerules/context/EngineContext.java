@@ -1,6 +1,5 @@
 package com.github.sneakytowelsuit.purerules.context;
 
-import com.github.sneakytowelsuit.purerules.conditions.Field;
 import lombok.Getter;
 
 import java.util.List;
@@ -9,15 +8,14 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class EngineContext {
     @Getter
-    public static class EvaluationContext {
+    public static class DeterministicEvaluationContext {
         private final Map<List<String>, Boolean> conditionResults;
-        public EvaluationContext() {
+        public DeterministicEvaluationContext() {
             this.conditionResults = new ConcurrentHashMap<>();
         }
     }
 
-    // TODO: Consider adding cache for field getter return values, agnostic of thread
-    private final Map<Long, EvaluationContext> threadIdToContextMap;
+    private final Map<Long, DeterministicEvaluationContext> threadIdToContextMap;
     private static EngineContext instance;
     public static EngineContext getInstance() {
         if (instance == null) {
@@ -29,13 +27,13 @@ public class EngineContext {
         this.threadIdToContextMap = new ConcurrentHashMap<>();
     }
     public void instantiateEvaluationContext(Long threadId) {
-       this.getThreadIdToContextMap().putIfAbsent(threadId, new EvaluationContext());
+       this.getThreadIdToContextMap().putIfAbsent(threadId, new DeterministicEvaluationContext());
     }
-    private Map<Long, EvaluationContext> getThreadIdToContextMap() {
+    private Map<Long, DeterministicEvaluationContext> getThreadIdToContextMap() {
         return this.threadIdToContextMap;
     }
-    public EvaluationContext getEvaluationContext(Long threadId) {
-        return this.getThreadIdToContextMap().computeIfAbsent(threadId, k -> new EvaluationContext());
+    public DeterministicEvaluationContext getEvaluationContext(Long threadId) {
+        return this.getThreadIdToContextMap().computeIfAbsent(threadId, k -> new DeterministicEvaluationContext());
     }
     public void clearContext(Long threadId) {
         this.getThreadIdToContextMap().remove(threadId);
