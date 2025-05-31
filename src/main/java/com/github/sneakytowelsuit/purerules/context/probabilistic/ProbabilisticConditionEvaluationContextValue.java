@@ -1,4 +1,4 @@
 package com.github.sneakytowelsuit.purerules.context.probabilistic;
 
-public sealed interface ProbabilisticConditionEvaluationContextValue permits ProbabilisticRuleEvaluationContextValue, ProbabilisticRuleGroupEvaluationContextValue {
-}
+public sealed interface ProbabilisticConditionEvaluationContextValue
+    permits ProbabilisticRuleEvaluationContextValue, ProbabilisticRuleGroupEvaluationContextValue {}

@@ -1,5 +1,3 @@
 package com.github.sneakytowelsuit.purerules.engine;
 
-public class PureRulesEngine {
-    
-}
+public class PureRulesEngine {}

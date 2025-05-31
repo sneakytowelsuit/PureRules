@@ -8,11 +8,13 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Preferences {
-    private Boolean darkMode;
-    private String secondaryUser;
-    public Preferences() {}
-    public Preferences(Boolean darkMode, String secondaryUser) {
-        this.darkMode = darkMode;
-        this.secondaryUser = secondaryUser;
-    }
+  private Boolean darkMode;
+  private String secondaryUser;
+
+  public Preferences() {}
+
+  public Preferences(Boolean darkMode, String secondaryUser) {
+    this.darkMode = darkMode;
+    this.secondaryUser = secondaryUser;
+  }
 }
