@@ -158,7 +158,7 @@ public class RuleGroupSerde<InputType> {
 
     private <T> T deserializeJsonNodeToValue(JsonNode jsonNode) {
         JsonNode valueNode =  jsonNode.get(RuleGroupJsonKeys.VALUE.getKey());
-        if (valueNode == null || !valueNode.isTextual()) {
+        if (valueNode == null || !valueNode.isObject()) {
             throw new RuleGroupDeserializationException("Invalid or missing 'value' in Rule JSON");
         }
         JsonNode valueClassNode = valueNode.get(RuleGroupJsonKeys.VALUE_CLASS.getKey());

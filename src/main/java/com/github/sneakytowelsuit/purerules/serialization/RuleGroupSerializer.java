@@ -35,7 +35,7 @@ public class RuleGroupSerializer extends StdSerializer<RuleGroup<?>> {
                 throw new NullPointerException("Conditions cannot be null");
             }
             gen.writeStartObject();
-            gen.writeStringField(RuleGroupJsonKeys.INVERTED.getKey(), String.valueOf(value.isInverted()));
+            gen.writeBooleanField(RuleGroupJsonKeys.INVERTED.getKey(), value.isInverted());
             gen.writeStringField(RuleGroupJsonKeys.COMBINATOR.getKey(), value.getCombinator().name());
             gen.writeStringField(RuleGroupJsonKeys.BIAS.getKey(), value.getBias().name());
             gen.writeArrayFieldStart(RuleGroupJsonKeys.CONDITIONS.getKey());

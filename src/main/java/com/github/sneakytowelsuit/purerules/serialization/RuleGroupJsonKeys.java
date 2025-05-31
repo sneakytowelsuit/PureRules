@@ -7,7 +7,7 @@ public enum RuleGroupJsonKeys {
     FIELD("field"),
     OPERATOR("operator"),
     VALUE("value"),
-    VALUE_CLASS("valueClass"),
+    VALUE_CLASS("class"),
     CONDITIONS("conditions"),
     VALUE_VALUE("value"),
     INVERTED("inverted"),
