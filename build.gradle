@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'java-library'
-    id("com.diffplug.spotless") version "5.0.0"
+    id "com.diffplug.spotless" version "7.0.4"
 }
 
 group = 'com.github.sneakytowelsuit'
@@ -30,4 +30,11 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+spotless {
+    java {
+        target '**/*.java'
+        // Apply Google Java Format
+        googleJavaFormat()
+    }
 }
