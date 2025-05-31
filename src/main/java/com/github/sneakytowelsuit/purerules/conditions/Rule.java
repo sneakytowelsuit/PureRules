@@ -7,6 +7,14 @@ import lombok.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Represents a single rule condition that evaluates an input using a field extractor,
+ * an operator, and a comparison value. The rule is uniquely identified and can be
+ * evaluated in the context of a rule group or independently.
+ *
+ * @param <TInput>  the type of input to evaluate
+ * @param <TValue>  the type of value extracted and compared
+ */
 @Builder
 @NoArgsConstructor(force = true)
 @AllArgsConstructor
@@ -21,6 +29,16 @@ public final class Rule<TInput, TValue> implements Condition<TInput> {
     private final Operator<TValue> operator;
     private final TValue value;
 
+    /**
+     * Evaluates this rule against the given input, using the provided parent ID path and thread ID.
+     * Stores the result in the deterministic evaluation context.
+     *
+     * @param input        the input to evaluate
+     * @param parentIdPath the parent ID path for context (can be null)
+     * @param threadId     the thread ID for context (must not be null)
+     * @return true if the rule condition is satisfied, false otherwise
+     * @throws AssertionError if required fields or parameters are null
+     */
     public boolean evaluate(TInput input, List<String> parentIdPath, Long threadId) {
         assert this.getOperator() != null;
         assert this.getField() != null;
