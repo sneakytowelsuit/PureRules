@@ -1,6 +1,6 @@
 package com.github.sneakytowelsuit.purerules.conditions;
 
-import com.github.sneakytowelsuit.purerules.context.EngineContext;
+import com.github.sneakytowelsuit.purerules.context.EngineContextImpl;
 import com.github.sneakytowelsuit.purerules.utils.ConditionUtils;
 import java.util.List;
 import java.util.UUID;
@@ -47,7 +47,7 @@ public final class Rule<TInput, TValue> implements Condition<TInput> {
     boolean result =
         this.getOperator()
             .test(this.getField().getFieldValueFunction().apply(input), this.getValue());
-    EngineContext.getInstance()
+    EngineContextImpl.getInstance()
         .getDeterministicEvaluationContext(threadId)
         .getConditionResults()
         .put(idPath, result);

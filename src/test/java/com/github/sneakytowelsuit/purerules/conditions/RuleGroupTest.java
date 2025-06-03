@@ -3,7 +3,7 @@ package com.github.sneakytowelsuit.purerules.conditions;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.sneakytowelsuit.purerules.TestUtils;
-import com.github.sneakytowelsuit.purerules.context.EngineContext;
+import com.github.sneakytowelsuit.purerules.context.EngineContextImpl;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -12,12 +12,12 @@ import org.junit.jupiter.api.Test;
 class RuleGroupTest {
   @BeforeAll
   static void setUp() {
-    EngineContext.getInstance();
+    EngineContextImpl.getInstance();
   }
 
   @AfterEach
   void tearDown() {
-    EngineContext.getInstance().flushAll();
+    EngineContextImpl.getInstance().flushAll();
   }
 
   @Test

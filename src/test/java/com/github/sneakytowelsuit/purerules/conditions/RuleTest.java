@@ -3,7 +3,7 @@ package com.github.sneakytowelsuit.purerules.conditions;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.sneakytowelsuit.purerules.TestUtils;
-import com.github.sneakytowelsuit.purerules.context.EngineContext;
+import com.github.sneakytowelsuit.purerules.context.EngineContextImpl;
 import java.util.Collections;
 import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +14,7 @@ class RuleTest {
 
   @BeforeEach
   void resetEngineContext() {
-    EngineContext.getInstance().flushAll();
+    EngineContextImpl.getInstance().flushAll();
   }
 
   @Test

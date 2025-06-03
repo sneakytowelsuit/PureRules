@@ -7,22 +7,22 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class EngineContext {
+public class EngineContextImpl {
   private final Map<Long, DeterministicEvaluationContext> threadIdToDeterministicEvaluationContext;
   private final Map<Long, ProbabilisticEvaluationContext> threadIdToProbabilisticEvaluationContext;
   private final EnumMap<EngineMode, EvaluationContext<?>> evaluationContexts =
       new EnumMap<>(EngineMode.class);
 
-  private static EngineContext instance;
+  private static EngineContextImpl instance;
 
-  public static EngineContext getInstance() {
+  public static EngineContextImpl getInstance() {
     if (instance == null) {
-      instance = new EngineContext();
+      instance = new EngineContextImpl();
     }
     return instance;
   }
 
-  private EngineContext() {
+  private EngineContextImpl() {
     this.threadIdToDeterministicEvaluationContext = new ConcurrentHashMap<>();
     this.threadIdToProbabilisticEvaluationContext = new ConcurrentHashMap<>();
     this.evaluationContexts.put(EngineMode.DETERMINISTIC, new DeterministicEvaluationContext());

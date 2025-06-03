@@ -1,6 +1,6 @@
 package com.github.sneakytowelsuit.purerules.conditions;
 
-import com.github.sneakytowelsuit.purerules.context.EngineContext;
+import com.github.sneakytowelsuit.purerules.context.EngineContextImpl;
 import com.github.sneakytowelsuit.purerules.utils.ConditionUtils;
 import java.util.*;
 import lombok.*;
@@ -51,7 +51,7 @@ public final class RuleGroup<TInput> implements Condition<TInput> {
    * @return true if the group condition is satisfied, false otherwise
    */
   private boolean evaluateConditions(TInput input, List<String> parentIdPath, Long threadId) {
-    EngineContext ctx = EngineContext.getInstance();
+    EngineContextImpl ctx = EngineContextImpl.getInstance();
     ctx.instantiateDeterministicEvaluationContext(threadId);
     if (conditions.isEmpty()) {
       return this.handleEmptyConditions(threadId, parentIdPath);
@@ -100,7 +100,7 @@ public final class RuleGroup<TInput> implements Condition<TInput> {
   }
 
   private void updateContext(Long threadId, List<String> parentIdPath, boolean result) {
-    EngineContext ctx = EngineContext.getInstance();
+    EngineContextImpl ctx = EngineContextImpl.getInstance();
     ctx.getDeterministicEvaluationContext(threadId)
         .getConditionResults()
         .putIfAbsent(parentIdPath, result);
