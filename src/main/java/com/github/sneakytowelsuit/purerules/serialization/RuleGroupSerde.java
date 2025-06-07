@@ -38,14 +38,24 @@ public class RuleGroupSerde<InputType> {
 
   private RuleGroup<InputType> deserializeJsonNodeToRuleGroup(JsonNode jsonNode) {
     try {
-      return RuleGroup.<InputType>builder()
-          .isInverted(deserializeInverted(jsonNode))
+      RuleGroup.RuleGroupBuilder<InputType> builder = RuleGroup.builder();
+      deserializeRuleGroupId(jsonNode, builder);
+      return builder
+              .isInverted(deserializeInverted(jsonNode))
           .bias(deserializeBias(jsonNode))
           .combinator(deserializeCombinator(jsonNode))
           .conditions(deserializeConditions(jsonNode))
           .build();
     } catch (Exception e) {
       throw new RuleGroupDeserializationException("Error encountered deserializing RuleGroup", e);
+    }
+  }
+
+  private void deserializeRuleGroupId(JsonNode jsonNode, RuleGroup.RuleGroupBuilder<InputType> builder) {
+    JsonNode node = jsonNode.get(RuleGroupJsonKeys.ID.getKey());
+    if (node != null && node.isTextual()) {
+      String id = node.asText();
+      builder.id(id);
     }
   }
 
@@ -106,14 +116,23 @@ public class RuleGroupSerde<InputType> {
 
   private Rule<InputType, ?> deserializeRule(JsonNode jsonNode) {
     try {
-      return (Rule<InputType, ?>)
-          Rule.builder()
-              .field((Field<Object, Object>) deserializeJsonNodeToField(jsonNode))
-              .operator((Operator<Object>) deserializeJsonNodeToOperator(jsonNode))
-              .value(deserializeJsonNodeToValue(jsonNode))
-              .build();
+      Rule.RuleBuilder<InputType, ?> builder =
+              (Rule.RuleBuilder<InputType, ?>) Rule.builder()
+                  .field((Field<Object, Object>) deserializeJsonNodeToField(jsonNode))
+                  .operator((Operator<Object>) deserializeJsonNodeToOperator(jsonNode))
+                  .value(deserializeJsonNodeToValue(jsonNode));
+      deserializeRuleId(jsonNode, builder);
+      return builder.build();
     } catch (Exception e) {
       throw new RuleGroupDeserializationException("Error encountered deserializing Rule", e);
+    }
+  }
+
+  private void deserializeRuleId(JsonNode jsonNode, Rule.RuleBuilder<InputType, ?> builder) {
+    JsonNode node = jsonNode.get(RuleGroupJsonKeys.ID.getKey());
+    if (node != null && node.isTextual()) {
+      String id = node.asText();
+      builder.id(id);
     }
   }
 

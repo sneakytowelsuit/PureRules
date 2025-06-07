@@ -20,6 +20,11 @@ public class RuleSerializer extends StdSerializer<Rule<?, ?>> {
     try {
       gen.writeStartObject();
 
+      if(value.getId() == null) {
+        throw new NullPointerException("ID cannot be null");
+      }
+      gen.writeStringField(RuleGroupJsonKeys.ID.getKey(), value.getId());
+
       if (value.getField() == null) {
         throw new NullPointerException("Field cannot be null");
       }

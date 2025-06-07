@@ -1,13 +1,13 @@
-package com.github.sneakytowelsuit.purerules.context.probabilistic;
+package com.github.sneakytowelsuit.purerules.context;
 
-import com.github.sneakytowelsuit.purerules.context.EvaluationContext;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import lombok.Getter;
 
 @Getter
-public class ProbabilisticEvaluationContext
+public final class ProbabilisticEvaluationContext
     implements EvaluationContext<ProbabilisticConditionEvaluationContextValue> {
   private final Map<List<String>, ProbabilisticConditionEvaluationContextValue> conditionResults;
 

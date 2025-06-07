@@ -23,6 +23,9 @@ public class RuleGroupSerializer extends StdSerializer<RuleGroup<?>> {
       if (value == null) {
         throw new NullPointerException("RuleGroup cannot be null");
       }
+      if(value.getId() == null) {
+        throw new NullPointerException("RuleGroup ID cannot be null");
+      }
       if (value.getCombinator() == null) {
         throw new NullPointerException("Combinator cannot be null");
       }
@@ -33,6 +36,7 @@ public class RuleGroupSerializer extends StdSerializer<RuleGroup<?>> {
         throw new NullPointerException("Conditions cannot be null");
       }
       gen.writeStartObject();
+      gen.writeStringField(RuleGroupJsonKeys.ID.getKey(), value.getId());
       gen.writeBooleanField(RuleGroupJsonKeys.INVERTED.getKey(), value.isInverted());
       gen.writeStringField(RuleGroupJsonKeys.COMBINATOR.getKey(), value.getCombinator().name());
       gen.writeStringField(RuleGroupJsonKeys.BIAS.getKey(), value.getBias().name());

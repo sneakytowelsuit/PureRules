@@ -3,19 +3,12 @@ package com.github.sneakytowelsuit.purerules.conditions;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.sneakytowelsuit.purerules.TestUtils;
-import com.github.sneakytowelsuit.purerules.context.EngineContextImpl;
 import java.util.Collections;
 import java.util.function.Function;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class RuleTest {
   private static final Long THREAD_ID = 1L;
-
-  @BeforeEach
-  void resetEngineContext() {
-    EngineContextImpl.getInstance().flushAll();
-  }
 
   @Test
   void testEvaluateReturnsTrue() {

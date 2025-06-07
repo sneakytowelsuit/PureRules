@@ -1,8 +1,10 @@
 package com.github.sneakytowelsuit.purerules.conditions;
 
-import com.github.sneakytowelsuit.purerules.context.EngineContextImpl;
 import com.github.sneakytowelsuit.purerules.utils.ConditionUtils;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import lombok.*;
 
 /**
@@ -17,6 +19,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 @EqualsAndHashCode
 public final class RuleGroup<TInput> implements Condition<TInput> {
   private static final String RULE_GROUP_ID_PREFIX = "rule-group-";
@@ -36,7 +39,6 @@ public final class RuleGroup<TInput> implements Condition<TInput> {
    * @return true if the group condition is satisfied, false otherwise
    */
   public boolean evaluate(TInput input) {
-    Long threadId = Thread.currentThread().threadId();
     return evaluateConditions(
         input, ConditionUtils.getIdPath(this, null), Thread.currentThread().threadId());
   }
@@ -51,8 +53,6 @@ public final class RuleGroup<TInput> implements Condition<TInput> {
    * @return true if the group condition is satisfied, false otherwise
    */
   private boolean evaluateConditions(TInput input, List<String> parentIdPath, Long threadId) {
-    EngineContextImpl ctx = EngineContextImpl.getInstance();
-    ctx.instantiateDeterministicEvaluationContext(threadId);
     if (conditions.isEmpty()) {
       return this.handleEmptyConditions(threadId, parentIdPath);
     }
@@ -67,9 +67,6 @@ public final class RuleGroup<TInput> implements Condition<TInput> {
     boolean result =
         handleConditions(
             input, this.getCombinator(), simpleRules, complexRules, parentIdPath, threadId);
-    ctx.getDeterministicEvaluationContext(threadId)
-        .getConditionResults()
-        .putIfAbsent(parentIdPath, result);
     return result;
   }
 
@@ -100,9 +97,6 @@ public final class RuleGroup<TInput> implements Condition<TInput> {
   }
 
   private void updateContext(Long threadId, List<String> parentIdPath, boolean result) {
-    EngineContextImpl ctx = EngineContextImpl.getInstance();
-    ctx.getDeterministicEvaluationContext(threadId)
-        .getConditionResults()
-        .putIfAbsent(parentIdPath, result);
+    // TODO : Implement context update logic
   }
 }

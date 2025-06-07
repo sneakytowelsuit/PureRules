@@ -1,4 +1,4 @@
-package com.github.sneakytowelsuit.purerules.context.probabilistic;
+package com.github.sneakytowelsuit.purerules.context;
 
 import lombok.Builder;
 

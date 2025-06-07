@@ -14,7 +14,7 @@ class RuleGroupSerdeTest {
   void testDeserializeValidJson() {
     RuleGroupSerde<String> serde = new RuleGroupSerde<>();
     String json =
-        "{\"inverted\": false, \"bias\": \"INCLUSIVE\", \"combinator\": \"AND\", \"conditions\": []}";
+        "{\"id\": \"testId1234\", \"inverted\": false, \"bias\": \"INCLUSIVE\", \"combinator\": \"AND\", \"conditions\": []}";
 
     RuleGroup<String> ruleGroup = serde.deserialize(json);
 
@@ -23,6 +23,7 @@ class RuleGroupSerdeTest {
     assertEquals(Bias.INCLUSIVE, ruleGroup.getBias());
     assertEquals(Combinator.AND, ruleGroup.getCombinator());
     assertTrue(ruleGroup.getConditions().isEmpty());
+    assertEquals("testId1234", ruleGroup.getId());
   }
 
   @Test

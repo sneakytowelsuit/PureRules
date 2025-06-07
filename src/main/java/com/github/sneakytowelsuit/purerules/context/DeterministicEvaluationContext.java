@@ -1,6 +1,5 @@
-package com.github.sneakytowelsuit.purerules.context.deterministic;
+package com.github.sneakytowelsuit.purerules.context;
 
-import com.github.sneakytowelsuit.purerules.context.EvaluationContext;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
