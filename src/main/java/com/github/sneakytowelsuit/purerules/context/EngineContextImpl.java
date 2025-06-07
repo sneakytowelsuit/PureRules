@@ -19,4 +19,12 @@ public class EngineContextImpl implements EngineContext {
   public EvaluationContext<?> getEvaluationContext(EngineMode engineMode) {
     return this.getEvaluationContexts().get(engineMode);
   }
+
+  @Override
+    public void flushEvaluationContext(EngineMode engineMode) {
+        EvaluationContext<?> context = this.getEvaluationContexts().get(engineMode);
+        if (context != null) {
+          context.getConditionResults().clear();
+        }
+    }
 }

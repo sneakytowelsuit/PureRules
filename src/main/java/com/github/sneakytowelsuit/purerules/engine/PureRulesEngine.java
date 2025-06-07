@@ -3,9 +3,15 @@ package com.github.sneakytowelsuit.purerules.engine;
 import com.github.sneakytowelsuit.purerules.conditions.RuleGroup;
 import com.github.sneakytowelsuit.purerules.context.EngineContext;
 import com.github.sneakytowelsuit.purerules.context.EngineContextImpl;
-import java.util.List;
+import lombok.Getter;
 
-public class PureRulesEngine<TInput> {
+import java.io.Closeable;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Getter
+public class PureRulesEngine<TInput> implements Closeable {
   private final EngineContext context;
   private final List<RuleGroup<TInput>> ruleGroups;
   /**
@@ -50,5 +56,23 @@ public class PureRulesEngine<TInput> {
     this.ruleGroups = ruleGroups;
     this.engineMode = EngineMode.DETERMINISTIC;
     this.context = new EngineContextImpl();
+  }
+
+  public Map<String, Boolean> evaluate(TInput input) {
+    Map<String, Boolean> resultMap = this.getRuleGroups().stream()
+            .collect(Collectors.toUnmodifiableMap(
+                RuleGroup::getId,
+                ruleGroup -> ruleGroup.evaluate(input)
+            ));
+    this.getContext().flushEvaluationContext(this.getEngineMode());
+    return resultMap;
+  }
+
+  @Override
+  public void close() {
+    // Ensure that the evaluation context is flushed when the engine is closed
+    for (EngineMode mode: EngineMode.values()) {
+        this.getContext().flushEvaluationContext(mode);
+    }
   }
 }
