@@ -1,9 +1,8 @@
 package com.github.sneakytowelsuit.purerules.context;
 
 import com.github.sneakytowelsuit.purerules.engine.EngineMode;
-import lombok.Getter;
-
 import java.util.EnumMap;
+import lombok.Getter;
 
 @Getter
 public class EngineContextImpl implements EngineContext {
@@ -21,10 +20,10 @@ public class EngineContextImpl implements EngineContext {
   }
 
   @Override
-    public void flushEvaluationContext(EngineMode engineMode) {
-        EvaluationContext<?> context = this.getEvaluationContexts().get(engineMode);
-        if (context != null) {
-          context.getConditionResults().clear();
-        }
+  public void flushEvaluationContext(EngineMode engineMode) {
+    EvaluationContext<?> context = this.getEvaluationContexts().get(engineMode);
+    if (context != null) {
+      context.getConditionResults().clear();
     }
+  }
 }

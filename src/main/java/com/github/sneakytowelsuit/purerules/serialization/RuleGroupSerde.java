@@ -41,7 +41,7 @@ public class RuleGroupSerde<InputType> {
       RuleGroup.RuleGroupBuilder<InputType> builder = RuleGroup.builder();
       deserializeRuleGroupId(jsonNode, builder);
       return builder
-              .isInverted(deserializeInverted(jsonNode))
+          .isInverted(deserializeInverted(jsonNode))
           .bias(deserializeBias(jsonNode))
           .combinator(deserializeCombinator(jsonNode))
           .conditions(deserializeConditions(jsonNode))
@@ -51,7 +51,8 @@ public class RuleGroupSerde<InputType> {
     }
   }
 
-  private void deserializeRuleGroupId(JsonNode jsonNode, RuleGroup.RuleGroupBuilder<InputType> builder) {
+  private void deserializeRuleGroupId(
+      JsonNode jsonNode, RuleGroup.RuleGroupBuilder<InputType> builder) {
     JsonNode node = jsonNode.get(RuleGroupJsonKeys.ID.getKey());
     if (node != null && node.isTextual()) {
       String id = node.asText();
@@ -117,7 +118,8 @@ public class RuleGroupSerde<InputType> {
   private Rule<InputType, ?> deserializeRule(JsonNode jsonNode) {
     try {
       Rule.RuleBuilder<InputType, ?> builder =
-              (Rule.RuleBuilder<InputType, ?>) Rule.builder()
+          (Rule.RuleBuilder<InputType, ?>)
+              Rule.builder()
                   .field((Field<Object, Object>) deserializeJsonNodeToField(jsonNode))
                   .operator((Operator<Object>) deserializeJsonNodeToOperator(jsonNode))
                   .value(deserializeJsonNodeToValue(jsonNode));

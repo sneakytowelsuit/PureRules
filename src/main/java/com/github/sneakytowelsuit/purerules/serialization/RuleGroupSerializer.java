@@ -23,7 +23,7 @@ public class RuleGroupSerializer extends StdSerializer<RuleGroup<?>> {
       if (value == null) {
         throw new NullPointerException("RuleGroup cannot be null");
       }
-      if(value.getId() == null) {
+      if (value.getId() == null) {
         throw new NullPointerException("RuleGroup ID cannot be null");
       }
       if (value.getCombinator() == null) {
