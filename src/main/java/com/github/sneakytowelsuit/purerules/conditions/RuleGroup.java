@@ -30,7 +30,7 @@ public final class RuleGroup<TInput> implements Condition<TInput> {
   @Builder.Default private final List<Condition<TInput>> conditions = new ArrayList<>();
   @Builder.Default private final Combinator combinator = Combinator.AND;
   @Builder.Default private final boolean isInverted = false;
-  @Builder.Default private final Integer priority = 0;
+  @Builder.Default private final Integer priority = 1;
 
   /** Bias to use when the group contains no conditions. Defaults to EXCLUSIVE (pessimistic). */
   @Builder.Default private final Bias bias = Bias.EXCLUSIVE;

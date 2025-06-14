@@ -18,7 +18,7 @@ public sealed interface Condition<InputType> permits Rule, RuleGroup {
    *     <li>{@link EngineMode#DETERMINISTIC} ignores priority altogether</li>
    *     <li>{@link EngineMode#PROBABILISTIC} respects priority to calculate balance while computing the confidence</li>
    * </ul>
-   * @return the priority of this condition, or 0 to represent no priority.
+   * @return the priority of this condition, or 1 to represent baseline priority.
    */
   public Integer getPriority();
 }
