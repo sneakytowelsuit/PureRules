@@ -1,5 +1,6 @@
 package com.github.sneakytowelsuit.purerules.conditions;
 
+import com.github.sneakytowelsuit.purerules.engine.EngineMode;
 import com.github.sneakytowelsuit.purerules.utils.ConditionUtils;
 import java.util.List;
 import java.util.UUID;
@@ -36,7 +37,7 @@ public final class Rule<TInput, TValue> implements Condition<TInput> {
    * @return true if the rule condition is satisfied, false otherwise
    * @throws AssertionError if required fields or parameters are null
    */
-  public boolean evaluate(TInput input, List<String> parentIdPath, Long threadId) {
+  public boolean evaluate(TInput input, List<String> parentIdPath, Long threadId, EngineMode engineMode) {
     assert this.getOperator() != null;
     assert this.getField() != null;
     assert this.getField().getFieldValueFunction() != null;

@@ -1,5 +1,6 @@
 package com.github.sneakytowelsuit.purerules.conditions;
 
+import com.github.sneakytowelsuit.purerules.engine.EngineMode;
 import com.github.sneakytowelsuit.purerules.utils.ConditionUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,9 +39,9 @@ public final class RuleGroup<TInput> implements Condition<TInput> {
    * @param input the input to evaluate
    * @return true if the group condition is satisfied, false otherwise
    */
-  public boolean evaluate(TInput input) {
+  public boolean evaluate(TInput input, EngineMode engineMode) {
     return evaluateConditions(
-        input, ConditionUtils.getIdPath(this, null), Thread.currentThread().threadId());
+        input, ConditionUtils.getIdPath(this, null), Thread.currentThread().threadId(), engineMode);
   }
 
   /**
@@ -48,13 +49,13 @@ public final class RuleGroup<TInput> implements Condition<TInput> {
    * Results are stored in the deterministic evaluation context.
    *
    * @param input the input to evaluate
-   * @param parentIdPath the parent ID path for context
+   * @param idPath the parent ID path for context
    * @param threadId the thread ID for context
    * @return true if the group condition is satisfied, false otherwise
    */
-  private boolean evaluateConditions(TInput input, List<String> parentIdPath, Long threadId) {
+  private boolean evaluateConditions(TInput input, List<String> idPath, Long threadId, EngineMode engineMode) {
     if (conditions.isEmpty()) {
-      return this.handleEmptyConditions(threadId, parentIdPath);
+      return this.handleEmptyConditions(threadId, idPath);
     }
     List<RuleGroup<TInput>> complexRules = new ArrayList<>();
     List<Rule<TInput, ?>> simpleRules = new ArrayList<>();
@@ -66,7 +67,7 @@ public final class RuleGroup<TInput> implements Condition<TInput> {
     }
     boolean result =
         handleConditions(
-            input, this.getCombinator(), simpleRules, complexRules, parentIdPath, threadId);
+            input, this.getCombinator(), simpleRules, complexRules, idPath, threadId, engineMode);
     return result;
   }
 
@@ -76,16 +77,17 @@ public final class RuleGroup<TInput> implements Condition<TInput> {
       List<Rule<TInput, ?>> simpleRules,
       List<RuleGroup<TInput>> complexRules,
       List<String> parentIdPath,
-      Long threadId) {
+      Long threadId,
+      EngineMode engineMode) {
     return switch (Optional.ofNullable(combinator).orElse(Combinator.AND)) {
           case AND ->
-              simpleRules.stream().allMatch(r -> r.evaluate(input, parentIdPath, threadId))
+              simpleRules.stream().allMatch(r -> r.evaluate(input, parentIdPath, threadId, engineMode))
                   && complexRules.stream()
-                      .allMatch(r -> r.evaluateConditions(input, parentIdPath, threadId));
+                      .allMatch(r -> r.evaluateConditions(input, parentIdPath, threadId, engineMode));
           case OR ->
-              simpleRules.stream().anyMatch(r -> r.evaluate(input, parentIdPath, threadId))
+              simpleRules.stream().anyMatch(r -> r.evaluate(input, parentIdPath, threadId, engineMode))
                   || complexRules.stream()
-                      .anyMatch(r -> r.evaluateConditions(input, parentIdPath, threadId));
+                      .anyMatch(r -> r.evaluateConditions(input, parentIdPath, threadId, engineMode));
         }
         ^ this.isInverted;
   }

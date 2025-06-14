@@ -68,7 +68,7 @@ public class PureRulesEngine<TInput> implements Closeable {
         this.getRuleGroups().stream()
             .collect(
                 Collectors.toUnmodifiableMap(
-                    RuleGroup::getId, ruleGroup -> ruleGroup.evaluate(input)));
+                    RuleGroup::getId, ruleGroup -> ruleGroup.evaluate(input, this.getEngineMode())));
     this.getContext().flushEvaluationContext(this.getEngineMode());
     return resultMap;
   }

@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.github.sneakytowelsuit.purerules.TestUtils;
 import java.util.List;
+
+import com.github.sneakytowelsuit.purerules.engine.EngineMode;
 import org.junit.jupiter.api.Test;
 
 class RuleGroupTest {
@@ -15,7 +17,7 @@ class RuleGroupTest {
             .combinator(Combinator.AND)
             .conditions(List.of(TestUtils.alwaysTrueRule(), TestUtils.alwaysTrueRule()))
             .build();
-    assertTrue(group.evaluate("input"));
+    assertTrue(group.evaluate("input", EngineMode.DETERMINISTIC));
   }
 
   @Test
@@ -25,7 +27,7 @@ class RuleGroupTest {
             .combinator(Combinator.AND)
             .conditions(List.of(TestUtils.alwaysTrueRule(), TestUtils.alwaysFalseRule()))
             .build();
-    assertFalse(group.evaluate("input"));
+    assertFalse(group.evaluate("input", EngineMode.DETERMINISTIC));
   }
 
   @Test
@@ -35,7 +37,7 @@ class RuleGroupTest {
             .combinator(Combinator.OR)
             .conditions(List.of(TestUtils.alwaysFalseRule(), TestUtils.alwaysFalseRule()))
             .build();
-    assertFalse(group.evaluate("input"));
+    assertFalse(group.evaluate("input", EngineMode.DETERMINISTIC));
   }
 
   @Test
@@ -45,7 +47,7 @@ class RuleGroupTest {
             .combinator(Combinator.OR)
             .conditions(List.of(TestUtils.alwaysFalseRule(), TestUtils.alwaysTrueRule()))
             .build();
-    assertTrue(group.evaluate("input"));
+    assertTrue(group.evaluate("input", EngineMode.DETERMINISTIC));
   }
 
   @Test
@@ -56,21 +58,21 @@ class RuleGroupTest {
             .isInverted(true)
             .conditions(List.of(TestUtils.alwaysTrueRule(), TestUtils.alwaysTrueRule()))
             .build();
-    assertFalse(group.evaluate("input"));
+    assertFalse(group.evaluate("input", EngineMode.DETERMINISTIC));
   }
 
   @Test
   void testEmptyConditionsExclusiveBias() {
     RuleGroup<String> group =
         RuleGroup.<String>builder().conditions(List.of()).bias(Bias.EXCLUSIVE).build();
-    assertFalse(group.evaluate("input"));
+    assertFalse(group.evaluate("input", EngineMode.DETERMINISTIC));
   }
 
   @Test
   void testEmptyConditionsInclusiveBias() {
     RuleGroup<String> group =
         RuleGroup.<String>builder().conditions(List.of()).bias(Bias.INCLUSIVE).build();
-    assertTrue(group.evaluate("input"));
+    assertTrue(group.evaluate("input", EngineMode.DETERMINISTIC));
   }
 
   @Test
@@ -81,7 +83,7 @@ class RuleGroupTest {
             .bias(Bias.INCLUSIVE)
             .isInverted(true)
             .build();
-    assertFalse(group.evaluate("input"));
+    assertFalse(group.evaluate("input", EngineMode.DETERMINISTIC));
   }
 
   @Test
@@ -96,7 +98,7 @@ class RuleGroupTest {
             .combinator(Combinator.AND)
             .conditions(List.of(inner, TestUtils.alwaysTrueRule()))
             .build();
-    assertTrue(outer.evaluate("input"));
+    assertTrue(outer.evaluate("input", EngineMode.DETERMINISTIC));
   }
 
   @Test
@@ -111,7 +113,7 @@ class RuleGroupTest {
             .combinator(Combinator.AND)
             .conditions(List.of(inner, TestUtils.alwaysTrueRule()))
             .build();
-    assertTrue(outer.evaluate("input"));
+    assertTrue(outer.evaluate("input", EngineMode.DETERMINISTIC));
   }
 
   @Test
@@ -125,6 +127,6 @@ class RuleGroupTest {
         RuleGroup.<String>builder().combinator(Combinator.AND).conditions(List.of(level3)).build();
     RuleGroup<String> level1 =
         RuleGroup.<String>builder().combinator(Combinator.AND).conditions(List.of(level2)).build();
-    assertTrue(level1.evaluate("input"));
+    assertTrue(level1.evaluate("input", EngineMode.DETERMINISTIC));
   }
 }

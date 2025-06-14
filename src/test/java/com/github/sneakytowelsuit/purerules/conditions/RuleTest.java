@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.github.sneakytowelsuit.purerules.TestUtils;
 import java.util.Collections;
 import java.util.function.Function;
+
+import com.github.sneakytowelsuit.purerules.engine.EngineMode;
 import org.junit.jupiter.api.Test;
 
 class RuleTest {
@@ -18,7 +20,7 @@ class RuleTest {
             .operator(new TestUtils.AlwaysTrueOperator())
             .value(5)
             .build();
-    boolean result = rule.evaluate("hello", Collections.emptyList(), THREAD_ID);
+    boolean result = rule.evaluate("hello", Collections.emptyList(), THREAD_ID, EngineMode.DETERMINISTIC);
     assertTrue(result);
   }
 
@@ -30,7 +32,7 @@ class RuleTest {
             .operator(new TestUtils.AlwaysFalseOperator())
             .value(5)
             .build();
-    boolean result = rule.evaluate("hello", Collections.emptyList(), THREAD_ID);
+    boolean result = rule.evaluate("hello", Collections.emptyList(), THREAD_ID, EngineMode.DETERMINISTIC);
     assertFalse(result);
   }
 
@@ -43,7 +45,7 @@ class RuleTest {
             .value(5)
             .build();
     assertThrows(
-        AssertionError.class, () -> rule.evaluate("hello", Collections.emptyList(), THREAD_ID));
+        AssertionError.class, () -> rule.evaluate("hello", Collections.emptyList(), THREAD_ID, EngineMode.DETERMINISTIC));
   }
 
   @Test
@@ -55,7 +57,7 @@ class RuleTest {
             .value(5)
             .build();
     assertThrows(
-        AssertionError.class, () -> rule.evaluate("hello", Collections.emptyList(), THREAD_ID));
+        AssertionError.class, () -> rule.evaluate("hello", Collections.emptyList(), THREAD_ID, EngineMode.DETERMINISTIC));
   }
 
   @Test
@@ -74,7 +76,7 @@ class RuleTest {
             .value(5)
             .build();
     assertThrows(
-        AssertionError.class, () -> rule.evaluate("hello", Collections.emptyList(), THREAD_ID));
+        AssertionError.class, () -> rule.evaluate("hello", Collections.emptyList(), THREAD_ID, EngineMode.DETERMINISTIC));
   }
 
   @Test
@@ -85,7 +87,7 @@ class RuleTest {
             .operator(new TestUtils.AlwaysTrueOperator())
             .value(5)
             .build();
-    assertThrows(AssertionError.class, () -> rule.evaluate("hello", Collections.emptyList(), null));
+    assertThrows(AssertionError.class, () -> rule.evaluate("hello", Collections.emptyList(), null, EngineMode.DETERMINISTIC));
   }
 
   @Test
@@ -96,7 +98,7 @@ class RuleTest {
             .operator(new TestUtils.AlwaysTrueOperator())
             .value(5)
             .build();
-    assertThrows(RuntimeException.class, () -> rule.evaluate("hello", Collections.emptyList(), 1L));
+    assertThrows(RuntimeException.class, () -> rule.evaluate("hello", Collections.emptyList(), THREAD_ID, EngineMode.DETERMINISTIC));
   }
 
   @Test
@@ -108,7 +110,7 @@ class RuleTest {
             .value(5)
             .build();
     // Should not throw, parentIdPath can be null
-    assertTrue(rule.evaluate("hello", null, 1L));
+    assertTrue(rule.evaluate("hello", null, 1L, EngineMode.DETERMINISTIC));
   }
 
   @Test
