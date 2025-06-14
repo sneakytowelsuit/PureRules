@@ -3,13 +3,13 @@ package com.github.sneakytowelsuit.purerules.engine;
 import com.github.sneakytowelsuit.purerules.conditions.RuleGroup;
 import com.github.sneakytowelsuit.purerules.context.EngineContext;
 import com.github.sneakytowelsuit.purerules.context.EngineContextImpl;
+import com.github.sneakytowelsuit.purerules.context.EvaluationContext;
+
 import java.io.Closeable;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.Getter;
 
-@Getter
 public class PureRulesEngine<TInput> implements Closeable {
   private final EngineContext context;
   private final List<RuleGroup<TInput>> ruleGroups;
@@ -63,13 +63,29 @@ public class PureRulesEngine<TInput> implements Closeable {
     this.context = new EngineContextImpl();
   }
 
+  private EngineMode getEngineMode() {
+    return this.engineMode;
+  }
+
+  private EvaluationContext<?> getEvaluationContext() {
+    return this.context.getEvaluationContext(this.getEngineMode());
+  }
+
+  private EngineContext getEngineContext() {
+    return this.context;
+  }
+
+  private List<RuleGroup<TInput>> getRuleGroups() {
+    return this.ruleGroups;
+  }
+
   public Map<String, Boolean> evaluate(TInput input) {
     Map<String, Boolean> resultMap =
         this.getRuleGroups().stream()
             .collect(
                 Collectors.toUnmodifiableMap(
-                    RuleGroup::getId, ruleGroup -> ruleGroup.evaluate(input, this.getEngineMode())));
-    this.getContext().flushEvaluationContext(this.getEngineMode());
+                    RuleGroup::getId, ruleGroup -> ruleGroup.evaluate(input, this.getEvaluationContext())));
+    this.getEngineContext().flushEvaluationContext(this.getEngineMode());
     return resultMap;
   }
 
@@ -77,7 +93,7 @@ public class PureRulesEngine<TInput> implements Closeable {
   public void close() {
     // Ensure that the evaluation context is flushed when the engine is closed
     for (EngineMode mode : EngineMode.values()) {
-      this.getContext().flushEvaluationContext(mode);
+      this.getEngineContext().flushEvaluationContext(mode);
     }
   }
 }
