@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 public final class ProbabilisticEvaluationContext
     implements EvaluationContext<ProbabilisticConditionEvaluationContextValue> {
-  private final Map<List<String>, ProbabilisticConditionEvaluationContextValue> conditionResults;
+  private final Map<ContextKey, ProbabilisticConditionEvaluationContextValue> conditionResults;
 
   public ProbabilisticEvaluationContext() {
     this.conditionResults = new ConcurrentHashMap<>();
