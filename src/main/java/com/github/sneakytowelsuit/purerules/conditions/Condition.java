@@ -12,12 +12,15 @@ public sealed interface Condition<InputType> permits Rule, RuleGroup {
   public String getId();
 
   /**
-   * Gets the priority of this condition. Higher priority conditions are weighted heavier when evaluating in
-   * probabilistic mode.
+   * Gets the priority of this condition. Higher priority conditions are weighted heavier when
+   * evaluating in probabilistic mode.
+   *
    * <ul>
-   *     <li>{@link EngineMode#DETERMINISTIC} ignores priority altogether</li>
-   *     <li>{@link EngineMode#PROBABILISTIC} respects priority to calculate balance while computing the confidence</li>
+   *   <li>{@link EngineMode#DETERMINISTIC} ignores priority altogether
+   *   <li>{@link EngineMode#PROBABILISTIC} respects priority to calculate balance while computing
+   *       the confidence
    * </ul>
+   *
    * @return the priority of this condition, or 1 to represent baseline priority.
    */
   public Integer getPriority();

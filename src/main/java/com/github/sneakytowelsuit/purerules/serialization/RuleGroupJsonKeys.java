@@ -5,6 +5,7 @@ import lombok.Getter;
 @Getter
 public enum RuleGroupJsonKeys {
   ID("id"),
+  PRIORITY("priority"),
   FIELD("field"),
   OPERATOR("operator"),
   VALUE("value"),

@@ -6,7 +6,7 @@ package com.github.sneakytowelsuit.purerules.conditions;
  *
  * @param <V> the type of value to compare
  */
-public interface Operator<V> {
+public interface Operator<TValue> {
   /**
    * Tests the input value against the expected value using this operator's logic.
    *
@@ -14,5 +14,5 @@ public interface Operator<V> {
    * @param value the value to compare against
    * @return true if the comparison is satisfied, false otherwise
    */
-  boolean test(V input, V value);
+  boolean test(TValue input, TValue value);
 }

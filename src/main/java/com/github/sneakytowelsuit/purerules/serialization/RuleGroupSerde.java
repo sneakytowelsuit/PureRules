@@ -40,6 +40,7 @@ public class RuleGroupSerde<InputType> {
     try {
       RuleGroup.RuleGroupBuilder<InputType> builder = RuleGroup.builder();
       deserializeRuleGroupId(jsonNode, builder);
+      deserializePriority(jsonNode, builder);
       return builder
           .isInverted(deserializeInverted(jsonNode))
           .bias(deserializeBias(jsonNode))
@@ -57,6 +58,15 @@ public class RuleGroupSerde<InputType> {
     if (node != null && node.isTextual()) {
       String id = node.asText();
       builder.id(id);
+    }
+  }
+
+  private void deserializePriority(
+      JsonNode jsonNode, RuleGroup.RuleGroupBuilder<InputType> builder) {
+    JsonNode node = jsonNode.get(RuleGroupJsonKeys.PRIORITY.getKey());
+    if (node != null && node.isInt()) {
+      Integer priority = node.asInt();
+      builder.priority(priority);
     }
   }
 
@@ -124,6 +134,7 @@ public class RuleGroupSerde<InputType> {
                   .operator((Operator<Object>) deserializeJsonNodeToOperator(jsonNode))
                   .value(deserializeJsonNodeToValue(jsonNode));
       deserializeRuleId(jsonNode, builder);
+      deserializeRulePriority(jsonNode, builder);
       return builder.build();
     } catch (Exception e) {
       throw new RuleGroupDeserializationException("Error encountered deserializing Rule", e);
@@ -135,6 +146,14 @@ public class RuleGroupSerde<InputType> {
     if (node != null && node.isTextual()) {
       String id = node.asText();
       builder.id(id);
+    }
+  }
+
+  private void deserializeRulePriority(JsonNode jsonNode, Rule.RuleBuilder<InputType, ?> builder) {
+    JsonNode node = jsonNode.get(RuleGroupJsonKeys.PRIORITY.getKey());
+    if (node != null && node.isInt()) {
+      Integer priority = node.asInt();
+      builder.priority(priority);
     }
   }
 

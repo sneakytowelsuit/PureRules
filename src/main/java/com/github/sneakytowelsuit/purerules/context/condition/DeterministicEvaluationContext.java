@@ -1,4 +1,4 @@
-package com.github.sneakytowelsuit.purerules.context;
+package com.github.sneakytowelsuit.purerules.context.condition;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
