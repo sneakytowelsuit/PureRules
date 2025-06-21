@@ -1,13 +1,15 @@
 package com.github.sneakytowelsuit.purerules.engine;
 
-import com.github.sneakytowelsuit.purerules.conditions.RuleGroup;
+import com.github.sneakytowelsuit.purerules.conditions.Condition;
+import com.github.sneakytowelsuit.purerules.evaluation.DeterministicEvaluationService;
 import com.github.sneakytowelsuit.purerules.evaluation.EvaluationService;
+import com.github.sneakytowelsuit.purerules.evaluation.ProbabilisticEvaluationService;
 
 import java.util.List;
 import java.util.Map;
 
 public class PureRulesEngine<TInput> {
-  private final List<RuleGroup<TInput>> ruleGroups;
+  private final List<Condition<TInput>> conditions;
 
   /**
    * The mode of the engine, which can be either DETERMINISTIC or PROBABILISTIC. This determines how
@@ -32,11 +34,11 @@ public class PureRulesEngine<TInput> {
    * The evaluation service used to evaluate the rules based on the engine mode. This service
    * encapsulates the logic for evaluating conditions and combining results.
    */
-  private EvaluationService<TInput> evaluationService;
+  private final EvaluationService<TInput> evaluationService;
 
   public static <T> PureRulesEngine<T> getProbablisticEngine(
-      Float minimumProbabilityThreshold, List<RuleGroup<T>> ruleGroups) {
-    return new PureRulesEngine<>(minimumProbabilityThreshold, ruleGroups);
+      Float minimumProbabilityThreshold, List<Condition<T>> conditions) {
+    return new PureRulesEngine<>(minimumProbabilityThreshold, conditions);
   }
 
   /**
@@ -45,21 +47,23 @@ public class PureRulesEngine<TInput> {
    *
    * @param minimumProbabilityThreshold - The minimum probability threshold for the PROBABILISTIC
    *     engine mode.
-   * @param ruleGroups - The list of rule groups to be evaluated by the engine.
+   * @param conditions - The list of conditions to be evaluated by the engine.
    */
-  private PureRulesEngine(Float minimumProbabilityThreshold, List<RuleGroup<TInput>> ruleGroups) {
-    this.ruleGroups = ruleGroups;
+  private PureRulesEngine(Float minimumProbabilityThreshold, List<Condition<TInput>> conditions) {
+    this.conditions = conditions;
     this.engineMode = EngineMode.PROBABILISTIC;
     this.minimumProbabilityThreshold = minimumProbabilityThreshold;
+    this.evaluationService = new ProbabilisticEvaluationService<>(conditions, minimumProbabilityThreshold);
   }
 
-  public static <T> PureRulesEngine<T> getDeterministicEngine(List<RuleGroup<T>> ruleGroups) {
-    return new PureRulesEngine<>(ruleGroups);
+  public static <T> PureRulesEngine<T> getDeterministicEngine(List<Condition<T>> conditions) {
+    return new PureRulesEngine<>(conditions);
   }
 
-  private PureRulesEngine(List<RuleGroup<TInput>> ruleGroups) {
-    this.ruleGroups = ruleGroups;
+  private PureRulesEngine(List<Condition<TInput>> conditions) {
+    this.conditions = conditions;
     this.engineMode = EngineMode.DETERMINISTIC;
+    this.evaluationService = new DeterministicEvaluationService<>(conditions);
   }
 
   private EngineMode getEngineMode() {
