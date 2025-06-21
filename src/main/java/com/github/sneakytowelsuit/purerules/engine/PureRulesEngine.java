@@ -1,17 +1,12 @@
 package com.github.sneakytowelsuit.purerules.engine;
 
 import com.github.sneakytowelsuit.purerules.conditions.RuleGroup;
-import com.github.sneakytowelsuit.purerules.context.EngineContext;
-import com.github.sneakytowelsuit.purerules.context.EngineContextImpl;
-import com.github.sneakytowelsuit.purerules.context.EvaluationContext;
+import com.github.sneakytowelsuit.purerules.evaluation.EvaluationService;
 
-import java.io.Closeable;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-public class PureRulesEngine<TInput> implements Closeable {
-  private final EngineContext context;
+public class PureRulesEngine<TInput> {
   private final List<RuleGroup<TInput>> ruleGroups;
 
   /**
@@ -33,6 +28,12 @@ public class PureRulesEngine<TInput> implements Closeable {
    */
   private Float minimumProbabilityThreshold;
 
+  /**
+   * The evaluation service used to evaluate the rules based on the engine mode. This service
+   * encapsulates the logic for evaluating conditions and combining results.
+   */
+  private EvaluationService<TInput> evaluationService;
+
   public static <T> PureRulesEngine<T> getProbablisticEngine(
       Float minimumProbabilityThreshold, List<RuleGroup<T>> ruleGroups) {
     return new PureRulesEngine<>(minimumProbabilityThreshold, ruleGroups);
@@ -50,7 +51,6 @@ public class PureRulesEngine<TInput> implements Closeable {
     this.ruleGroups = ruleGroups;
     this.engineMode = EngineMode.PROBABILISTIC;
     this.minimumProbabilityThreshold = minimumProbabilityThreshold;
-    this.context = new EngineContextImpl();
   }
 
   public static <T> PureRulesEngine<T> getDeterministicEngine(List<RuleGroup<T>> ruleGroups) {
@@ -60,40 +60,16 @@ public class PureRulesEngine<TInput> implements Closeable {
   private PureRulesEngine(List<RuleGroup<TInput>> ruleGroups) {
     this.ruleGroups = ruleGroups;
     this.engineMode = EngineMode.DETERMINISTIC;
-    this.context = new EngineContextImpl();
   }
 
   private EngineMode getEngineMode() {
     return this.engineMode;
   }
 
-  private EvaluationContext<?> getEvaluationContext() {
-    return this.context.getEvaluationContext(this.getEngineMode());
+  private EvaluationService<TInput> getEvaluationService() {
+    return this.evaluationService;
   }
-
-  private EngineContext getEngineContext() {
-    return this.context;
-  }
-
-  private List<RuleGroup<TInput>> getRuleGroups() {
-    return this.ruleGroups;
-  }
-
   public Map<String, Boolean> evaluate(TInput input) {
-    Map<String, Boolean> resultMap =
-        this.getRuleGroups().stream()
-            .collect(
-                Collectors.toUnmodifiableMap(
-                    RuleGroup::getId, ruleGroup -> ruleGroup.evaluate(input, EvaluationMode.EVALUATE, this.getEvaluationContext())));
-    this.getEngineContext().flushEvaluationContext(this.getEngineMode());
-    return resultMap;
-  }
-
-  @Override
-  public void close() {
-    // Ensure that the evaluation context is flushed when the engine is closed
-    for (EngineMode mode : EngineMode.values()) {
-      this.getEngineContext().flushEvaluationContext(mode);
-    }
+    return this.getEvaluationService().evaluate(input);
   }
 }
