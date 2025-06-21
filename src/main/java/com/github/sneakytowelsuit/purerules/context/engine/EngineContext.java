@@ -1,10 +1,20 @@
 package com.github.sneakytowelsuit.purerules.context.engine;
 
 import com.github.sneakytowelsuit.purerules.context.condition.EvaluationContext;
-import com.github.sneakytowelsuit.purerules.engine.EngineMode;
 
-public interface EngineContext {
-  <T> EvaluationContext<T> getEvaluationContext(EngineContextKey engineContextKey);
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-  <T> void flushEvaluationContext(EngineContextKey engineContextKey);
+public class EngineContext<I> {
+  private final Map<EngineContextKey<I>, EvaluationContext<?>> evaluationContexts = new ConcurrentHashMap<>();
+
+  public EngineContext() {}
+
+  public <T> EvaluationContext<?> getEvaluationContext(EngineContextKey<T> engineContextKey) {
+    return  evaluationContexts.get(engineContextKey);
+  }
+
+  public <T> void flushEvaluationContext(EngineContextKey<T> engineContextKey) {
+    evaluationContexts.remove(engineContextKey);
+  }
 }

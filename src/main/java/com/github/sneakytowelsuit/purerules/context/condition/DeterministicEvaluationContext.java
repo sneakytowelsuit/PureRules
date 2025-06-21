@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 public final class DeterministicEvaluationContext implements EvaluationContext<Boolean> {
 
-  private final Map<ContextKey, Boolean> conditionResults;
+  private final Map<ConditionContextKey, Boolean> conditionResults;
 
   public DeterministicEvaluationContext() {
     this.conditionResults = new ConcurrentHashMap<>();
