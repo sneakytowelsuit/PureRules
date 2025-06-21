@@ -25,6 +25,17 @@ class PureRulesEngineTest {
                       .build()))
           .build();
 
+  class Something {
+    private final String name;
+
+    public Something(String name) {
+      this.name = name;
+    }
+
+    public String getName() {
+      return name;
+    }
+  }
   @Test
   void testEngineInitialization() {
     PureRulesEngine<String> engine = PureRulesEngine.getDeterministicEngine(List.of(ruleGroup));

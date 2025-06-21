@@ -4,29 +4,36 @@ import com.github.sneakytowelsuit.purerules.context.condition.DeterministicEvalu
 import com.github.sneakytowelsuit.purerules.context.condition.EvaluationContext;
 import com.github.sneakytowelsuit.purerules.context.condition.ProbabilisticEvaluationContext;
 import com.github.sneakytowelsuit.purerules.engine.EngineMode;
-import java.util.EnumMap;
-import lombok.Getter;
 
-@Getter
-public class EngineContextImpl implements EngineContext {
-  private final EnumMap<EngineMode, EvaluationContext<?>> evaluationContexts =
-      new EnumMap<>(EngineMode.class);
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-  public EngineContextImpl() {
-    this.evaluationContexts.put(EngineMode.DETERMINISTIC, new DeterministicEvaluationContext());
-    this.evaluationContexts.put(EngineMode.PROBABILISTIC, new ProbabilisticEvaluationContext());
+public class EngineContextImpl<TInput> implements EngineContext {
+  private final Map<EngineContextKey, EvaluationContext<?>> evaluationContexts = new ConcurrentHashMap<>();
+
+  public EngineContextImpl(TInput input) {
+    this.evaluationContexts.put(
+            new EngineContextKey(input.hashCode(), EngineMode.DETERMINISTIC),
+            new DeterministicEvaluationContext()
+    );
+    this.evaluationContexts.put(
+            new EngineContextKey(input.hashCode(), EngineMode.PROBABILISTIC),
+            new ProbabilisticEvaluationContext()
+    );
   }
 
   @Override
-  public EvaluationContext<?> getEvaluationContext(EngineMode engineMode) {
-    return this.getEvaluationContexts().get(engineMode);
-  }
-
-  @Override
-  public void flushEvaluationContext(EngineMode engineMode) {
-    EvaluationContext<?> context = this.getEvaluationContexts().get(engineMode);
-    if (context != null) {
-      context.getConditionResults().clear();
+  public EvaluationContext<?> getEvaluationContext(EngineContextKey engineContextKey) {
+    if (engineContextKey == null) {
+      return null;
     }
+    return this.evaluationContexts.get(engineContextKey);
+  }
+
+  @Override
+  public void flushEvaluationContext(EngineContextKey engineContextKey) {
+    this.getEvaluationContext(engineContextKey)
+        .getConditionResults()
+        .clear();
   }
 }

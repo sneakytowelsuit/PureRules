@@ -70,11 +70,11 @@ public class DeterministicEvaluationService<TInput> implements EvaluationService
 
     private boolean evaluateRule(
             TInput input,
-            Rule<TInput, ?> condition
+            Rule<TInput, ?> rule
     ) {
-        if (condition == null) {
+        if (rule == null) {
             return false;
         }
-        return condition.evaluate(input);
+        return rule.evaluate(input);
     }
 }

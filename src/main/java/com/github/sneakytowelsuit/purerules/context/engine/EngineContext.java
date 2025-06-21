@@ -4,7 +4,7 @@ import com.github.sneakytowelsuit.purerules.context.condition.EvaluationContext;
 import com.github.sneakytowelsuit.purerules.engine.EngineMode;
 
 public interface EngineContext {
-  <T> EvaluationContext<T> getEvaluationContext(EngineMode engineMode);
+  <T> EvaluationContext<T> getEvaluationContext(EngineContextKey engineContextKey);
 
-  void flushEvaluationContext(EngineMode engineMode);
+  <T> void flushEvaluationContext(EngineContextKey engineContextKey);
 }
