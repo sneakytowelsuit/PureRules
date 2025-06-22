@@ -1,8 +1,11 @@
 package com.github.sneakytowelsuit.purerules.context.field;
 
+import lombok.Getter;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Getter
 public class FieldContext<TInputId> {
   /**
    * A map that holds the context for fields, where the key is a FieldContextKey and the value is an
@@ -14,7 +17,4 @@ public class FieldContext<TInputId> {
     this.fieldContextMap = new ConcurrentHashMap<>();
   }
 
-  public Map<FieldContextKey<TInputId>, Object> getFieldContextMap() {
-    return fieldContextMap;
-  }
 }

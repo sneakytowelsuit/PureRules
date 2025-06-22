@@ -16,13 +16,18 @@ class PureRulesEngineTest {
 
   private class Something {
     private final String name;
+    private final int id;
 
-    public Something(String name) {
+    public Something(int id, String name) {
+      this.id = id;
       this.name = name;
     }
 
     public String getName() {
       return name;
+    }
+    public int getId() {
+      return id;
     }
   }
 
@@ -50,25 +55,60 @@ class PureRulesEngineTest {
 
   @Test
   void testEngineInitialization() {
-    PureRulesEngine<Something, String> engine = PureRulesEngine.<Something, String>getDeterministicEngine(x -> x.getName(), List.of(
+    PureRulesEngine<Something, Integer> engine = PureRulesEngine.<Something, Integer>getDeterministicEngine(Something::getId, List.of(
             RuleGroup.<Something>builder()
                     .conditions(List.of(
                             Rule.<Something, String>builder()
                                     .field(new SomethingNameField())
-                                    .operator(new StringEqualsCaseInsensitiveOperator())
-                                    .value("test") // this one should pass
-                                    .build(),
-                            Rule.<Something, String>builder()
-                                    .field(new SomethingNameField())
                                     .operator(new StringEqualsCaseSensitiveOperator())
                                     .value("test") // this one should fail
+                                    .build(),
+                            RuleGroup.<Something>builder()
+                                    .conditions(List.of(
+                                            Rule.<Something, String>builder()
+                                                    .field(new SomethingNameField())
+                                                    .value("test")
+                                                    .operator(new StringEqualsCaseInsensitiveOperator())
+                                                    .build(),
+                                            RuleGroup.<Something>builder()
+                                                    .conditions(List.of(
+                                                            Rule.<Something, String>builder()
+                                                                    .field(new SomethingNameField())
+                                                                    .value("test")
+                                                                    .operator(new StringEqualsCaseSensitiveOperator())
+                                                                    .build(),
+                                                            Rule.<Something, String>builder()
+                                                                    .field(new SomethingNameField())
+                                                                    .value("test")
+                                                                    .operator(new StringEqualsCaseInsensitiveOperator())
+                                                                    .build()
+                                                    ))
+                                                    .combinator(Combinator.OR)
+                                                    .build(),
+                                            Rule.<Something, String>builder()
+                                                    .field(new SomethingNameField())
+                                                    .value("test")
+                                                    .operator(new StringEqualsCaseInsensitiveOperator())
+                                                    .build(),
+                                            Rule.<Something, String>builder()
+                                                    .field(new SomethingNameField())
+                                                    .value("test")
+                                                    .operator(new StringEqualsCaseInsensitiveOperator())
+                                                    .build(),
+                                            Rule.<Something, String>builder()
+                                                    .field(new SomethingNameField())
+                                                    .value("test")
+                                                    .operator(new StringEqualsCaseInsensitiveOperator())
+                                                    .build()
+                                    ))
+                                    .combinator(Combinator.AND)
                                     .build()
                     ))
-                    .combinator(Combinator.OR) // OR combinator means at least one condition must be true
+                    .combinator(Combinator.OR)
                     .build()
     ));
     assertNotNull(engine);
-    Something testObject = new Something("Test");
+    Something testObject = new Something(1234, "Test");
     Map<String, Boolean> results = engine.evaluate(testObject);
     results.forEach((key, value) -> assertTrue(value));
   }
