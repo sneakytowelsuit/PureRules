@@ -5,6 +5,6 @@ import lombok.Builder;
 @Builder
 public final class ProbabilisticRuleGroupEvaluationContextValue
     implements ProbabilisticConditionEvaluationContextValue {
-  private final Integer max;
+  private final Integer maxCount;
   private final Integer resultCount;
 }

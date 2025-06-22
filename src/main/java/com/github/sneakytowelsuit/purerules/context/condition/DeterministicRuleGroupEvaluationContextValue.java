@@ -1,0 +1,4 @@
+package com.github.sneakytowelsuit.purerules.context.condition;
+
+public final class DeterministicRuleGroupEvaluationContextValue implements DeterministicConditionEvaluationContextValue {
+}

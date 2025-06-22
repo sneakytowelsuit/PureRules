@@ -1,10 +1,9 @@
 package com.github.sneakytowelsuit.purerules.conditions;
 
-import lombok.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import lombok.*;
 
 /**
  * Represents a group of conditions (rules or nested rule groups) that are evaluated together using
