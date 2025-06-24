@@ -23,5 +23,5 @@ public final class Rule<TInput, TValue> implements Condition<TInput> {
   private final Field<TInput, TValue> field;
   private final Operator<TValue> operator;
   private final TValue value;
-  @Builder.Default private final Integer priority = 1;
+  @Builder.Default private final Integer weight = 1;
 }
