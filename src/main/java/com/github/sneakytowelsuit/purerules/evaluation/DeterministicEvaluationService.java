@@ -23,21 +23,21 @@ public class DeterministicEvaluationService<TInput, TInputId> implements Evaluat
     }
 
     @Override
-    public Map<String, Boolean> evaluate(TInput input, EngineContextService<TInputId> engineContextService) {
+    public Map<String, Boolean> evaluate(TInput input, EngineContextService<TInput, TInputId> engineContextService) {
         return conditions.stream()
                 .collect(
                         Collectors.toMap(
                                 Condition::getId, condition -> evaluationConditions(input, condition, engineContextService)));
     }
 
-    private boolean evaluationConditions(TInput input, Condition<TInput> condition, EngineContextService<TInputId> engineContextService) {
+    private boolean evaluationConditions(TInput input, Condition<TInput> condition, EngineContextService<TInput, TInputId> engineContextService) {
         return switch (condition) {
             case Rule<TInput, ?> rule -> evaluateRule(input, rule, engineContextService);
             case RuleGroup<TInput> ruleGroup -> evaluateRuleGroup(input, ruleGroup, engineContextService);
         };
     }
 
-    private boolean evaluateRuleGroup(TInput input, RuleGroup<TInput> ruleGroup, EngineContextService<TInputId> engineContextService) {
+    private boolean evaluateRuleGroup(TInput input, RuleGroup<TInput> ruleGroup, EngineContextService<TInput, TInputId> engineContextService) {
         if (ruleGroup.getConditions().isEmpty()) {
             return evaluateEmptyRuleGroup(ruleGroup, engineContextService);
         }
@@ -71,7 +71,7 @@ public class DeterministicEvaluationService<TInput, TInputId> implements Evaluat
         return result;
     }
 
-    private boolean evaluateEmptyRuleGroup(RuleGroup<TInput> ruleGroup, EngineContextService<TInputId> engineContextService) {
+    private boolean evaluateEmptyRuleGroup(RuleGroup<TInput> ruleGroup, EngineContextService<TInput, TInputId> engineContextService) {
         ConditionContextKey<TInputId> conditionContextKey = new ConditionContextKey<>(engineContextService.getInputId(), ruleGroup.getId());
         engineContextService.getConditionEvaluationContext().getConditionContextMap().put(
                 conditionContextKey,
@@ -86,7 +86,7 @@ public class DeterministicEvaluationService<TInput, TInputId> implements Evaluat
         return ruleGroup.getBias().isBiasResult() ^ ruleGroup.isInverted();
     }
 
-    private <V> boolean evaluateRule(TInput input, Rule<TInput, V> rule, EngineContextService<TInputId> engineContextService) {
+    private <V> boolean evaluateRule(TInput input, Rule<TInput, V> rule, EngineContextService<TInput, TInputId> engineContextService) {
         if (rule == null) {
             return false;
         }
@@ -113,7 +113,7 @@ public class DeterministicEvaluationService<TInput, TInputId> implements Evaluat
         return result;
     }
 
-    private <V> V getFieldValue(TInput input, Rule<TInput, V> rule, EngineContextService<TInputId> engineContextService) {
+    private <V> V getFieldValue(TInput input, Rule<TInput, V> rule, EngineContextService<TInput, TInputId> engineContextService) {
         assert rule.getField() != null;
         TInputId inputId = engineContextService.getInputId();
         V fieldValue = rule.getField().getFieldValueFunction().apply(input);

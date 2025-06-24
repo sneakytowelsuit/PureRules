@@ -37,8 +37,8 @@ public class PureRulesEngine<TInput, TInputId> {
    */
   private final EvaluationService<TInput, TInputId> evaluationService;
 
-  private Function<TInput, TInputId> inputIdGetter;
-  private EngineContextService<TInputId> engineContextService;
+  private final Function<TInput, TInputId> inputIdGetter;
+  private final EngineContextService<TInput, TInputId> engineContextService;
 
   public static <T, I> PureRulesEngine<T, I> getProbablisticEngine(
       Function<T, I> inputIdGetter,
@@ -64,7 +64,7 @@ public class PureRulesEngine<TInput, TInputId> {
     this.minimumProbabilityThreshold = minimumProbabilityThreshold;
     this.evaluationService = new ProbabilisticEvaluationService<>(conditions, minimumProbabilityThreshold);
     this.inputIdGetter = inputIdGetter;
-    this.engineContextService = new EngineContextService<>(EngineMode.PROBABILISTIC);
+    this.engineContextService = new EngineContextService<>(EngineMode.PROBABILISTIC, conditions);
   }
 
   public static <T, I> PureRulesEngine<T, I> getDeterministicEngine(
@@ -78,14 +78,14 @@ public class PureRulesEngine<TInput, TInputId> {
     this.engineMode = EngineMode.DETERMINISTIC;
     this.evaluationService = new DeterministicEvaluationService<>(conditions);
     this.inputIdGetter = inputIdGetter;
-    this.engineContextService = new EngineContextService<>(EngineMode.DETERMINISTIC);
+    this.engineContextService = new EngineContextService<>(EngineMode.DETERMINISTIC, conditions);
   }
 
   private EvaluationService<TInput,TInputId> getEvaluationService() {
     return this.evaluationService;
   }
 
-  private EngineContextService<TInputId> getEngineContextService() {
+  private EngineContextService<TInput, TInputId> getEngineContextService() {
     return this.engineContextService;
   }
 
