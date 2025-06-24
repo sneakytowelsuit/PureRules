@@ -39,7 +39,7 @@ public class DeterministicEvaluationService<TInput, TInputId> implements Evaluat
 
     private boolean evaluateRuleGroup(TInput input, RuleGroup<TInput> ruleGroup, EngineContextService<TInput, TInputId> engineContextService) {
         if (ruleGroup.getConditions().isEmpty()) {
-            return evaluateEmptyRuleGroup(ruleGroup, engineContextService);
+            return evaluateEmptyRuleGroup(input, ruleGroup, engineContextService);
         }
         // Sort the conditions by type
         List<Rule<TInput, ?>> rules = new ArrayList<>();
@@ -50,7 +50,7 @@ public class DeterministicEvaluationService<TInput, TInputId> implements Evaluat
                 case RuleGroup<TInput> ruleGroupCondition -> ruleGroups.add(ruleGroupCondition);
             }
         }
-        ConditionContextKey<TInputId> contextKey = new ConditionContextKey<TInputId>(engineContextService.getInputId(), ruleGroup.getId());
+        ConditionContextKey<TInputId> contextKey = new ConditionContextKey<TInputId>(engineContextService.getInputIdGetter().apply(input), ruleGroup.getId());
         boolean result = switch (ruleGroup.getCombinator()) {
             case AND -> rules.stream().allMatch(rule -> evaluateRule(input, rule, engineContextService))
                     && ruleGroups.stream()
@@ -71,8 +71,8 @@ public class DeterministicEvaluationService<TInput, TInputId> implements Evaluat
         return result;
     }
 
-    private boolean evaluateEmptyRuleGroup(RuleGroup<TInput> ruleGroup, EngineContextService<TInput, TInputId> engineContextService) {
-        ConditionContextKey<TInputId> conditionContextKey = new ConditionContextKey<>(engineContextService.getInputId(), ruleGroup.getId());
+    private boolean evaluateEmptyRuleGroup(TInput input, RuleGroup<TInput> ruleGroup, EngineContextService<TInput, TInputId> engineContextService) {
+        ConditionContextKey<TInputId> conditionContextKey = new ConditionContextKey<>(engineContextService.getInputIdGetter().apply(input), ruleGroup.getId());
         engineContextService.getConditionEvaluationContext().getConditionContextMap().put(
                 conditionContextKey,
                 RuleGroupContextValue.builder()
@@ -97,14 +97,14 @@ public class DeterministicEvaluationService<TInput, TInputId> implements Evaluat
         V fieldValue = this.getFieldValue(input, rule, engineContextService);
         V valueValue = rule.getValue();
         boolean result = rule.getOperator().test(fieldValue, valueValue);
-        ConditionContextKey<TInputId> conditionContextKey = new ConditionContextKey<>(engineContextService.getInputId(), rule.getId());
+        ConditionContextKey<TInputId> conditionContextKey = new ConditionContextKey<>(engineContextService.getInputIdGetter().apply(input), rule.getId());
         engineContextService.getConditionEvaluationContext()
                 .getConditionContextMap()
                 .put(
                         conditionContextKey,
                         RuleContextValue.builder()
                                 .ruleId(rule.getId())
-                                .result(result)
+                                .result(result ? 1 : 0)
                                 .fieldValue(fieldValue)
                                 .valueValue(valueValue)
                                 .operator(rule.getOperator().getClass().getName())
@@ -115,7 +115,7 @@ public class DeterministicEvaluationService<TInput, TInputId> implements Evaluat
 
     private <V> V getFieldValue(TInput input, Rule<TInput, V> rule, EngineContextService<TInput, TInputId> engineContextService) {
         assert rule.getField() != null;
-        TInputId inputId = engineContextService.getInputId();
+        TInputId inputId = engineContextService.getInputIdGetter().apply(input);
         V fieldValue = rule.getField().getFieldValueFunction().apply(input);
         // Set the field value in the engine context service
         // We can assume the field value is the same across every instance of the same field class for the same input

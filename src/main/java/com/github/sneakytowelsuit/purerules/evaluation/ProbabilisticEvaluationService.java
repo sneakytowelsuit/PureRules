@@ -17,7 +17,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId> implements Evaluat
   }
 
   @Override
-  public Map<String, Boolean> evaluate(TInput input, EngineContextService<TInputId> engineContextService) {
+  public Map<String, Boolean> evaluate(TInput input, EngineContextService<TInput, TInputId> engineContextService) {
     return Map.of();
   }
 }

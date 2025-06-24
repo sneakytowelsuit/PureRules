@@ -115,5 +115,63 @@ class PureRulesEngineTest {
 
   @Test
   void testProbabilisticEngineInitialization() {
+    PureRulesEngine<Something, Integer> engine = PureRulesEngine.<Something, Integer>getProbablisticEngine(Something::getId, 0.75f, List.of(
+            RuleGroup.<Something>builder()
+                    .conditions(List.of(
+                            Rule.<Something, String>builder()
+                                    .field(new SomethingNameField())
+                                    .operator(new StringEqualsCaseSensitiveOperator())
+                                    .value("test") // this one should fail
+                                    .build(),
+                            RuleGroup.<Something>builder()
+                                    .conditions(List.of(
+                                            Rule.<Something, String>builder()
+                                                    .field(new SomethingNameField())
+                                                    .value("test")
+                                                    .operator(new StringEqualsCaseInsensitiveOperator())
+                                                    .build(),
+                                            RuleGroup.<Something>builder()
+                                                    .conditions(List.of(
+                                                            Rule.<Something, String>builder()
+                                                                    .field(new SomethingNameField())
+                                                                    .value("test")
+                                                                    .operator(new StringEqualsCaseSensitiveOperator())
+                                                                    .build(),
+                                                            Rule.<Something, String>builder()
+                                                                    .field(new SomethingNameField())
+                                                                    .value("test")
+                                                                    .operator(new StringEqualsCaseInsensitiveOperator())
+                                                                    .build()
+                                                    ))
+                                                    .weight(2)
+                                                    .combinator(Combinator.OR)
+                                                    .build(),
+                                            Rule.<Something, String>builder()
+                                                    .field(new SomethingNameField())
+                                                    .value("test")
+                                                    .operator(new StringEqualsCaseInsensitiveOperator())
+                                                    .build(),
+                                            Rule.<Something, String>builder()
+                                                    .field(new SomethingNameField())
+                                                    .value("test")
+                                                    .operator(new StringEqualsCaseInsensitiveOperator())
+                                                    .build(),
+                                            Rule.<Something, String>builder()
+                                                    .field(new SomethingNameField())
+                                                    .value("test")
+                                                    .operator(new StringEqualsCaseInsensitiveOperator())
+                                                    .build()
+                                    ))
+                                    .combinator(Combinator.AND)
+                                    .weight(1000)
+                                    .build()
+                    ))
+                    .combinator(Combinator.OR)
+                    .build()
+    ));
+    assertNotNull(engine);
+    Something testObject = new Something(1234, "Test");
+    Map<String, Boolean> results = engine.evaluate(testObject);
+    results.forEach((key, value) -> assertTrue(value));
   }
 }

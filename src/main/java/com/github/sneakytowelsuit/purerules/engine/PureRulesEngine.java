@@ -8,6 +8,7 @@ import com.github.sneakytowelsuit.purerules.evaluation.ProbabilisticEvaluationSe
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class PureRulesEngine<TInput, TInputId> {
   private final List<Condition<TInput>> conditions;
@@ -37,7 +38,6 @@ public class PureRulesEngine<TInput, TInputId> {
    */
   private final EvaluationService<TInput, TInputId> evaluationService;
 
-  private final Function<TInput, TInputId> inputIdGetter;
   private final EngineContextService<TInput, TInputId> engineContextService;
 
   public static <T, I> PureRulesEngine<T, I> getProbablisticEngine(
@@ -63,8 +63,7 @@ public class PureRulesEngine<TInput, TInputId> {
     this.engineMode = EngineMode.PROBABILISTIC;
     this.minimumProbabilityThreshold = minimumProbabilityThreshold;
     this.evaluationService = new ProbabilisticEvaluationService<>(conditions, minimumProbabilityThreshold);
-    this.inputIdGetter = inputIdGetter;
-    this.engineContextService = new EngineContextService<>(EngineMode.PROBABILISTIC, conditions);
+    this.engineContextService = new EngineContextService<>(EngineMode.PROBABILISTIC, inputIdGetter, conditions);
   }
 
   public static <T, I> PureRulesEngine<T, I> getDeterministicEngine(
@@ -77,8 +76,7 @@ public class PureRulesEngine<TInput, TInputId> {
     this.conditions = conditions;
     this.engineMode = EngineMode.DETERMINISTIC;
     this.evaluationService = new DeterministicEvaluationService<>(conditions);
-    this.inputIdGetter = inputIdGetter;
-    this.engineContextService = new EngineContextService<>(EngineMode.DETERMINISTIC, conditions);
+    this.engineContextService = new EngineContextService<>(EngineMode.DETERMINISTIC, inputIdGetter, conditions);
   }
 
   private EvaluationService<TInput,TInputId> getEvaluationService() {
@@ -90,8 +88,11 @@ public class PureRulesEngine<TInput, TInputId> {
   }
 
   public Map<String, Boolean> evaluate(TInput input) {
-    // Set the input ID in the engine context service
-    this.getEngineContextService().setInputId(this.inputIdGetter, input);
     return this.getEvaluationService().evaluate(input, this.getEngineContextService());
+  }
+
+  public Map<TInputId, Map<String, Boolean>> evaluateAll(List<TInput> inputs) {
+    return inputs.stream()
+            .collect(Collectors.toMap(input -> this.engineContextService.getInputIdGetter().apply(input), this::evaluate));
   }
 }
