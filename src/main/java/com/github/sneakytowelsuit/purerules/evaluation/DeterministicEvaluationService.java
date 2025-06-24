@@ -78,6 +78,7 @@ public class DeterministicEvaluationService<TInput, TInputId> implements Evaluat
                 RuleGroupContextValue.builder()
                         .bias(ruleGroup.getBias())
                         .result(Integer.valueOf(String.valueOf(ruleGroup.getBias().isBiasResult())))
+                        // Deterministic evaluation doesn't need to account for the weight of the conditions
                         .maximumResult(ruleGroup.getConditions().size())
                         .combinator(ruleGroup.getCombinator())
                         .build()

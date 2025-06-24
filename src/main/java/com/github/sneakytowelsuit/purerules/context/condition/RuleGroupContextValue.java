@@ -3,7 +3,6 @@ package com.github.sneakytowelsuit.purerules.context.condition;
 import com.github.sneakytowelsuit.purerules.conditions.Bias;
 import com.github.sneakytowelsuit.purerules.conditions.Combinator;
 import lombok.Builder;
-import lombok.Getter;
 
 @Builder
 public final class RuleGroupContextValue implements ConditionContextValue {

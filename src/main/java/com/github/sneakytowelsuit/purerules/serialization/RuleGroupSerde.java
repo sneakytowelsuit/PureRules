@@ -65,8 +65,8 @@ public class RuleGroupSerde<InputType> {
       JsonNode jsonNode, RuleGroup.RuleGroupBuilder<InputType> builder) {
     JsonNode node = jsonNode.get(RuleGroupJsonKeys.PRIORITY.getKey());
     if (node != null && node.isInt()) {
-      Integer priority = node.asInt();
-      builder.priority(priority);
+      Integer weight = node.asInt();
+      builder.weight(weight);
     }
   }
 
