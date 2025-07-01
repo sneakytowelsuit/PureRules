@@ -137,7 +137,24 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
           evaluateRuleGroupRule(input, rule, engineContextService, totalResult, totalWeight);
         }
         case RuleGroup<TInput> nestedGroup -> {
-          evaluateNestedRuleGroup(input, ruleGroup, engineContextService, totalResult, totalWeight, minProbability);
+          // Recursively evaluate nested group
+          boolean nestedResult =
+              evaluateRuleGroup(
+                  input, (RuleGroup<TInput>) nestedGroup, engineContextService, minProbability);
+          // Retrieve the nested group's actual result and maximumResult from its context
+          ConditionContextValue ctx =
+              engineContextService
+                  .getConditionEvaluationContext()
+                  .getConditionContextMap()
+                  .get(
+                      new ConditionContextKey<>(
+                          engineContextService.getInputIdGetter().apply(input), nestedGroup.getId()));
+          if (ctx == null || !(ctx instanceof RuleGroupContextValue nestedCtx)) {
+            throw new IllegalStateException(
+                "Expected RuleGroupContextValue for nested group: " + nestedGroup.getId());
+          }
+          totalWeight.addAndGet(nestedCtx.getMaximumResult());
+          totalResult.addAndGet(nestedCtx.getResult());
         }
       }
     }
@@ -194,32 +211,6 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
             "Expected RuleContextValue but got RuleGroupContextValue for rule: " + rule.getId());
       }
     }
-  }
-
-  private void evaluateNestedRuleGroup(
-          TInput input,
-            RuleGroup<TInput> nestedGroup,
-            EngineContextService<TInput, TInputId> engineContextService,
-            AtomicInteger totalResult,
-            AtomicInteger totalWeight,
-            float minProbability
-  ) {
-    // Recursively evaluate nested group
-    evaluateRuleGroup(input, (RuleGroup<TInput>) nestedGroup, engineContextService, minProbability);
-    // Retrieve the nested group's actual result and maximumResult from its context
-    ConditionContextValue ctx =
-            engineContextService
-                    .getConditionEvaluationContext()
-                    .getConditionContextMap()
-                    .get(
-                            new ConditionContextKey<>(
-                                    engineContextService.getInputIdGetter().apply(input), nestedGroup.getId()));
-    if (ctx == null || !(ctx instanceof RuleGroupContextValue nestedCtx)) {
-      throw new IllegalStateException(
-              "Expected RuleGroupContextValue for nested group: " + nestedGroup.getId());
-    }
-    totalWeight.addAndGet(nestedCtx.getMaximumResult());
-    totalResult.addAndGet(nestedCtx.getResult());
   }
 
   private Integer evaluateEmptyRuleGroup(
