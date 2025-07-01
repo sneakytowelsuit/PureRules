@@ -124,7 +124,7 @@ class PureRulesEngineTest {
    * ├── Rule: name equals "Test" (case-insensitive, weight 3)
    * └── Nested RuleGroup (OR, weight 7)
    *     ├── Rule: name equals "Test" (case-sensitive, weight 4)
-   *     └── Rule: name equals "test" (case-insensitive, weight 3)
+   *     └── Rule: name equals "fail" (case-insensitive, weight 3)
    * </pre>
    * The minimum probability threshold is set to 0.7. For input "Test", both the root rule and
    * the first nested rule will pass, resulting in a score:
@@ -155,11 +155,10 @@ class PureRulesEngineTest {
                     Rule.<Something, String>builder()
                         .field(new SomethingNameField())
                         .operator(new StringEqualsCaseInsensitiveOperator())
-                        .value("test")
+                        .value("fail") // This will fail, so only 4/7 from nested group
                         .weight(3)
                         .build()))
             .combinator(Combinator.OR)
-            .weight(7)
             .build();
 
     RuleGroup<Something> rootGroup =
@@ -183,7 +182,7 @@ class PureRulesEngineTest {
     Something testObject = new Something(1, "Test");
     Map<String, Boolean> results = engine.evaluate(testObject);
 
-    // All results should be true, as the minimum probability is met
+    // All results should be true, as the minimum probability is met (7/10 = 0.7)
     results.forEach(
         (key, value) ->
             assertTrue(value, "RuleGroup " + key + " should pass probabilistic evaluation"));
