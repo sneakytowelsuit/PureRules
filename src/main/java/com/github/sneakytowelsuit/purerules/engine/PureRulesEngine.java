@@ -62,8 +62,10 @@ public class PureRulesEngine<TInput, TInputId> {
     this.conditions = conditions;
     this.engineMode = EngineMode.PROBABILISTIC;
     this.minimumProbabilityThreshold = minimumProbabilityThreshold;
-    this.evaluationService = new ProbabilisticEvaluationService<>(conditions, minimumProbabilityThreshold);
-    this.engineContextService = new EngineContextService<>(EngineMode.PROBABILISTIC, inputIdGetter, conditions);
+    this.evaluationService =
+        new ProbabilisticEvaluationService<>(conditions, minimumProbabilityThreshold);
+    this.engineContextService =
+        new EngineContextService<>(EngineMode.PROBABILISTIC, inputIdGetter, conditions);
   }
 
   public static <T, I> PureRulesEngine<T, I> getDeterministicEngine(
@@ -76,10 +78,11 @@ public class PureRulesEngine<TInput, TInputId> {
     this.conditions = conditions;
     this.engineMode = EngineMode.DETERMINISTIC;
     this.evaluationService = new DeterministicEvaluationService<>(conditions);
-    this.engineContextService = new EngineContextService<>(EngineMode.DETERMINISTIC, inputIdGetter, conditions);
+    this.engineContextService =
+        new EngineContextService<>(EngineMode.DETERMINISTIC, inputIdGetter, conditions);
   }
 
-  private EvaluationService<TInput,TInputId> getEvaluationService() {
+  private EvaluationService<TInput, TInputId> getEvaluationService() {
     return this.evaluationService;
   }
 
@@ -93,6 +96,9 @@ public class PureRulesEngine<TInput, TInputId> {
 
   public Map<TInputId, Map<String, Boolean>> evaluateAll(List<TInput> inputs) {
     return inputs.stream()
-            .collect(Collectors.toMap(input -> this.engineContextService.getInputIdGetter().apply(input), this::evaluate));
+        .collect(
+            Collectors.toMap(
+                input -> this.engineContextService.getInputIdGetter().apply(input),
+                this::evaluate));
   }
 }

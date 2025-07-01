@@ -2,14 +2,11 @@ package com.github.sneakytowelsuit.purerules.engine;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.github.sneakytowelsuit.purerules.TestUtils;
 import com.github.sneakytowelsuit.purerules.conditions.*;
-
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
-
 import org.junit.jupiter.api.Test;
 
 class PureRulesEngineTest {
@@ -26,6 +23,7 @@ class PureRulesEngineTest {
     public String getName() {
       return name;
     }
+
     public int getId() {
       return id;
     }
@@ -45,6 +43,7 @@ class PureRulesEngineTest {
       return input.toLowerCase(Locale.ROOT).equals(s.toLowerCase(Locale.ROOT));
     }
   }
+
   private class StringEqualsCaseSensitiveOperator implements Operator<String> {
 
     @Override
@@ -55,123 +54,131 @@ class PureRulesEngineTest {
 
   @Test
   void testEngineInitialization() {
-    PureRulesEngine<Something, Integer> engine = PureRulesEngine.<Something, Integer>getDeterministicEngine(Something::getId, List.of(
-            RuleGroup.<Something>builder()
-                    .conditions(List.of(
+    PureRulesEngine<Something, Integer> engine =
+        PureRulesEngine.<Something, Integer>getDeterministicEngine(
+            Something::getId,
+            List.of(
+                RuleGroup.<Something>builder()
+                    .conditions(
+                        List.of(
                             Rule.<Something, String>builder()
-                                    .field(new SomethingNameField())
-                                    .operator(new StringEqualsCaseSensitiveOperator())
-                                    .value("test") // this one should fail
-                                    .build(),
+                                .field(new SomethingNameField())
+                                .operator(new StringEqualsCaseSensitiveOperator())
+                                .value("test") // this one should fail
+                                .build(),
                             RuleGroup.<Something>builder()
-                                    .conditions(List.of(
-                                            Rule.<Something, String>builder()
-                                                    .field(new SomethingNameField())
-                                                    .value("test")
-                                                    .operator(new StringEqualsCaseInsensitiveOperator())
-                                                    .build(),
-                                            RuleGroup.<Something>builder()
-                                                    .conditions(List.of(
-                                                            Rule.<Something, String>builder()
-                                                                    .field(new SomethingNameField())
-                                                                    .value("test")
-                                                                    .operator(new StringEqualsCaseSensitiveOperator())
-                                                                    .build(),
-                                                            Rule.<Something, String>builder()
-                                                                    .field(new SomethingNameField())
-                                                                    .value("test")
-                                                                    .operator(new StringEqualsCaseInsensitiveOperator())
-                                                                    .build()
-                                                    ))
-                                                    .combinator(Combinator.OR)
-                                                    .build(),
-                                            Rule.<Something, String>builder()
-                                                    .field(new SomethingNameField())
-                                                    .value("test")
-                                                    .operator(new StringEqualsCaseInsensitiveOperator())
-                                                    .build(),
-                                            Rule.<Something, String>builder()
-                                                    .field(new SomethingNameField())
-                                                    .value("test")
-                                                    .operator(new StringEqualsCaseInsensitiveOperator())
-                                                    .build(),
-                                            Rule.<Something, String>builder()
-                                                    .field(new SomethingNameField())
-                                                    .value("test")
-                                                    .operator(new StringEqualsCaseInsensitiveOperator())
-                                                    .build()
-                                    ))
-                                    .combinator(Combinator.AND)
-                                    .build()
-                    ))
+                                .conditions(
+                                    List.of(
+                                        Rule.<Something, String>builder()
+                                            .field(new SomethingNameField())
+                                            .value("test")
+                                            .operator(new StringEqualsCaseInsensitiveOperator())
+                                            .build(),
+                                        RuleGroup.<Something>builder()
+                                            .conditions(
+                                                List.of(
+                                                    Rule.<Something, String>builder()
+                                                        .field(new SomethingNameField())
+                                                        .value("test")
+                                                        .operator(
+                                                            new StringEqualsCaseSensitiveOperator())
+                                                        .build(),
+                                                    Rule.<Something, String>builder()
+                                                        .field(new SomethingNameField())
+                                                        .value("test")
+                                                        .operator(
+                                                            new StringEqualsCaseInsensitiveOperator())
+                                                        .build()))
+                                            .combinator(Combinator.OR)
+                                            .build(),
+                                        Rule.<Something, String>builder()
+                                            .field(new SomethingNameField())
+                                            .value("test")
+                                            .operator(new StringEqualsCaseInsensitiveOperator())
+                                            .build(),
+                                        Rule.<Something, String>builder()
+                                            .field(new SomethingNameField())
+                                            .value("test")
+                                            .operator(new StringEqualsCaseInsensitiveOperator())
+                                            .build(),
+                                        Rule.<Something, String>builder()
+                                            .field(new SomethingNameField())
+                                            .value("test")
+                                            .operator(new StringEqualsCaseInsensitiveOperator())
+                                            .build()))
+                                .combinator(Combinator.AND)
+                                .build()))
                     .combinator(Combinator.OR)
-                    .build()
-    ));
+                    .build()));
     assertNotNull(engine);
     Something testObject = new Something(1234, "Test");
     Map<String, Boolean> results = engine.evaluate(testObject);
     results.forEach((key, value) -> assertTrue(value));
   }
 
+  /**
+   * This test demonstrates a passing scenario for probabilistic evaluation using a RuleGroup tree
+   * with a depth of at least 2. The tree structure is as follows:
+   *
+   * <p>Root RuleGroup (AND) ├── Rule: name equals "Test" (case-insensitive, weight 3) └── Nested
+   * RuleGroup (OR, weight 7) ├── Rule: name equals "Test" (case-sensitive, weight 4) └── Rule: name
+   * equals "test" (case-insensitive, weight 3)
+   *
+   * <p>The minimum probability threshold is set to 0.7. For input "Test", both the root rule and
+   * the first nested rule will pass, resulting in a score: - Root: 3 (pass) - Nested: 4
+   * (case-sensitive pass) + 0 (case-insensitive fail) = 4 - Total: 3 + 4 = 7 out of 10 (weights
+   * sum), so score = 0.7, which meets the threshold.
+   */
   @Test
-  void testProbabilisticEngineInitialization() {
-    PureRulesEngine<Something, Integer> engine = PureRulesEngine.<Something, Integer>getProbablisticEngine(Something::getId, 0.75f, List.of(
-            RuleGroup.<Something>builder()
-                    .conditions(List.of(
-                            Rule.<Something, String>builder()
-                                    .field(new SomethingNameField())
-                                    .operator(new StringEqualsCaseSensitiveOperator())
-                                    .value("test") // this one should fail
-                                    .build(),
-                            RuleGroup.<Something>builder()
-                                    .conditions(List.of(
-                                            Rule.<Something, String>builder()
-                                                    .field(new SomethingNameField())
-                                                    .value("test")
-                                                    .operator(new StringEqualsCaseInsensitiveOperator())
-                                                    .build(),
-                                            RuleGroup.<Something>builder()
-                                                    .conditions(List.of(
-                                                            Rule.<Something, String>builder()
-                                                                    .field(new SomethingNameField())
-                                                                    .value("test")
-                                                                    .operator(new StringEqualsCaseSensitiveOperator())
-                                                                    .build(),
-                                                            Rule.<Something, String>builder()
-                                                                    .field(new SomethingNameField())
-                                                                    .value("test")
-                                                                    .operator(new StringEqualsCaseInsensitiveOperator())
-                                                                    .build()
-                                                    ))
-                                                    .weight(2)
-                                                    .combinator(Combinator.OR)
-                                                    .build(),
-                                            Rule.<Something, String>builder()
-                                                    .field(new SomethingNameField())
-                                                    .value("test")
-                                                    .operator(new StringEqualsCaseInsensitiveOperator())
-                                                    .build(),
-                                            Rule.<Something, String>builder()
-                                                    .field(new SomethingNameField())
-                                                    .value("test")
-                                                    .operator(new StringEqualsCaseInsensitiveOperator())
-                                                    .build(),
-                                            Rule.<Something, String>builder()
-                                                    .field(new SomethingNameField())
-                                                    .value("test")
-                                                    .operator(new StringEqualsCaseInsensitiveOperator())
-                                                    .build()
-                                    ))
-                                    .combinator(Combinator.AND)
-                                    .weight(1000)
-                                    .build()
-                    ))
-                    .combinator(Combinator.OR)
-                    .build()
-    ));
-    assertNotNull(engine);
-    Something testObject = new Something(1234, "Test");
+  void testProbabilisticEvaluationWithNestedRuleGroups() {
+    final String NAME = "Test";
+    final float MIN_PROBABILITY = 0.7f;
+
+    // Build a RuleGroup tree of depth 2
+    RuleGroup<Something> nestedGroup =
+        RuleGroup.<Something>builder()
+            .conditions(
+                List.of(
+                    Rule.<Something, String>builder()
+                        .field(new SomethingNameField())
+                        .operator(new StringEqualsCaseSensitiveOperator())
+                        .value(NAME)
+                        .weight(4)
+                        .build(),
+                    Rule.<Something, String>builder()
+                        .field(new SomethingNameField())
+                        .operator(new StringEqualsCaseInsensitiveOperator())
+                        .value("test")
+                        .weight(3)
+                        .build()))
+            .combinator(Combinator.OR)
+            .weight(7)
+            .build();
+
+    RuleGroup<Something> rootGroup =
+        RuleGroup.<Something>builder()
+            .conditions(
+                List.of(
+                    Rule.<Something, String>builder()
+                        .field(new SomethingNameField())
+                        .operator(new StringEqualsCaseInsensitiveOperator())
+                        .value(NAME)
+                        .weight(3)
+                        .build(),
+                    nestedGroup))
+            .combinator(Combinator.AND)
+            .build();
+
+    PureRulesEngine<Something, Integer> engine =
+        PureRulesEngine.getProbablisticEngine(
+            Something::getId, MIN_PROBABILITY, List.of(rootGroup));
+
+    Something testObject = new Something(1, "Test");
     Map<String, Boolean> results = engine.evaluate(testObject);
-    results.forEach((key, value) -> assertTrue(value));
+
+    // All results should be true, as the minimum probability is met
+    results.forEach(
+        (key, value) ->
+            assertTrue(value, "RuleGroup " + key + " should pass probabilistic evaluation"));
   }
 }
