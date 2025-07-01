@@ -36,5 +36,6 @@ spotless {
         target '**/*.java'
         // Apply Google Java Format
         googleJavaFormat()
+        toggleOffOn()
     }
 }

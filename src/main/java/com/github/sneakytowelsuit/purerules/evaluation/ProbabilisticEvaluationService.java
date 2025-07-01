@@ -148,7 +148,8 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
                   .getConditionContextMap()
                   .get(
                       new ConditionContextKey<>(
-                          engineContextService.getInputIdGetter().apply(input), nestedGroup.getId()));
+                          engineContextService.getInputIdGetter().apply(input),
+                          nestedGroup.getId()));
           if (ctx == null || !(ctx instanceof RuleGroupContextValue nestedCtx)) {
             throw new IllegalStateException(
                 "Expected RuleGroupContextValue for nested group: " + nestedGroup.getId());

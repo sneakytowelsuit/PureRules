@@ -117,6 +117,7 @@ class PureRulesEngineTest {
   }
 
   /**
+   * spotless:off
    * This test demonstrates a passing scenario for probabilistic evaluation using a RuleGroup tree
    * with a depth of at least 2. The tree structure is as follows:
    * <pre>
@@ -135,6 +136,7 @@ class PureRulesEngineTest {
    *     <li>Weights sum: 10 (3 + 4 + 3)</li>
    *     <li>Score: 7 / 10 = 0.7</li>
    * </ul>
+   * spotless:on
    */
   @Test
   void testProbabilisticEvaluationWithNestedRuleGroups() {
