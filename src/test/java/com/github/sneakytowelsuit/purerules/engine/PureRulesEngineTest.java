@@ -119,15 +119,22 @@ class PureRulesEngineTest {
   /**
    * This test demonstrates a passing scenario for probabilistic evaluation using a RuleGroup tree
    * with a depth of at least 2. The tree structure is as follows:
-   *
-   * <p>Root RuleGroup (AND) ├── Rule: name equals "Test" (case-insensitive, weight 3) └── Nested
-   * RuleGroup (OR, weight 7) ├── Rule: name equals "Test" (case-sensitive, weight 4) └── Rule: name
-   * equals "test" (case-insensitive, weight 3)
-   *
-   * <p>The minimum probability threshold is set to 0.7. For input "Test", both the root rule and
-   * the first nested rule will pass, resulting in a score: - Root: 3 (pass) - Nested: 4
-   * (case-sensitive pass) + 0 (case-insensitive fail) = 4 - Total: 3 + 4 = 7 out of 10 (weights
-   * sum), so score = 0.7, which meets the threshold.
+   * <pre>
+   * Root RuleGroup (AND)
+   * ├── Rule: name equals "Test" (case-insensitive, weight 3)
+   * └── Nested RuleGroup (OR, weight 7)
+   *     ├── Rule: name equals "Test" (case-sensitive, weight 4)
+   *     └── Rule: name equals "test" (case-insensitive, weight 3)
+   * </pre>
+   * The minimum probability threshold is set to 0.7. For input "Test", both the root rule and
+   * the first nested rule will pass, resulting in a score:
+   * <ul>
+   *     <li>Root Rule: 3 (case-insensitive pass)</li>
+   *     <li>Nested RuleGroup: 4 (case-sensitive pass) + 0 (case-insensitive fail)</li>
+   *     <li>Total: 3 (root) + 4 (nested) = 7</li>
+   *     <li>Weights sum: 10 (3 + 4 + 3)</li>
+   *     <li>Score: 7 / 10 = 0.7</li>
+   * </ul>
    */
   @Test
   void testProbabilisticEvaluationWithNestedRuleGroups() {
