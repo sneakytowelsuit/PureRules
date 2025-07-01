@@ -128,7 +128,6 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
       return evaluateEmptyRuleGroup(input, ruleGroup, engineContextService) == 1;
     }
 
-    // Accumulate result and weight for all children (rules and groups)
     AtomicInteger totalResult = new AtomicInteger(0);
     AtomicInteger totalWeight = new AtomicInteger(0);
 
@@ -138,18 +137,15 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
           evaluateRuleGroupRule(input, rule, engineContextService, totalResult, totalWeight);
         }
         case RuleGroup<TInput> nestedGroup -> {
-          evaluateRuleGroupNestedRuleGroup(
-              input, nestedGroup, engineContextService, minProbability, totalResult, totalWeight);
+          evaluateNestedRuleGroup(input, ruleGroup, engineContextService, totalResult, totalWeight, minProbability);
         }
       }
     }
 
-    // If no weight, treat as fail
     if (totalWeight.get() == 0) {
       totalResult.set(0);
     }
 
-    // Store context for this group
     int finalTotalResult = totalResult.get();
     int finalTotalWeight = totalWeight.get();
     engineContextService
@@ -166,7 +162,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
                     .maximumResult(finalTotalWeight)
                     .build());
 
-    float score = totalWeight.get() == 0 ? 0f : (float) totalResult.get() / totalWeight.get();
+    float score = finalTotalWeight == 0 ? 0f : (float) finalTotalResult / finalTotalWeight;
     return score >= minProbability;
   }
 
@@ -200,26 +196,30 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
     }
   }
 
-  private void evaluateRuleGroupNestedRuleGroup(
-      TInput input,
-      RuleGroup<TInput> nestedGroup,
-      EngineContextService<TInput, TInputId> engineContextService,
-      float minProbability,
-      AtomicInteger totalResult,
-      AtomicInteger totalWeight) {
+  private void evaluateNestedRuleGroup(
+          TInput input,
+            RuleGroup<TInput> nestedGroup,
+            EngineContextService<TInput, TInputId> engineContextService,
+            AtomicInteger totalResult,
+            AtomicInteger totalWeight,
+            float minProbability
+  ) {
     // Recursively evaluate nested group
-    boolean nestedResult =
-        evaluateRuleGroup(
-            input, (RuleGroup<TInput>) nestedGroup, engineContextService, minProbability);
-    // Get cumulative weight for nested group
-    Integer nestedWeight =
-        engineContextService.getConditionCumulativeWeightMap().get(nestedGroup.getId());
-    if (nestedWeight == null) {
+    evaluateRuleGroup(input, (RuleGroup<TInput>) nestedGroup, engineContextService, minProbability);
+    // Retrieve the nested group's actual result and maximumResult from its context
+    ConditionContextValue ctx =
+            engineContextService
+                    .getConditionEvaluationContext()
+                    .getConditionContextMap()
+                    .get(
+                            new ConditionContextKey<>(
+                                    engineContextService.getInputIdGetter().apply(input), nestedGroup.getId()));
+    if (ctx == null || !(ctx instanceof RuleGroupContextValue nestedCtx)) {
       throw new IllegalStateException(
-          "Cumulative weight not found for nested rule group: " + nestedGroup.getId());
+              "Expected RuleGroupContextValue for nested group: " + nestedGroup.getId());
     }
-    totalWeight.addAndGet(nestedWeight);
-    totalResult.addAndGet(nestedResult ? nestedWeight : 0);
+    totalWeight.addAndGet(nestedCtx.getMaximumResult());
+    totalResult.addAndGet(nestedCtx.getResult());
   }
 
   private Integer evaluateEmptyRuleGroup(
