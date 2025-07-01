@@ -1,9 +1,8 @@
 package com.github.sneakytowelsuit.purerules.context.field;
 
-import lombok.Getter;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import lombok.Getter;
 
 @Getter
 public class FieldContext<TInputId> {
@@ -16,5 +15,4 @@ public class FieldContext<TInputId> {
   public FieldContext() {
     this.fieldContextMap = new ConcurrentHashMap<>();
   }
-
 }

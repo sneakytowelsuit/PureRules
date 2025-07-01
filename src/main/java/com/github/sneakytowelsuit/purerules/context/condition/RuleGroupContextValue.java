@@ -8,8 +8,8 @@ import lombok.Getter;
 @Builder
 @Getter
 public final class RuleGroupContextValue implements ConditionContextValue {
-    private Combinator combinator;
-    private Bias bias;
-    private Integer maximumResult;
-    private Integer result;
+  private Combinator combinator;
+  private Bias bias;
+  private Integer maximumResult;
+  private Integer result;
 }

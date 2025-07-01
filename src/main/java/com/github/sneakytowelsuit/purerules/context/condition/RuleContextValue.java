@@ -6,10 +6,10 @@ import lombok.Getter;
 @Builder
 @Getter
 public final class RuleContextValue<V> implements ConditionContextValue {
-    private String ruleId;
-    private V fieldValue;
-    private V valueValue;
-    private String operator;
-    private Integer result;
-    private Integer maximumResult;
+  private String ruleId;
+  private V fieldValue;
+  private V valueValue;
+  private String operator;
+  private Integer result;
+  private Integer maximumResult;
 }
