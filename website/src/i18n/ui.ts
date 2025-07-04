@@ -10,7 +10,7 @@ export const defaultLang = websiteConfig.defaultLanguage;
 export const ui = {
   en: {
     'article.author.name': 'by {name}',
-    'footer.readingTime': 'Tiempo de Lectura: {readingTime}',
+    'footer.readingTime': 'Time to Read: {readingTime}',
     'footer.charactersCount': '{characters} characters',
     'footer.wordsCount': '{words} words',
     'format.minute': '{minute} minute',

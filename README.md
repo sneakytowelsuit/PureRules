@@ -1,4 +1,4 @@
-# PureRules: A JVM Rules Engine for Modern Engineering Teams
+# <img src="./website/src/content/vault/Assets/logos/thinking_duke.svg" width="30" alt="pure-rules-logo"/> PureRules: A JVM Rules Engine for Modern Engineering Teams
 
 ## Overview
 PureRules is a JVM-based rules engine designed to offer a flexible, developer-friendly alternative to traditional engines like Drools. It provides a balance between generic, user-defined rules and robust lifecycle control, empowering engineering teams to manage rule evaluation with precision and clarity.

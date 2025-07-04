@@ -159,8 +159,8 @@
   --color-hr-border-dark: var(--color-obsidian-300);
 
   --font-title: "JetBrains Mono Variable", "sans-serif";
-  --font-heading: "Space Grotesk Variable",  "sans-serif";
-  --font-paragraph: "IBM Plex Sans Variable";
+  --font-heading: "JetBrains Mono Variable",  "sans-serif";
+  --font-paragraph: "JetBrains Mono Variable", "sans-serif";
   --font-menu: "JetBrains Mono Variable",  "sans-serif";
   --font-code: "Fira Code Variable", "ui-monospace";
 }
