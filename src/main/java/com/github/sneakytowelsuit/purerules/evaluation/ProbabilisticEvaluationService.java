@@ -166,6 +166,10 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
 
     int finalTotalResult = totalResult.get();
     int finalTotalWeight = totalWeight.get();
+    // Apply RuleGroup weight to totalResult and totalWeight
+    int groupWeight = ruleGroup.getWeight() != null ? ruleGroup.getWeight() : 1;
+    int weightedTotalResult = finalTotalResult * groupWeight;
+    int weightedTotalWeight = finalTotalWeight * groupWeight;
     engineContextService
         .getConditionEvaluationContext()
         .getConditionContextMap()
@@ -175,12 +179,12 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
             _ignored ->
                 RuleGroupContextValue.builder()
                     .bias(ruleGroup.getBias())
-                    .result(finalTotalResult)
+                    .result(weightedTotalResult)
                     .combinator(ruleGroup.getCombinator())
-                    .maximumResult(finalTotalWeight)
+                    .maximumResult(weightedTotalWeight)
                     .build());
 
-    float score = finalTotalWeight == 0 ? 0f : (float) finalTotalResult / finalTotalWeight;
+    float score = weightedTotalWeight == 0 ? 0f : (float) weightedTotalResult / weightedTotalWeight;
     return score >= minProbability;
   }
 
