@@ -24,9 +24,4 @@ public final class Rule<TInput, TValue> implements Condition<TInput> {
   private final Operator<TValue> operator;
   private final TValue value;
   @Builder.Default private final Integer weight = 1;
-
-  @Override
-  public Integer getCumulativeWeight() {
-    return this.getWeight();
-  }
 }

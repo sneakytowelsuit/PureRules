@@ -29,13 +29,4 @@ public final class RuleGroup<TInput> implements Condition<TInput> {
 
   /** Bias to use when the group contains no conditions. Defaults to EXCLUSIVE (pessimistic). */
   @Builder.Default private final Bias bias = Bias.EXCLUSIVE;
-
-  @Override
-  public Integer getCumulativeWeight() {
-    int sum = 0;
-    for (Condition<TInput> condition : conditions) {
-      sum += condition.getCumulativeWeight();
-    }
-    return sum * this.getWeight();
-  }
 }

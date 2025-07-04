@@ -24,6 +24,4 @@ public sealed interface Condition<InputType> permits Rule, RuleGroup {
    * @return the priority of this condition, or 1 to represent baseline priority.
    */
   public Integer getWeight();
-
-  public Integer getCumulativeWeight();
 }
