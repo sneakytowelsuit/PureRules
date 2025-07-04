@@ -1,6 +1,10 @@
 name: Build & Check
 on:
   push:
+    paths:
+      - "src/**"
+      - "build.gradle"
+      - ".github/workflows/build-and-check.yml"
 
 env:
   JAVA_DISTRIBUTION: 'corretto'
