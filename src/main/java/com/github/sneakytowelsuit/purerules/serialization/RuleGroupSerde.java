@@ -26,11 +26,40 @@ public class RuleGroupSerde<InputType> {
   public RuleGroup<InputType> deserialize(String json) {
     try {
       JsonNode jsonNode = MAPPER.readTree(json);
-      if (jsonNode == null || !jsonNode.isObject()) {
+      if (jsonNode == null) {
         throw new RuleGroupDeserializationException(
             "Invalid JSON input for RuleGroup deserialization");
       }
-      return deserializeJsonNodeToRuleGroup(jsonNode);
+      if (jsonNode.isObject()) {
+        return deserializeJsonNodeToRuleGroup(jsonNode);
+      } else if (jsonNode.isArray()) {
+        throw new RuleGroupDeserializationException(
+            "Use deserializeList for JSON arrays");
+      } else {
+        throw new RuleGroupDeserializationException(
+            "Invalid JSON input for RuleGroup deserialization");
+      }
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public List<RuleGroup<InputType>> deserializeList(String json) {
+    try {
+      JsonNode jsonNode = MAPPER.readTree(json);
+      if (jsonNode == null || !jsonNode.isArray()) {
+        throw new RuleGroupDeserializationException(
+            "Input is not a JSON array for RuleGroup list deserialization");
+      }
+      List<RuleGroup<InputType>> groups = new ArrayList<>();
+      for (JsonNode node : jsonNode) {
+        if (!node.isObject()) {
+          throw new RuleGroupDeserializationException(
+              "All elements in the array must be JSON objects");
+        }
+        groups.add(deserializeJsonNodeToRuleGroup(node));
+      }
+      return groups;
     } catch (JsonProcessingException e) {
       throw new RuntimeException(e);
     }
@@ -138,6 +167,51 @@ public class RuleGroupSerde<InputType> {
       return builder.build();
     } catch (Exception e) {
       throw new RuleGroupDeserializationException("Error encountered deserializing Rule", e);
+    }
+  }
+
+  public Rule<InputType, ?> deserializeRule(String json) {
+    try {
+      JsonNode jsonNode = MAPPER.readTree(json);
+      if (jsonNode == null || !jsonNode.isObject()) {
+        throw new RuleGroupDeserializationException(
+            "Invalid JSON input for Rule deserialization");
+      }
+      if (!isRule(jsonNode)) {
+        throw new RuleGroupDeserializationException(
+            "JSON does not represent a Rule");
+      }
+      return deserializeRule(jsonNode);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public List<Rule<InputType, ?>> deserializeRuleList(String json) {
+    try {
+      JsonNode jsonNode = MAPPER.readTree(json);
+      if (jsonNode == null) {
+        throw new RuleGroupDeserializationException(
+            "Invalid JSON input for Rule list deserialization");
+      }
+      List<Rule<InputType, ?>> rules = new ArrayList<>();
+      if (jsonNode.isArray()) {
+        for (JsonNode node : jsonNode) {
+          if (!isRule(node)) {
+            throw new RuleGroupDeserializationException(
+                "All elements in the array must be Rule objects");
+          }
+          rules.add(deserializeRule(node));
+        }
+      } else if (jsonNode.isObject() && isRule(jsonNode)) {
+        rules.add(deserializeRule(jsonNode));
+      } else {
+        throw new RuleGroupDeserializationException(
+            "Input is not a Rule or array of Rules");
+      }
+      return rules;
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
     }
   }
 

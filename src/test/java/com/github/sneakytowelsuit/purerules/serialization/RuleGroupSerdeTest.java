@@ -142,4 +142,94 @@ class RuleGroupSerdeTest {
     assertEquals(group.getCombinator(), deserialized.getCombinator());
     assertEquals(group.getConditions().size(), deserialized.getConditions().size());
   }
+
+  @Test
+  void testDeserializeListWithValidArray() {
+    RuleGroupSerde<String> serde = new RuleGroupSerde<>();
+    String json = "[" +
+        "{\"id\": \"id1\", \"inverted\": false, \"bias\": \"INCLUSIVE\", \"combinator\": \"AND\", \"conditions\": []}," +
+        "{\"id\": \"id2\", \"inverted\": true, \"bias\": \"EXCLUSIVE\", \"combinator\": \"OR\", \"conditions\": []}" +
+        "]";
+    var groups = serde.deserializeList(json);
+    assertEquals(2, groups.size());
+    assertEquals("id1", groups.get(0).getId());
+    assertEquals("id2", groups.get(1).getId());
+    assertFalse(groups.get(0).isInverted());
+    assertTrue(groups.get(1).isInverted());
+    assertEquals(Bias.INCLUSIVE, groups.get(0).getBias());
+    assertEquals(Bias.EXCLUSIVE, groups.get(1).getBias());
+    assertEquals(Combinator.AND, groups.get(0).getCombinator());
+    assertEquals(Combinator.OR, groups.get(1).getCombinator());
+    assertTrue(groups.get(0).getConditions().isEmpty());
+    assertTrue(groups.get(1).getConditions().isEmpty());
+  }
+
+  @Test
+  void testDeserializeListWithInvalidArrayThrows() {
+    RuleGroupSerde<String> serde = new RuleGroupSerde<>();
+    String json = "[1, 2, 3]";
+    assertThrows(RuleGroupDeserializationException.class, () -> serde.deserializeList(json));
+  }
+
+  @Test
+  void testDeserializeWithArrayInputThrows() {
+    RuleGroupSerde<String> serde = new RuleGroupSerde<>();
+    String json = "[{}]";
+    assertThrows(RuleGroupDeserializationException.class, () -> serde.deserialize(json));
+  }
+
+  @Test
+  void testDeserializeSingleRule() {
+    RuleGroupSerde<String> serde = new RuleGroupSerde<>();
+    String fieldClass = TestUtils.DummyField.class.getName();
+    String operatorClass = TestUtils.AlwaysTrueOperator.class.getName();
+    String json = "{" +
+        "\"field\": \"" + fieldClass + "\"," +
+        "\"operator\": \"" + operatorClass + "\"," +
+        "\"value\": {\"class\": \"java.lang.String\", \"value\": \"foo\"}" +
+        "}";
+    Rule<String, ?> rule = serde.deserializeRule(json);
+    assertNotNull(rule);
+    assertEquals("foo", rule.getValue());
+    assertTrue(rule.getField() instanceof TestUtils.DummyField);
+    assertTrue(rule.getOperator() instanceof TestUtils.AlwaysTrueOperator);
+  }
+
+  @Test
+  void testDeserializeRuleListWithArray() {
+    RuleGroupSerde<String> serde = new RuleGroupSerde<>();
+    String fieldClass = TestUtils.DummyField.class.getName();
+    String operatorClass = TestUtils.AlwaysTrueOperator.class.getName();
+    String json = "[" +
+        "{" +
+        "\"field\": \"" + fieldClass + "\"," +
+        "\"operator\": \"" + operatorClass + "\"," +
+        "\"value\": {\"class\": \"java.lang.String\", \"value\": \"foo\"}" +
+        "}," +
+        "{" +
+        "\"field\": \"" + fieldClass + "\"," +
+        "\"operator\": \"" + operatorClass + "\"," +
+        "\"value\": {\"class\": \"java.lang.String\", \"value\": \"bar\"}" +
+        "}" +
+        "]";
+    var rules = serde.deserializeRuleList(json);
+    assertEquals(2, rules.size());
+    assertEquals("foo", rules.get(0).getValue());
+    assertEquals("bar", rules.get(1).getValue());
+  }
+
+  @Test
+  void testDeserializeRuleListWithSingleObject() {
+    RuleGroupSerde<String> serde = new RuleGroupSerde<>();
+    String fieldClass = TestUtils.DummyField.class.getName();
+    String operatorClass = TestUtils.AlwaysTrueOperator.class.getName();
+    String json = "{" +
+        "\"field\": \"" + fieldClass + "\"," +
+        "\"operator\": \"" + operatorClass + "\"," +
+        "\"value\": {\"class\": \"java.lang.String\", \"value\": \"baz\"}" +
+        "}";
+    var rules = serde.deserializeRuleList(json);
+    assertEquals(1, rules.size());
+    assertEquals("baz", rules.get(0).getValue());
+  }
 }
