@@ -2,9 +2,8 @@ package com.github.sneakytowelsuit.purerules.context;
 
 import com.github.sneakytowelsuit.purerules.context.condition.ConditionContext;
 import com.github.sneakytowelsuit.purerules.context.field.FieldContext;
-import lombok.Getter;
-
 import java.util.function.Function;
+import lombok.Getter;
 
 @Getter
 public class EngineContextService<TInput, TInputId> {

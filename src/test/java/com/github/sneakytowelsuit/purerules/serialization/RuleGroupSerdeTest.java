@@ -146,10 +146,11 @@ class RuleGroupSerdeTest {
   @Test
   void testDeserializeListWithValidArray() {
     RuleGroupSerde<String> serde = new RuleGroupSerde<>();
-    String json = "[" +
-        "{\"id\": \"id1\", \"inverted\": false, \"bias\": \"INCLUSIVE\", \"combinator\": \"AND\", \"conditions\": []}," +
-        "{\"id\": \"id2\", \"inverted\": true, \"bias\": \"EXCLUSIVE\", \"combinator\": \"OR\", \"conditions\": []}" +
-        "]";
+    String json =
+        "["
+            + "{\"id\": \"id1\", \"inverted\": false, \"bias\": \"INCLUSIVE\", \"combinator\": \"AND\", \"conditions\": []},"
+            + "{\"id\": \"id2\", \"inverted\": true, \"bias\": \"EXCLUSIVE\", \"combinator\": \"OR\", \"conditions\": []}"
+            + "]";
     var groups = serde.deserializeList(json);
     assertEquals(2, groups.size());
     assertEquals("id1", groups.get(0).getId());
@@ -183,11 +184,16 @@ class RuleGroupSerdeTest {
     RuleGroupSerde<String> serde = new RuleGroupSerde<>();
     String fieldClass = TestUtils.DummyField.class.getName();
     String operatorClass = TestUtils.AlwaysTrueOperator.class.getName();
-    String json = "{" +
-        "\"field\": \"" + fieldClass + "\"," +
-        "\"operator\": \"" + operatorClass + "\"," +
-        "\"value\": {\"class\": \"java.lang.String\", \"value\": \"foo\"}" +
-        "}";
+    String json =
+        "{"
+            + "\"field\": \""
+            + fieldClass
+            + "\","
+            + "\"operator\": \""
+            + operatorClass
+            + "\","
+            + "\"value\": {\"class\": \"java.lang.String\", \"value\": \"foo\"}"
+            + "}";
     Rule<String, ?> rule = serde.deserializeRule(json);
     assertNotNull(rule);
     assertEquals("foo", rule.getValue());
@@ -200,18 +206,27 @@ class RuleGroupSerdeTest {
     RuleGroupSerde<String> serde = new RuleGroupSerde<>();
     String fieldClass = TestUtils.DummyField.class.getName();
     String operatorClass = TestUtils.AlwaysTrueOperator.class.getName();
-    String json = "[" +
-        "{" +
-        "\"field\": \"" + fieldClass + "\"," +
-        "\"operator\": \"" + operatorClass + "\"," +
-        "\"value\": {\"class\": \"java.lang.String\", \"value\": \"foo\"}" +
-        "}," +
-        "{" +
-        "\"field\": \"" + fieldClass + "\"," +
-        "\"operator\": \"" + operatorClass + "\"," +
-        "\"value\": {\"class\": \"java.lang.String\", \"value\": \"bar\"}" +
-        "}" +
-        "]";
+    String json =
+        "["
+            + "{"
+            + "\"field\": \""
+            + fieldClass
+            + "\","
+            + "\"operator\": \""
+            + operatorClass
+            + "\","
+            + "\"value\": {\"class\": \"java.lang.String\", \"value\": \"foo\"}"
+            + "},"
+            + "{"
+            + "\"field\": \""
+            + fieldClass
+            + "\","
+            + "\"operator\": \""
+            + operatorClass
+            + "\","
+            + "\"value\": {\"class\": \"java.lang.String\", \"value\": \"bar\"}"
+            + "}"
+            + "]";
     var rules = serde.deserializeRuleList(json);
     assertEquals(2, rules.size());
     assertEquals("foo", rules.get(0).getValue());
@@ -223,11 +238,16 @@ class RuleGroupSerdeTest {
     RuleGroupSerde<String> serde = new RuleGroupSerde<>();
     String fieldClass = TestUtils.DummyField.class.getName();
     String operatorClass = TestUtils.AlwaysTrueOperator.class.getName();
-    String json = "{" +
-        "\"field\": \"" + fieldClass + "\"," +
-        "\"operator\": \"" + operatorClass + "\"," +
-        "\"value\": {\"class\": \"java.lang.String\", \"value\": \"baz\"}" +
-        "}";
+    String json =
+        "{"
+            + "\"field\": \""
+            + fieldClass
+            + "\","
+            + "\"operator\": \""
+            + operatorClass
+            + "\","
+            + "\"value\": {\"class\": \"java.lang.String\", \"value\": \"baz\"}"
+            + "}";
     var rules = serde.deserializeRuleList(json);
     assertEquals(1, rules.size());
     assertEquals("baz", rules.get(0).getValue());

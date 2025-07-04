@@ -64,8 +64,7 @@ public class PureRulesEngine<TInput, TInputId> {
     this.minimumProbabilityThreshold = minimumProbabilityThreshold;
     this.evaluationService =
         new ProbabilisticEvaluationService<>(conditions, minimumProbabilityThreshold);
-    this.engineContextService =
-        new EngineContextService<>(inputIdGetter);
+    this.engineContextService = new EngineContextService<>(inputIdGetter);
   }
 
   public static <T, I> PureRulesEngine<T, I> getDeterministicEngine(
@@ -78,8 +77,7 @@ public class PureRulesEngine<TInput, TInputId> {
     this.conditions = conditions;
     this.engineMode = EngineMode.DETERMINISTIC;
     this.evaluationService = new DeterministicEvaluationService<>(conditions);
-    this.engineContextService =
-        new EngineContextService<>(inputIdGetter);
+    this.engineContextService = new EngineContextService<>(inputIdGetter);
   }
 
   private EvaluationService<TInput, TInputId> getEvaluationService() {

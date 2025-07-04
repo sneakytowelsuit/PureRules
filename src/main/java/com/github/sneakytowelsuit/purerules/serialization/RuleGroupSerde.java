@@ -33,8 +33,7 @@ public class RuleGroupSerde<InputType> {
       if (jsonNode.isObject()) {
         return deserializeJsonNodeToRuleGroup(jsonNode);
       } else if (jsonNode.isArray()) {
-        throw new RuleGroupDeserializationException(
-            "Use deserializeList for JSON arrays");
+        throw new RuleGroupDeserializationException("Use deserializeList for JSON arrays");
       } else {
         throw new RuleGroupDeserializationException(
             "Invalid JSON input for RuleGroup deserialization");
@@ -174,12 +173,10 @@ public class RuleGroupSerde<InputType> {
     try {
       JsonNode jsonNode = MAPPER.readTree(json);
       if (jsonNode == null || !jsonNode.isObject()) {
-        throw new RuleGroupDeserializationException(
-            "Invalid JSON input for Rule deserialization");
+        throw new RuleGroupDeserializationException("Invalid JSON input for Rule deserialization");
       }
       if (!isRule(jsonNode)) {
-        throw new RuleGroupDeserializationException(
-            "JSON does not represent a Rule");
+        throw new RuleGroupDeserializationException("JSON does not represent a Rule");
       }
       return deserializeRule(jsonNode);
     } catch (JsonProcessingException e) {
@@ -206,8 +203,7 @@ public class RuleGroupSerde<InputType> {
       } else if (jsonNode.isObject() && isRule(jsonNode)) {
         rules.add(deserializeRule(jsonNode));
       } else {
-        throw new RuleGroupDeserializationException(
-            "Input is not a Rule or array of Rules");
+        throw new RuleGroupDeserializationException("Input is not a Rule or array of Rules");
       }
       return rules;
     } catch (JsonProcessingException e) {
