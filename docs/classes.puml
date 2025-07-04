@@ -1,0 +1,194 @@
+@startuml
+package "com.github.sneakytowelsuit.purerules.conditions" {
+  interface "Condition<TInput>" as Condition {
+    + String getId()
+    + Integer getWeight()
+  }
+  class "Rule<TInput, TValue>" as Rule {
+    - String id
+    - Field<TInput, TValue> field
+    - Operator<TValue> operator
+    - TValue value
+    - Integer weight
+    + String getId()
+    + Field<TInput, TValue> getField()
+    + Operator<TValue> getOperator()
+    + TValue getValue()
+    + Integer getWeight()
+    + void setId(String id)
+    + void setField(Field<TInput, TValue> field)
+    + void setOperator(Operator<TValue> operator)
+    + void setValue(TValue value)
+    + void setWeight(Integer weight)
+  }
+  class "RuleGroup<TInput>" as RuleGroup {
+    - String id
+    - List<Condition<TInput>> conditions
+    - Combinator combinator
+    - boolean isInverted
+    - Integer weight
+    - Bias bias
+    + String getId()
+    + List<Condition<TInput>> getConditions()
+    + Combinator getCombinator()
+    + boolean isInverted()
+    + Integer getWeight()
+    + Bias getBias()
+    + void setId(String id)
+    + void setConditions(List<Condition<TInput>> conditions)
+    + void setCombinator(Combinator combinator)
+    + void setIsInverted(boolean isInverted)
+    + void setWeight(Integer weight)
+    + void setBias(Bias bias)
+  }
+  interface "Field<TInput, TValue>" as Field {
+    + Function<TInput, TValue> getFieldValueFunction()
+  }
+  interface "Operator<TValue>" as Operator {
+    + boolean test(TValue input, TValue value)
+  }
+  enum "Combinator" as Combinator {
+    AND
+    OR
+  }
+  enum "Bias" as Bias {
+    INCLUSIVE
+    EXCLUSIVE
+  }
+
+  Condition <|.. Rule
+  Condition <|.. RuleGroup
+  Rule::field o-- Field
+  Rule::operator o-- Operator
+  RuleGroup::conditions *-- Condition
+  RuleGroup::combinator o-- Combinator
+  RuleGroup::bias o-- Bias
+
+  ' Show that RuleGroup contains Rule (as a subset of Condition)
+  RuleGroup o-- "0..*" Rule
+}
+
+package "com.github.sneakytowelsuit.purerules.engine" {
+  class "PureRulesEngine<TInput, TInputId>" as PureRulesEngine {
+    - List<Condition<TInput>> conditions
+    - EngineMode engineMode
+    - Float minimumProbabilityThreshold
+    - EvaluationService<TInput, TInputId> evaluationService
+    - EngineContextService<TInput, TInputId> engineContextService
+    + static <T, I> PureRulesEngine<T, I> getProbabilisticEngine(Function<T, I> inputIdGetter, Float minimumProbabilityThreshold, List<Condition<T>> conditions)
+    + static <T, I> PureRulesEngine<T, I> getDeterministicEngine(Function<T, I> inputIdGetter, List<Condition<T>> conditions)
+    + Map<String, Boolean> evaluate(TInput input)
+    + Map<TInputId, Map<String, Boolean>> evaluateAll(List<TInput> inputs)
+  }
+  enum "EngineMode" as EngineMode {
+    DETERMINISTIC
+    PROBABILISTIC
+  }
+  PureRulesEngine::conditions o-- Condition
+  PureRulesEngine::engineMode o-- EngineMode
+}
+
+package "com.github.sneakytowelsuit.purerules.evaluation" {
+  interface "EvaluationService<TInput, TInputId>" as EvaluationService {
+    + Map<String, Boolean> evaluate(TInput input, EngineContextService<TInput, TInputId> engineContextService)
+  }
+  class "DeterministicEvaluationService<TInput, TInputId>" as DeterministicEvaluationService {
+    - List<Condition<TInput>> conditions
+    + DeterministicEvaluationService(List<Condition<TInput>> conditions)
+    + Map<String, Boolean> evaluate(TInput input, EngineContextService<TInput, TInputId> engineContextService)
+  }
+  class "ProbabilisticEvaluationService<TInput, TInputId>" as ProbabilisticEvaluationService {
+    - Float minimumProbability
+    - List<Condition<TInput>> conditions
+    + ProbabilisticEvaluationService(List<Condition<TInput>> conditions, Float minimumProbability)
+    + Map<String, Boolean> evaluate(TInput input, EngineContextService<TInput, TInputId> engineContextService)
+  }
+  EvaluationService <|.. DeterministicEvaluationService
+  EvaluationService <|.. ProbabilisticEvaluationService
+  DeterministicEvaluationService o-- Condition
+  ProbabilisticEvaluationService o-- Condition
+}
+
+package "com.github.sneakytowelsuit.purerules.serialization" {
+  class "RuleGroupSerde<InputType>" as RuleGroupSerde {
+    - ObjectMapper MAPPER
+    - Map<String, Field<InputType, ?>> fieldCache
+    - Map<String, Operator<?>> operatorCache
+    + RuleGroup<InputType> deserialize(String json)
+  }
+  class "RuleSerializer" as RuleSerializer {
+    + void serialize(Rule<?, ?> value, JsonGenerator gen, SerializerProvider provider)
+  }
+  class "RuleGroupSerializer" as RuleGroupSerializer {
+    + void serialize(RuleGroup<?> value, JsonGenerator gen, SerializerProvider provider)
+  }
+  enum "RuleGroupJsonKeys" as RuleGroupJsonKeys {
+    ID
+    PRIORITY
+    FIELD
+    OPERATOR
+    VALUE
+    VALUE_CLASS
+    CONDITIONS
+    VALUE_VALUE
+    INVERTED
+    BIAS
+    COMBINATOR
+  }
+  RuleGroupSerde o-- RuleGroupSerializer
+  RuleGroupSerde o-- RuleSerializer
+  RuleSerializer ..> Rule
+  RuleGroupSerializer ..> RuleGroup
+  RuleGroupSerializer ..> Rule
+  RuleGroupSerde o-- RuleGroupJsonKeys
+  RuleSerializer o-- RuleGroupJsonKeys
+  RuleGroupSerializer o-- RuleGroupJsonKeys
+}
+
+package "com.github.sneakytowelsuit.purerules.context" {
+  class "EngineContextService<TInput, TInputId>" as EngineContextService {
+    - ConditionContext<TInputId> conditionEvaluationContext
+    - FieldContext<TInputId> fieldContext
+    - Function<TInput, TInputId> inputIdGetter
+    + EngineContextService(Function<TInput, TInputId> inputIdGetter)
+    + ConditionContext<TInputId> getConditionEvaluationContext()
+    + FieldContext<TInputId> getFieldContext()
+    + Function<TInput, TInputId> getInputIdGetter()
+  }
+}
+
+package "com.github.sneakytowelsuit.purerules.context.condition" {
+  class "ConditionContext<TInputId>" as ConditionContext {
+    - Map<ConditionContextKey<TInputId>, ConditionContextValue> conditionContextMap
+    + ConditionContext()
+    + Map<ConditionContextKey<TInputId>, ConditionContextValue> getConditionContextMap()
+  }
+  class "ConditionContextKey<TInputId>" as ConditionContextKey {
+    + TInputId inputId
+    + String conditionId
+  }
+  interface "ConditionContextValue" as ConditionContextValue {
+    + Integer getResult()
+    + Integer getMaximumResult()
+  }
+}
+
+package "com.github.sneakytowelsuit.purerules.context.field" {
+  class "FieldContext<TInputId>" as FieldContext {
+    - Map<FieldContextKey<TInputId>, Object> fieldContextMap
+    + FieldContext()
+    + Map<FieldContextKey<TInputId>, Object> getFieldContextMap()
+  }
+  class "FieldContextKey<TInputId>" as FieldContextKey {
+    + TInputId inputId
+    + String fieldId
+  }
+}
+
+EngineContextService::conditionContextMap o-- ConditionContext
+EngineContextService::fieldContext o-- FieldContext
+ConditionContext o-- ConditionContextKey
+ConditionContext o-- ConditionContextValue
+FieldContext o-- FieldContextKey
+PureRulesEngine o-- EngineContextService
+@enduml
