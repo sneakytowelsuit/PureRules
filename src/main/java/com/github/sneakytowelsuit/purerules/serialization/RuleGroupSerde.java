@@ -13,6 +13,43 @@ import java.util.List;
 import java.util.Map;
 import lombok.Getter;
 
+/**
+ * Provides JSON serialization and deserialization capabilities for {@link RuleGroup} instances.
+ *
+ * <p>This class handles the complete serialization/deserialization lifecycle for rule groups,
+ * including nested rule groups and individual rules. It manages caching of field and operator
+ * instances to ensure proper object reuse and consistency across serialization operations.
+ *
+ * <p>Key features:
+ *
+ * <ul>
+ *   <li>JSON serialization and deserialization of complex rule group hierarchies
+ *   <li>Automatic caching of field and operator instances for performance and consistency
+ *   <li>Support for both single rule groups and lists of rule groups
+ *   <li>Type-safe deserialization with proper generic type handling
+ *   <li>Comprehensive error handling with descriptive exception messages
+ * </ul>
+ *
+ * <p>The serialization format supports all rule group features including:
+ *
+ * <ul>
+ *   <li>Nested rule groups with combinators (AND/OR)
+ *   <li>Individual rules with custom fields and operators
+ *   <li>Bias settings for empty rule groups
+ *   <li>Inversion flags and weight configurations
+ *   <li>Custom field and operator types through reflection
+ * </ul>
+ *
+ * <p>Usage example:
+ *
+ * <pre>{@code
+ * RuleGroupSerde<MyInputType> serde = new RuleGroupSerde<>();
+ * RuleGroup<MyInputType> ruleGroup = serde.deserialize(jsonString);
+ * String serialized = serde.serialize(ruleGroup);
+ * }</pre>
+ *
+ * @param <InputType> the type of input data that the rules will be evaluated against
+ */
 public class RuleGroupSerde<InputType> {
   private final ObjectMapper MAPPER =
       new ObjectMapper()
