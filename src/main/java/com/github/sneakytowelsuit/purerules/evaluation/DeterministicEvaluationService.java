@@ -13,15 +13,51 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of {@link EvaluationService} that performs deterministic boolean evaluation of
+ * rules and conditions.
+ *
+ * <p>This service evaluates each condition as a strict boolean operation, returning true or false
+ * based on exact matches between field values and rule criteria. It handles:
+ *
+ * <ul>
+ *   <li>Individual rules with field comparisons using operators
+ *   <li>Rule groups with AND/OR combinators and inversion logic
+ *   <li>Nested rule groups with hierarchical evaluation
+ *   <li>Empty rule groups evaluated based on bias settings
+ * </ul>
+ *
+ * <p>The evaluation process maintains context information for debugging and analysis, storing
+ * intermediate results and field values in the provided {@link EngineContextService}.
+ *
+ * @param <TInput> the type of input data to be evaluated
+ * @param <TInputId> the type used to uniquely identify input instances
+ */
 public class DeterministicEvaluationService<TInput, TInputId>
     implements EvaluationService<TInput, TInputId> {
-  // List of conditions to evaluate, defaulting to an empty list.
+
+  /** List of conditions to evaluate, defaulting to an empty list. */
   private List<Condition<TInput>> conditions = List.of();
 
+  /**
+   * Creates a new deterministic evaluation service with the specified conditions.
+   *
+   * @param conditions the list of conditions (rules and rule groups) to evaluate
+   */
   public DeterministicEvaluationService(final List<Condition<TInput>> conditions) {
     this.conditions = conditions;
   }
 
+  /**
+   * Evaluates all configured conditions against the input using deterministic boolean logic.
+   *
+   * <p>Each condition is evaluated independently and the results are collected into a map. The
+   * evaluation maintains context information including field values and intermediate results.
+   *
+   * @param input the input data to evaluate
+   * @param engineContextService the context service for caching and state management
+   * @return a map of condition IDs to their boolean evaluation results
+   */
   @Override
   public Map<String, Boolean> evaluate(
       TInput input, EngineContextService<TInput, TInputId> engineContextService) {
@@ -32,6 +68,15 @@ public class DeterministicEvaluationService<TInput, TInputId>
                 condition -> evaluationConditions(input, condition, engineContextService)));
   }
 
+  /**
+   * Evaluates a single condition, dispatching to the appropriate evaluation method based on the
+   * condition type.
+   *
+   * @param input the input data to evaluate
+   * @param condition the condition to evaluate (either a Rule or RuleGroup)
+   * @param engineContextService the context service for state management
+   * @return the boolean result of the condition evaluation
+   */
   private boolean evaluationConditions(
       TInput input,
       Condition<TInput> condition,
@@ -42,6 +87,24 @@ public class DeterministicEvaluationService<TInput, TInputId>
     };
   }
 
+  /**
+   * Evaluates a rule group by processing its conditions according to the specified combinator
+   * logic.
+   *
+   * <p>The evaluation handles:
+   *
+   * <ul>
+   *   <li>AND combinators: all conditions must be true
+   *   <li>OR combinators: at least one condition must be true
+   *   <li>Inversion logic: results can be inverted based on the group's inversion flag
+   *   <li>Mixed conditions: both rules and nested rule groups
+   * </ul>
+   *
+   * @param input the input data to evaluate
+   * @param ruleGroup the rule group containing conditions and combinator logic
+   * @param engineContextService the context service for state management
+   * @return the boolean result of the rule group evaluation
+   */
   private boolean evaluateRuleGroup(
       TInput input,
       RuleGroup<TInput> ruleGroup,
@@ -93,6 +156,18 @@ public class DeterministicEvaluationService<TInput, TInputId>
     return result;
   }
 
+  /**
+   * Evaluates an empty rule group based on its bias setting and inversion flag.
+   *
+   * <p>Empty rule groups are evaluated using their bias configuration, which provides a default
+   * result when no conditions are present. The result can then be inverted if the group's inversion
+   * flag is set.
+   *
+   * @param input the input data (used for context key generation)
+   * @param ruleGroup the empty rule group to evaluate
+   * @param engineContextService the context service for storing evaluation results
+   * @return the boolean result based on bias and inversion settings
+   */
   private boolean evaluateEmptyRuleGroup(
       TInput input,
       RuleGroup<TInput> ruleGroup,
@@ -116,6 +191,24 @@ public class DeterministicEvaluationService<TInput, TInputId>
     return result;
   }
 
+  /**
+   * Evaluates a single rule by extracting the field value, applying the operator, and comparing
+   * against the rule's target value.
+   *
+   * <p>The evaluation process:
+   *
+   * <ol>
+   *   <li>Extracts the field value from the input using the rule's field extractor
+   *   <li>Applies the rule's operator to compare the field value with the target value
+   *   <li>Stores the evaluation context including field values and results
+   * </ol>
+   *
+   * @param <V> the type of value being compared
+   * @param input the input data to evaluate
+   * @param rule the rule containing field, operator, and target value
+   * @param engineContextService the context service for caching field values and results
+   * @return true if the rule passes, false otherwise
+   */
   private <V> boolean evaluateRule(
       TInput input,
       Rule<TInput, V> rule,
@@ -148,6 +241,19 @@ public class DeterministicEvaluationService<TInput, TInputId>
     return result;
   }
 
+  /**
+   * Extracts and caches the field value from the input for the specified rule.
+   *
+   * <p>This method uses the context service to cache field values, ensuring that the same field is
+   * only extracted once per input instance. The cached value is reused for subsequent rules that
+   * use the same field on the same input.
+   *
+   * @param <V> the type of value extracted by the field
+   * @param input the input data to extract the field value from
+   * @param rule the rule containing the field extractor
+   * @param engineContextService the context service for caching field values
+   * @return the extracted field value
+   */
   private <V> V getFieldValue(
       TInput input,
       Rule<TInput, V> rule,
