@@ -2,7 +2,7 @@ package com.github.sneakytowelsuit.purerules.exceptions;
 
 /**
  * Exception thrown when a {@link com.github.sneakytowelsuit.purerules.conditions.RuleGroup} cannot
- * be serialized to JSON or other formats.
+ * be serialized to JSON.
  *
  * <p>This runtime exception indicates problems during the serialization process, such as:
  *

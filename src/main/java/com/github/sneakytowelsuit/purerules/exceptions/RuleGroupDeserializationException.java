@@ -2,7 +2,7 @@ package com.github.sneakytowelsuit.purerules.exceptions;
 
 /**
  * Exception thrown when a {@link com.github.sneakytowelsuit.purerules.conditions.RuleGroup} cannot
- * be deserialized from JSON or other formats.
+ * be deserialized from JSON.
  *
  * <p>This runtime exception indicates problems during the deserialization process, such as:
  *
