@@ -74,28 +74,6 @@ public class PureRulesEngine<TInput, TInputId> {
     return this.engineContextService;
   }
 
-  public Map<ConditionContextKey<TInputId>, ConditionContextValue> trace(TInput input) {
-    Map<String, Boolean> evaluationResults =
-        this.getEvaluationService().evaluate(input, this.getEngineContextService());
-    if (evaluationResults != null) {
-      Map<ConditionContextKey<TInputId>, ConditionContextValue> ctx = Map.copyOf(this.getEngineContextService()
-              .getConditionEvaluationContext()
-              .getConditionContextMap());
-      // Clear the context after evaluation to avoid memory leaks
-      this.getEngineContextService().flush(input);
-      return ctx;
-    }
-    return Collections.emptyMap();
-  }
-
-  public Map<TInputId, Map<ConditionContextKey<TInputId>, ConditionContextValue>> traceAll(List<TInput> inputs) {
-    return inputs.stream()
-        .collect(
-            Collectors.toMap(
-                input -> this.engineContextService.getInputIdGetter().apply(input),
-                this::trace));
-  }
-
   public Map<String, Boolean> evaluate(TInput input) {
     Map<String, Boolean> results = this.getEvaluationService().evaluate(input, this.getEngineContextService());
     if (results == null) {
