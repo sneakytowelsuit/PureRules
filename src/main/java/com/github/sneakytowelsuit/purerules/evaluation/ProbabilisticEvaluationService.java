@@ -362,4 +362,9 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
                     .build())
         .getResult();
   }
+
+  @Override
+  public void trace(TInput input, EngineContextService<TInput, TInputId> engineContextService) {
+    // No-op for probabilistic evaluation (stub for interface compliance)
+  }
 }

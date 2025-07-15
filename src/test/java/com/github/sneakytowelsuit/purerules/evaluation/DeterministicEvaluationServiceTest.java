@@ -6,6 +6,8 @@ import com.github.sneakytowelsuit.purerules.conditions.Combinator;
 import com.github.sneakytowelsuit.purerules.conditions.Rule;
 import com.github.sneakytowelsuit.purerules.conditions.RuleGroup;
 import com.github.sneakytowelsuit.purerules.context.EngineContextService;
+import com.github.sneakytowelsuit.purerules.context.condition.ConditionContext;
+import com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey;
 import com.github.sneakytowelsuit.purerules.testutils.TestHelpers;
 import java.util.List;
 import java.util.Map;
@@ -204,5 +206,140 @@ class DeterministicEvaluationServiceTest {
     TestHelpers.Something alice = new TestHelpers.Something(1, "Alice");
     // EXCLUSIVE bias: empty group should evaluate to false
     assertFalse(service.evaluate(alice, dummyContextService).get("empty_exclusive"));
+  }
+
+  @Test
+  void testTraceUpdatesContext() {
+    Rule<TestHelpers.Something, String> rule =
+        Rule.<TestHelpers.Something, String>builder()
+            .field(new TestHelpers.SomethingNameField())
+            .operator(new TestHelpers.StringEqualsCaseInsensitiveOperator())
+            .value("Alice")
+            .weight(1)
+            .build();
+    DeterministicEvaluationService<TestHelpers.Something, Integer> service =
+        new DeterministicEvaluationService<>(List.of(rule));
+    TestHelpers.Something alice = new TestHelpers.Something(1, "Alice");
+    TestHelpers.Something bob = new TestHelpers.Something(2, "Bob");
+    service.trace(alice, dummyContextService);
+    service.trace(bob, dummyContextService);
+    // Assert context for Alice exists and is correct
+    assertTrue(dummyContextService.getConditionEvaluationContext().getConditionContextMap().containsKey(new ConditionContextKey<>(alice.getId(), rule.getId())));
+    assertEquals(1, dummyContextService.getConditionEvaluationContext().getConditionContextMap().get(new ConditionContextKey<>(alice.getId(), rule.getId())).getResult());
+    // Assert context for Bob exists and is correct
+    assertTrue(dummyContextService.getConditionEvaluationContext().getConditionContextMap().containsKey(new ConditionContextKey<>(bob.getId(), rule.getId())));
+    assertEquals(0, dummyContextService.getConditionEvaluationContext().getConditionContextMap().get(new ConditionContextKey<>(bob.getId(), rule.getId())).getResult());
+  }
+
+  @Test
+  void testTraceUpdatesContextComplexRuleGroup() {
+    // Create rules
+    Rule<TestHelpers.Something, String> ruleA =
+        Rule.<TestHelpers.Something, String>builder()
+            .field(new TestHelpers.SomethingNameField())
+            .operator(new TestHelpers.StringEqualsCaseInsensitiveOperator())
+            .value("Alice")
+            .id("aliceRule")
+            .build();
+    Rule<TestHelpers.Something, String> ruleB =
+        Rule.<TestHelpers.Something, String>builder()
+            .field(new TestHelpers.SomethingNameField())
+            .operator(new TestHelpers.StringEqualsCaseInsensitiveOperator())
+            .value("Bob")
+            .id("bobRule")
+            .build();
+    Rule<TestHelpers.Something, String> ruleC =
+        Rule.<TestHelpers.Something, String>builder()
+            .field(new TestHelpers.SomethingNameField())
+            .operator(new TestHelpers.StringEqualsCaseInsensitiveOperator())
+            .value("Charlie")
+            .id("charlieRule")
+            .build();
+
+    // Nested group: (ruleA OR ruleB)
+    RuleGroup<TestHelpers.Something> innerGroup =
+        RuleGroup.<TestHelpers.Something>builder()
+            .id("innerGroup")
+            .combinator(Combinator.OR)
+            .conditions(List.of(ruleA, ruleB))
+            .build();
+    // Outer group: (innerGroup AND ruleC)
+    RuleGroup<TestHelpers.Something> outerGroup =
+        RuleGroup.<TestHelpers.Something>builder()
+            .id("outerGroup")
+            .combinator(Combinator.AND)
+            .conditions(List.of(innerGroup, ruleC))
+            .build();
+
+    DeterministicEvaluationService<TestHelpers.Something, String> service =
+        new DeterministicEvaluationService<>(List.of(outerGroup));
+
+    TestHelpers.Something alice = new TestHelpers.Something(1, "Alice");
+    TestHelpers.Something bob = new TestHelpers.Something(2, "Bob");
+    TestHelpers.Something charlie = new TestHelpers.Something(3, "Charlie");
+    TestHelpers.Something dave = new TestHelpers.Something(4, "Dave");
+
+    var ctxService = new EngineContextService<>(TestHelpers.Something::getName);
+    // Trace all
+    service.trace(alice, ctxService);
+    service.trace(bob, ctxService);
+    service.trace(charlie, ctxService);
+    service.trace(dave, ctxService);
+
+    // Helper for context assertions
+    var contextMap = ctxService.getConditionEvaluationContext().getConditionContextMap();
+    // Alice: ruleA true, ruleB false, ruleC false, innerGroup true, outerGroup false
+    assertTrue(contextMap.containsKey(new ConditionContextKey<>(alice.getName(), ruleA.getId())));
+    assertEquals(1, contextMap.get(new ConditionContextKey<>(alice.getName(), ruleA.getId())).getResult());
+    assertTrue(contextMap.containsKey(new ConditionContextKey<>(alice.getName(), ruleB.getId())));
+    assertEquals(0, contextMap.get(new ConditionContextKey<>(alice.getName(), ruleB.getId())).getResult());
+    assertTrue(contextMap.containsKey(new ConditionContextKey<>(alice.getName(), ruleC.getId())));
+    assertEquals(0, contextMap.get(new ConditionContextKey<>(alice.getName(), ruleC.getId())).getResult());
+    assertTrue(contextMap.containsKey(new ConditionContextKey<>(alice.getName(), "innerGroup")));
+    assertEquals(1, contextMap.get(new ConditionContextKey<>(alice.getName(), "innerGroup")).getResult());
+    assertTrue(contextMap.containsKey(new ConditionContextKey<>(alice.getName(), "outerGroup")));
+    assertEquals(0, contextMap.get(new ConditionContextKey<>(alice.getName(), "outerGroup")).getResult());
+
+    // Bob: ruleA false, ruleB true, ruleC false, innerGroup true, outerGroup false
+    assertTrue(contextMap.containsKey(new ConditionContextKey<>(bob.getName(), ruleA.getId())));
+    assertEquals(0, contextMap.get(new ConditionContextKey<>(bob.getName(), ruleA.getId())).getResult());
+    assertTrue(contextMap.containsKey(new ConditionContextKey<>(bob.getName(), ruleB.getId())));
+    assertEquals(1, contextMap.get(new ConditionContextKey<>(bob.getName(), ruleB.getId())).getResult());
+    assertTrue(contextMap.containsKey(new ConditionContextKey<>(bob.getName(), ruleC.getId())));
+    assertEquals(0, contextMap.get(new ConditionContextKey<>(bob.getName(), ruleC.getId())).getResult());
+    assertTrue(contextMap.containsKey(new ConditionContextKey<>(bob.getName(), "innerGroup")));
+    assertEquals(1, contextMap.get(new ConditionContextKey<>(bob.getName(), "innerGroup")).getResult());
+    assertTrue(contextMap.containsKey(new ConditionContextKey<>(bob.getName(), "outerGroup")));
+    assertEquals(0, contextMap.get(new ConditionContextKey<>(bob.getName(), "outerGroup")).getResult());
+
+    // Charlie: ruleA false, ruleB false, ruleC true, innerGroup false, outerGroup false
+    System.out.println("Charlie context:");
+    System.out.println("ruleA: " + contextMap.get(new ConditionContextKey<>(charlie.getName(), ruleA.getId())));
+    System.out.println("ruleB: " + contextMap.get(new ConditionContextKey<>(charlie.getName(), ruleB.getId())));
+    System.out.println("ruleC: " + contextMap.get(new ConditionContextKey<>(charlie.getName(), ruleC.getId())));
+    System.out.println("innerGroup: " + contextMap.get(new ConditionContextKey<>(charlie.getName(), "innerGroup")));
+    System.out.println("outerGroup: " + contextMap.get(new ConditionContextKey<>(charlie.getName(), "outerGroup")));
+    assertTrue(contextMap.containsKey(new ConditionContextKey<>(charlie.getName(), ruleA.getId())), "Missing context for Charlie/ruleA: " + contextMap.get(new ConditionContextKey<>(charlie.getName(), ruleA.getId())));
+    assertEquals(0, contextMap.get(new ConditionContextKey<>(charlie.getName(), ruleA.getId())).getResult(), "Charlie/ruleA result: " + contextMap.get(new ConditionContextKey<>(charlie.getName(), ruleA.getId())));
+    assertTrue(contextMap.containsKey(new ConditionContextKey<>(charlie.getName(), ruleB.getId())), "Missing context for Charlie/ruleB: " + contextMap.get(new ConditionContextKey<>(charlie.getName(), ruleB.getId())));
+    assertEquals(0, contextMap.get(new ConditionContextKey<>(charlie.getName(), ruleB.getId())).getResult(), "Charlie/ruleB result: " + contextMap.get(new ConditionContextKey<>(charlie.getName(), ruleB.getId())));
+    assertTrue(contextMap.containsKey(new ConditionContextKey<>(charlie.getName(), ruleC.getId())), "Missing context for Charlie/ruleC: " + contextMap.get(new ConditionContextKey<>(charlie.getName(), ruleC.getId())));
+    assertEquals(1, contextMap.get(new ConditionContextKey<>(charlie.getName(), ruleC.getId())).getResult(), "Charlie/ruleC result: " + contextMap.get(new ConditionContextKey<>(charlie.getName(), ruleC.getId())));
+    assertTrue(contextMap.containsKey(new ConditionContextKey<>(charlie.getName(), "innerGroup")), "Missing context for Charlie/innerGroup: " + contextMap.get(new ConditionContextKey<>(charlie.getName(), "innerGroup")));
+    assertEquals(0, contextMap.get(new ConditionContextKey<>(charlie.getName(), "innerGroup")).getResult(), "Charlie/innerGroup result: " + contextMap.get(new ConditionContextKey<>(charlie.getName(), "innerGroup")));
+    assertTrue(contextMap.containsKey(new ConditionContextKey<>(charlie.getName(), "outerGroup")), "Missing context for Charlie/outerGroup: " + contextMap.get(new ConditionContextKey<>(charlie.getName(), "outerGroup")));
+    assertEquals(0, contextMap.get(new ConditionContextKey<>(charlie.getName(), "outerGroup")).getResult(), "Charlie/outerGroup result: " + contextMap.get(new ConditionContextKey<>(charlie.getName(), "outerGroup")));
+
+    // Dave: ruleA false, ruleB false, ruleC false, innerGroup false, outerGroup false
+    assertTrue(contextMap.containsKey(new ConditionContextKey<>(dave.getName(), ruleA.getId())));
+    assertEquals(0, contextMap.get(new ConditionContextKey<>(dave.getName(), ruleA.getId())).getResult());
+    assertTrue(contextMap.containsKey(new ConditionContextKey<>(dave.getName(), ruleB.getId())));
+    assertEquals(0, contextMap.get(new ConditionContextKey<>(dave.getName(), ruleB.getId())).getResult());
+    assertTrue(contextMap.containsKey(new ConditionContextKey<>(dave.getName(), ruleC.getId())));
+    assertEquals(0, contextMap.get(new ConditionContextKey<>(dave.getName(), ruleC.getId())).getResult());
+    assertTrue(contextMap.containsKey(new ConditionContextKey<>(dave.getName(), "innerGroup")));
+    assertEquals(0, contextMap.get(new ConditionContextKey<>(dave.getName(), "innerGroup")).getResult());
+    assertTrue(contextMap.containsKey(new ConditionContextKey<>(dave.getName(), "outerGroup")));
+    assertEquals(0, contextMap.get(new ConditionContextKey<>(dave.getName(), "outerGroup")).getResult());
   }
 }
