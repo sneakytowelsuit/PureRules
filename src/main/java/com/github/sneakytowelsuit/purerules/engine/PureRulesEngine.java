@@ -12,27 +12,7 @@ import java.util.stream.Collectors;
 
 public class PureRulesEngine<TInput, TInputId> {
   private final List<Condition<TInput>> conditions;
-
-  /**
-   * The mode of the engine, which can be either DETERMINISTIC or PROBABILISTIC. This determines how
-   * the rules are evaluated and the results are combined.
-   *
-   * <ul>
-   *   <li>{@link EngineMode#DETERMINISTIC}: The engine evaluates rules and returns a boolean result
-   *       based on the conditions defined in the rule groups.
-   *   <li>{@link EngineMode#PROBABILISTIC}: The engine evaluates rules and returns a probability
-   *       score based on the conditions defined in the rule groups.
-   * </ul>
-   */
-  private final EngineMode engineMode;
-
-  /**
-   * The minimum probability threshold for the PROBABILISTIC engine mode. If the calculated
-   * probability is below this threshold, the result will be considered false.
-   */
-  private Float minimumProbabilityThreshold;
-
-  /**
+    /**
    * The evaluation service used to evaluate the rules based on the engine mode. This service
    * encapsulates the logic for evaluating conditions and combining results.
    */
@@ -60,9 +40,11 @@ public class PureRulesEngine<TInput, TInputId> {
       Float minimumProbabilityThreshold,
       List<Condition<TInput>> conditions) {
     this.conditions = conditions;
-    this.engineMode = EngineMode.PROBABILISTIC;
-    this.minimumProbabilityThreshold = minimumProbabilityThreshold;
-    this.evaluationService =
+      /**
+       * The minimum probability threshold for the PROBABILISTIC engine mode. If the calculated
+       * probability is below this threshold, the result will be considered false.
+       */
+      this.evaluationService =
         new ProbabilisticEvaluationService<>(conditions, minimumProbabilityThreshold);
     this.engineContextService = new EngineContextService<>(inputIdGetter);
   }
@@ -75,7 +57,6 @@ public class PureRulesEngine<TInput, TInputId> {
   private PureRulesEngine(
       Function<TInput, TInputId> inputIdGetter, List<Condition<TInput>> conditions) {
     this.conditions = conditions;
-    this.engineMode = EngineMode.DETERMINISTIC;
     this.evaluationService = new DeterministicEvaluationService<>(conditions);
     this.engineContextService = new EngineContextService<>(inputIdGetter);
   }
