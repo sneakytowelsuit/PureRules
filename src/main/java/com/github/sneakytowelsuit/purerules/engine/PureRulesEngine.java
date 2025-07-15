@@ -2,9 +2,14 @@ package com.github.sneakytowelsuit.purerules.engine;
 
 import com.github.sneakytowelsuit.purerules.conditions.Condition;
 import com.github.sneakytowelsuit.purerules.context.EngineContextService;
+import com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey;
+import com.github.sneakytowelsuit.purerules.context.condition.ConditionContextValue;
 import com.github.sneakytowelsuit.purerules.evaluation.DeterministicEvaluationService;
 import com.github.sneakytowelsuit.purerules.evaluation.EvaluationService;
 import com.github.sneakytowelsuit.purerules.evaluation.ProbabilisticEvaluationService;
+
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -69,8 +74,36 @@ public class PureRulesEngine<TInput, TInputId> {
     return this.engineContextService;
   }
 
+  public Map<ConditionContextKey<TInputId>, ConditionContextValue> trace(TInput input) {
+    Map<String, Boolean> evaluationResults =
+        this.getEvaluationService().evaluate(input, this.getEngineContextService());
+    if (evaluationResults != null) {
+      Map<ConditionContextKey<TInputId>, ConditionContextValue> ctx = Map.copyOf(this.getEngineContextService()
+              .getConditionEvaluationContext()
+              .getConditionContextMap());
+      // Clear the context after evaluation to avoid memory leaks
+      this.getEngineContextService().flush(input);
+      return ctx;
+    }
+    return Collections.emptyMap();
+  }
+
+  public Map<TInputId, Map<ConditionContextKey<TInputId>, ConditionContextValue>> traceAll(List<TInput> inputs) {
+    return inputs.stream()
+        .collect(
+            Collectors.toMap(
+                input -> this.engineContextService.getInputIdGetter().apply(input),
+                this::trace));
+  }
+
   public Map<String, Boolean> evaluate(TInput input) {
-    return this.getEvaluationService().evaluate(input, this.getEngineContextService());
+    Map<String, Boolean> results = this.getEvaluationService().evaluate(input, this.getEngineContextService());
+    if (results == null) {
+      return Collections.emptyMap();
+    }
+    // Clear the context after evaluation to avoid memory leaks
+    this.getEngineContextService().flush(input);
+    return results;
   }
 
   public Map<TInputId, Map<String, Boolean>> evaluateAll(List<TInput> inputs) {
