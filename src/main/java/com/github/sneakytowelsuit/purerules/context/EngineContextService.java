@@ -3,11 +3,9 @@ package com.github.sneakytowelsuit.purerules.context;
 import com.github.sneakytowelsuit.purerules.context.condition.ConditionContext;
 import com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey;
 import com.github.sneakytowelsuit.purerules.context.field.FieldContext;
-
+import com.github.sneakytowelsuit.purerules.context.field.FieldContextKey;
 import java.util.List;
 import java.util.function.Function;
-
-import com.github.sneakytowelsuit.purerules.context.field.FieldContextKey;
 import lombok.Getter;
 
 /**
@@ -61,20 +59,19 @@ public class EngineContextService<TInput, TInputId> {
     this.inputIdGetter = inputIdGetter;
   }
 
-  public void flush(TInput input){
-    List<ConditionContextKey<TInputId>> conditionContextKeysToRemove = conditionEvaluationContext.getConditionContextMap()
-            .keySet()
-                    .stream()
-                            .filter(key -> key.inputId() == inputIdGetter.apply(input))
-                                    .toList();
-    List<FieldContextKey<TInputId>> fieldContextKeysToRemove = fieldContext.getFieldContextMap()
-            .keySet()
-                    .stream()
-                            .filter(key -> key.inputId() == inputIdGetter.apply(input))
-                                    .toList();
+  public void flush(TInput input) {
+    List<ConditionContextKey<TInputId>> conditionContextKeysToRemove =
+        conditionEvaluationContext.getConditionContextMap().keySet().stream()
+            .filter(key -> key.inputId() == inputIdGetter.apply(input))
+            .toList();
+    List<FieldContextKey<TInputId>> fieldContextKeysToRemove =
+        fieldContext.getFieldContextMap().keySet().stream()
+            .filter(key -> key.inputId() == inputIdGetter.apply(input))
+            .toList();
 
     // Remove condition context keys associated with the input ID
-    conditionContextKeysToRemove.forEach(conditionEvaluationContext.getConditionContextMap()::remove);
+    conditionContextKeysToRemove.forEach(
+        conditionEvaluationContext.getConditionContextMap()::remove);
     // Remove field context keys associated with the input ID
     fieldContextKeysToRemove.forEach(fieldContext.getFieldContextMap()::remove);
   }

@@ -45,6 +45,7 @@ public interface EvaluationService<TInput, TInputId> {
    * Traces the evaluation process for the given input, calculating the context and field values
    * without returning a result map. This method is useful for debugging or logging the evaluation
    * process.
+   *
    * @param input the input data to trace the evaluation for
    * @param engineContextService the context service for managing field values and evaluation state
    */

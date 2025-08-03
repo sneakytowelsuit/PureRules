@@ -2,14 +2,10 @@ package com.github.sneakytowelsuit.purerules.engine;
 
 import com.github.sneakytowelsuit.purerules.conditions.Condition;
 import com.github.sneakytowelsuit.purerules.context.EngineContextService;
-import com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey;
-import com.github.sneakytowelsuit.purerules.context.condition.ConditionContextValue;
 import com.github.sneakytowelsuit.purerules.evaluation.DeterministicEvaluationService;
 import com.github.sneakytowelsuit.purerules.evaluation.EvaluationService;
 import com.github.sneakytowelsuit.purerules.evaluation.ProbabilisticEvaluationService;
-
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -17,7 +13,8 @@ import java.util.stream.Collectors;
 
 public class PureRulesEngine<TInput, TInputId> {
   private final List<Condition<TInput>> conditions;
-    /**
+
+  /**
    * The evaluation service used to evaluate the rules based on the engine mode. This service
    * encapsulates the logic for evaluating conditions and combining results.
    */
@@ -45,11 +42,11 @@ public class PureRulesEngine<TInput, TInputId> {
       Float minimumProbabilityThreshold,
       List<Condition<TInput>> conditions) {
     this.conditions = conditions;
-      /**
-       * The minimum probability threshold for the PROBABILISTIC engine mode. If the calculated
-       * probability is below this threshold, the result will be considered false.
-       */
-      this.evaluationService =
+    /**
+     * The minimum probability threshold for the PROBABILISTIC engine mode. If the calculated
+     * probability is below this threshold, the result will be considered false.
+     */
+    this.evaluationService =
         new ProbabilisticEvaluationService<>(conditions, minimumProbabilityThreshold);
     this.engineContextService = new EngineContextService<>(inputIdGetter);
   }
@@ -75,7 +72,8 @@ public class PureRulesEngine<TInput, TInputId> {
   }
 
   public Map<String, Boolean> evaluate(TInput input) {
-    Map<String, Boolean> results = this.getEvaluationService().evaluate(input, this.getEngineContextService());
+    Map<String, Boolean> results =
+        this.getEvaluationService().evaluate(input, this.getEngineContextService());
     if (results == null) {
       return Collections.emptyMap();
     }
