@@ -159,7 +159,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
             new ConditionContextKey<>(
                 engineContextService.getInputIdGetter().apply(input), rule.getId()),
             RuleContextValue.builder()
-                .ruleId(rule.getId())
+                    .id(rule.getId())
                 .operator(rule.getOperator().getClass().getName())
                 .result(result ? 1 : 0)
                 // Rules are weighed based solely on their weight since they are leaf nodes
@@ -401,7 +401,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
             new ConditionContextKey<>(
                 engineContextService.getInputIdGetter().apply(input), rule.getId()),
             RuleContextValue.builder()
-                .ruleId(rule.getId())
+                .id(rule.getId())
                 .operator(rule.getOperator().getClass().getName())
                 .result(weightedResult)
                 .maximumResult(rule.getWeight())
@@ -433,7 +433,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
                           engineContextService.getInputIdGetter().apply(input), rule.getId()));
           int ruleWeight = rule.getWeight();
           totalWeight += ruleWeight;
-          totalResult += (ctx != null && ctx.getResult() == 1) ? ruleWeight : 0;
+          totalResult += ctx != null ? ruleWeight : 0;
         }
         case RuleGroup<TInput> nestedGroup -> {
           traceRuleGroup(input, nestedGroup, engineContextService);
@@ -462,6 +462,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
             new ConditionContextKey<>(
                 engineContextService.getInputIdGetter().apply(input), ruleGroup.getId()),
             RuleGroupContextValue.builder()
+                    .id(ruleGroup.getId())
                 .bias(ruleGroup.getBias())
                 .result(weightedTotalResult)
                 .combinator(ruleGroup.getCombinator())

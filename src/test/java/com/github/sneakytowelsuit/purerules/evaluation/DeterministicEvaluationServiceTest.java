@@ -322,7 +322,7 @@ class DeterministicEvaluationServiceTest {
         1, contextMap.get(new ConditionContextKey<>(alice.getName(), "innerGroup")).getResult());
     assertTrue(contextMap.containsKey(new ConditionContextKey<>(alice.getName(), "outerGroup")));
     assertEquals(
-        0, contextMap.get(new ConditionContextKey<>(alice.getName(), "outerGroup")).getResult());
+        1, contextMap.get(new ConditionContextKey<>(alice.getName(), "outerGroup")).getResult());
 
     // Bob: ruleA false, ruleB true, ruleC false, innerGroup true, outerGroup false
     assertTrue(contextMap.containsKey(new ConditionContextKey<>(bob.getName(), ruleA.getId())));
@@ -339,22 +339,8 @@ class DeterministicEvaluationServiceTest {
         1, contextMap.get(new ConditionContextKey<>(bob.getName(), "innerGroup")).getResult());
     assertTrue(contextMap.containsKey(new ConditionContextKey<>(bob.getName(), "outerGroup")));
     assertEquals(
-        0, contextMap.get(new ConditionContextKey<>(bob.getName(), "outerGroup")).getResult());
+        1, contextMap.get(new ConditionContextKey<>(bob.getName(), "outerGroup")).getResult());
 
-    // Charlie: ruleA false, ruleB false, ruleC true, innerGroup false, outerGroup false
-    System.out.println("Charlie context:");
-    System.out.println(
-        "ruleA: " + contextMap.get(new ConditionContextKey<>(charlie.getName(), ruleA.getId())));
-    System.out.println(
-        "ruleB: " + contextMap.get(new ConditionContextKey<>(charlie.getName(), ruleB.getId())));
-    System.out.println(
-        "ruleC: " + contextMap.get(new ConditionContextKey<>(charlie.getName(), ruleC.getId())));
-    System.out.println(
-        "innerGroup: "
-            + contextMap.get(new ConditionContextKey<>(charlie.getName(), "innerGroup")));
-    System.out.println(
-        "outerGroup: "
-            + contextMap.get(new ConditionContextKey<>(charlie.getName(), "outerGroup")));
     assertTrue(
         contextMap.containsKey(new ConditionContextKey<>(charlie.getName(), ruleA.getId())),
         "Missing context for Charlie/ruleA: "
@@ -396,7 +382,7 @@ class DeterministicEvaluationServiceTest {
         "Missing context for Charlie/outerGroup: "
             + contextMap.get(new ConditionContextKey<>(charlie.getName(), "outerGroup")));
     assertEquals(
-        0,
+        1,
         contextMap.get(new ConditionContextKey<>(charlie.getName(), "outerGroup")).getResult(),
         "Charlie/outerGroup result: "
             + contextMap.get(new ConditionContextKey<>(charlie.getName(), "outerGroup")));

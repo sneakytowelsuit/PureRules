@@ -106,7 +106,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
         .put(
             conditionContextKey,
             RuleContextValue.builder()
-                .ruleId(rule.getId())
+                .id(rule.getId())
                 .result(result ? 1 : 0)
                 .maximumResult(1)
                 .fieldValue(fieldValue)
@@ -178,6 +178,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
         .put(
             ruleGroupConditionKey,
             RuleGroupContextValue.builder()
+                    .id(ruleGroup.getId())
                 .bias(ruleGroup.getBias())
                 .combinator(ruleGroup.getCombinator())
                 .result(ruleGroupResult)
@@ -366,7 +367,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
         .put(
             conditionContextKey,
             RuleContextValue.builder()
-                .ruleId(rule.getId())
+                .id(rule.getId())
                 .result(result ? 1 : 0)
                 .fieldValue(fieldValue)
                 .valueValue(valueValue)
