@@ -344,7 +344,7 @@ class ProbabilisticEvaluationServiceTest {
                     alice.getId(), "ruleB"))
             .getResult());
     assertEquals(
-        4,
+        6,
         contextMap
             .get(
                 new com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey<>(
@@ -365,7 +365,7 @@ class ProbabilisticEvaluationServiceTest {
                     alice.getId(), "ruleC"))
             .getResult());
     assertEquals(
-        0,
+        7,
         contextMap
             .get(
                 new com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey<>(
@@ -395,7 +395,7 @@ class ProbabilisticEvaluationServiceTest {
                     charlie.getId(), "ruleB"))
             .getResult());
     assertEquals(
-        0,
+        6,
         contextMap
             .get(
                 new com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey<>(
@@ -416,7 +416,7 @@ class ProbabilisticEvaluationServiceTest {
                     charlie.getId(), "ruleC"))
             .getResult());
     assertEquals(
-        1,
+        7,
         contextMap
             .get(
                 new com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey<>(
