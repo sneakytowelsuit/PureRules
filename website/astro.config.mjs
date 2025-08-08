@@ -30,7 +30,18 @@ function JavaDocSyncPlugin() {
   };
 }
 
-const base = process.env.PAGES_BASE_PATH || '/';
+// Normalize base path for Astro (must be a pathname with leading & trailing slash)
+const rawBase = process.env.PAGES_BASE_PATH || '/';
+let base = rawBase;
+try {
+  // If an absolute URL is provided, extract just the pathname
+  const u = new URL(rawBase);
+  base = u.pathname;
+} catch {
+  // If not a valid absolute URL, keep as-is
+}
+if (!base.startsWith('/')) base = '/' + base;
+if (!base.endsWith('/')) base += '/';
 
 // Compute site for GitHub Pages. Example: https://<owner>.github.io[/<repo>/]
 const owner = process.env.GITHUB_REPOSITORY_OWNER || 'sneakytowelsuit';
