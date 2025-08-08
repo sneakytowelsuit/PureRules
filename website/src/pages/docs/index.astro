@@ -2,8 +2,9 @@
 import { getCollection } from 'astro:content';
 import DocsLayout from '../../layouts/DocsLayout.astro';
 const pages = (await getCollection('docs')).sort((a,b)=>(a.data.order??0)-(b.data.order??0));
-const { Content } = await pages[0].render();
+const first = pages[0];
+const Content = first ? (await first.render()).Content : undefined;
 ---
 <DocsLayout title="Docs">
-  <Content />
+  {Content ? <Content /> : <p>No docs yet. Add files under <code>src/content/docs</code>.</p>}
 </DocsLayout>
