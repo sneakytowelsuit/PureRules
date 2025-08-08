@@ -67,6 +67,8 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Generate Javadocs
         run: ./gradlew javadoc
+      - name: Apply neo-brutalist skin to Javadoc
+        run: bash scripts/skin-javadoc.sh build/docs/javadoc
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
