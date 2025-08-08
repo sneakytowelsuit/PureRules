@@ -6,12 +6,11 @@ import { getCollection } from 'astro:content';
 export const getStaticPaths: GetStaticPaths = async () => {
   const refs = await getCollection('reference');
   if (!refs.length) return [];
-  return refs.map((p) => ({ params: { slug: p.slug.split('/') } }));
+  return refs.map((p) => ({ params: { slug: p.slug } }));
 };
 
 const all = await getCollection('reference');
-const slugParam = Astro.params.slug;
-const slug = Array.isArray(slugParam) ? slugParam.join('/') : '';
+const slug = (Astro.params.slug as string | undefined) ?? '';
 const entry = all.find((p) => p.slug === slug) ?? all[0];
 if (!entry) throw new Error('No reference entry found');
 const { Content } = await entry.render();

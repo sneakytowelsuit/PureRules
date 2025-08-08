@@ -6,14 +6,11 @@ import { getCollection } from 'astro:content';
 export const getStaticPaths: GetStaticPaths = async () => {
   const docs = await getCollection('docs');
   if (!docs.length) return [];
-  return docs.map((p) => ({
-    params: { slug: p.slug.split('/') },
-  }));
+  return docs.map((p) => ({ params: { slug: p.slug } }));
 };
 
 const pages = await getCollection('docs');
-const slugParam = Astro.params.slug;
-const slug = Array.isArray(slugParam) ? slugParam.join('/') : '00-index';
+const slug = (Astro.params.slug as string | undefined) ?? '00-index';
 const entry = pages.find((p) => p.slug === slug) ?? pages.find((p) => p.slug === '00-index');
 if (!entry) throw new Error('No docs entry found');
 const { Content } = await entry.render();
