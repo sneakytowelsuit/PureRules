@@ -16,16 +16,39 @@ repositories {
     mavenCentral()
 }
 
+// Add a detached configuration to run Lombok's delombok tool
+configurations {
+    lombok
+}
+
 dependencies {
     // https://mvnrepository.com/artifact/org.projectlombok/lombok
     compileOnly 'org.projectlombok:lombok:1.18.38'
     annotationProcessor 'org.projectlombok:lombok:1.18.38'
+    // Delombok runtime
+    lombok 'org.projectlombok:lombok:1.18.38'
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core
     implementation 'com.fasterxml.jackson.core:jackson-core:2.19.0'
     annotationProcessor 'com.fasterxml.jackson.core:jackson-annotations:2.19.0'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.19.0'
+}
+
+// Task to delombok sources into build/delombok/main
+tasks.register('delombok', JavaExec) {
+    group = 'build'
+    description = 'Generates delomboked sources for Javadoc.'
+    classpath = configurations.lombok
+    // Gradle 7+/8+ style for main class
+    mainClass.set('lombok.launch.Main')
+    // Provide classpath so delombok can resolve imports (e.g., Jackson)
+    args 'delombok', '--classpath', sourceSets.main.compileClasspath.asPath, 'src/main/java', '-d', "$buildDir/delombok/main"
+    inputs.dir 'src/main/java'
+    // Also treat classpath as an input so task re-runs if deps change
+    inputs.files(sourceSets.main.compileClasspath)
+    outputs.dir "$buildDir/delombok/main"
 }
 
 test {
@@ -36,6 +59,22 @@ spotless {
         target '**/*.java'
         // Apply Google Java Format
         googleJavaFormat()
+        // Allow // spotless:off/on to preserve Javadoc formatting
         toggleOffOn()
     }
+}
+
+javadoc {
+    // Ensure delombok runs first
+    dependsOn tasks.named('delombok')
+    // Point Javadoc at the delomboked sources
+    source = fileTree("$buildDir/delombok/main")
+    // Keep the proper classpath for external dependencies
+    classpath = sourceSets.main.compileClasspath
+
+    destinationDir = file("${buildDir}/docs/javadoc")
+
+    // Make Javadoc tolerant of imperfect comments
+    options.encoding = 'UTF-8'
+    options.addStringOption('Xdoclint:none', '-quiet')
 }
