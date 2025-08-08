@@ -72,6 +72,11 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Add deployment URL to summary
+        if: always()
+        run: |
+          echo "### 🚀 Production deployed to" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
 
   deploy-pr-preview:
     if: github.event_name == 'pull_request'
@@ -87,6 +92,11 @@ jobs:
       - name: Deploy PR Preview
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Add preview URL to summary
+        if: always()
+        run: |
+          echo "### 🧪 PR Preview deployed to" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
 
   deploy-feature-preview:
     if: startsWith(github.ref, 'refs/heads/feature/') || startsWith(github.ref, 'refs/heads/feat/')
@@ -102,3 +112,8 @@ jobs:
       - name: Deploy Feature Branch Preview
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Add feature preview URL to summary
+        if: always()
+        run: |
+          echo "### 🌱 Feature Preview deployed to" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
