@@ -1,4 +1,5 @@
 ---
+import type { GetStaticPaths } from "astro";
 import DocsLayout from '../../layouts/DocsLayout.astro';
 import { getCollection } from 'astro:content';
 
@@ -9,6 +10,27 @@ const slug = Array.isArray(slugArr) ? slugArr.join('/') : slugArr ?? '00-index';
 const entry = bySlug.get(slug) ?? bySlug.get('00-index');
 if (!entry) throw new Error('No docs entry found');
 const { Content } = await entry.render();
+
+export const getStaticPaths = (() => {
+    if (all.length > 0) {
+        return all.map((p) => ({
+            params: { slug: p.slug },
+            props: { entry: p }
+        }));
+    }
+    // If no entries, return an empty array to avoid errors
+    // This is useful for static site generation when no docs are available
+    console.warn('No docs entries found, returning empty paths');
+    // This will prevent the build from failing, but the page will not be generated
+    // You can also return a default path if needed, e.g. [{ params: { slug: '00-index' } }]
+    // but this will not generate any pages if there are no entries.
+    // Uncomment the line below to return a default path:
+    // return [{ params: { slug: '00-index' } }];
+    // Or return an empty array to indicate no paths
+    // This will result in no pages being generated, which is fine if you have no docs
+    // but you can also handle this case in your application logic.
+    return [];
+}) satisfies GetStaticPaths;
 ---
 <DocsLayout title={entry.data.title}>
   <Content />
