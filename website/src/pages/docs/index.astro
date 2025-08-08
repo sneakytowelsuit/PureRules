@@ -1,0 +1,9 @@
+---
+import { getCollection } from 'astro:content';
+import DocsLayout from '../../layouts/DocsLayout.astro';
+const pages = (await getCollection('docs')).sort((a,b)=>(a.data.order??0)-(b.data.order??0));
+const { Content } = await pages[0].render();
+---
+<DocsLayout title="Docs">
+  <Content />
+</DocsLayout>

@@ -1,0 +1,104 @@
+name: Build & Deploy Website
+
+on:
+  push:
+    branches:
+      - main
+      - feature/**
+      - feat/**
+    paths:
+      - 'website/**'
+      - 'src/main/java/**'
+      - '.github/workflows/website.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'website/**'
+      - 'src/main/java/**'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: website/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Sync JavaDoc to Markdown
+        run: npm run sync
+
+      - name: Build
+        env:
+          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_url }}
+        run: npm run build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: website/dist
+
+  deploy-main:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pages-main
+      cancel-in-progress: true
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  deploy-pr-preview:
+    if: github.event_name == 'pull_request'
+    needs: build
+    environment:
+      name: github-pages-pr
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pages-pr-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    steps:
+      - name: Deploy PR Preview
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  deploy-feature-preview:
+    if: startsWith(github.ref, 'refs/heads/feature/') || startsWith(github.ref, 'refs/heads/feat/')
+    needs: build
+    environment:
+      name: github-pages-feature
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pages-feature-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Deploy Feature Branch Preview
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,15 @@
+---
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import { getCollection } from 'astro:content';
+
+const all = await getCollection('docs');
+const bySlug = new Map(all.map(p => [p.slug, p]));
+const slugArr = Astro.params.slug;
+const slug = Array.isArray(slugArr) ? slugArr.join('/') : slugArr ?? '00-index';
+const entry = bySlug.get(slug) ?? bySlug.get('00-index');
+if (!entry) throw new Error('No docs entry found');
+const { Content } = await entry.render();
+---
+<DocsLayout title={entry.data.title}>
+  <Content />
+</DocsLayout>
