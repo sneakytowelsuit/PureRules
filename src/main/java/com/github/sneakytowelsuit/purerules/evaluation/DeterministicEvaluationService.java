@@ -68,6 +68,144 @@ public class DeterministicEvaluationService<TInput, TInputId>
                 condition -> evaluationConditions(input, condition, engineContextService)));
   }
 
+  @Override
+  public void trace(TInput input, EngineContextService<TInput, TInputId> engineContextService) {
+    conditions.forEach(condition -> traceCondition(input, condition, engineContextService));
+  }
+
+  private void traceCondition(
+      TInput input,
+      Condition<TInput> condition,
+      EngineContextService<TInput, TInputId> engineContextService) {
+    switch (condition) {
+      case Rule<TInput, ?> rule -> traceRule(input, rule, engineContextService);
+      case RuleGroup<TInput> ruleGroup -> traceRuleGroup(input, ruleGroup, engineContextService);
+    }
+  }
+
+  private <V> void traceRule(
+      TInput input,
+      Rule<TInput, V> rule,
+      EngineContextService<TInput, TInputId> engineContextService) {
+    ConditionContextKey<TInputId> contextKey =
+        new ConditionContextKey<>(
+            engineContextService.getInputIdGetter().apply(input), rule.getId());
+    assert rule.getOperator() != null;
+    assert rule.getField() != null;
+    assert rule.getValue() != null;
+
+    V fieldValue = this.getFieldValue(input, rule, engineContextService);
+    V valueValue = rule.getValue();
+    boolean result = rule.getOperator().test(fieldValue, valueValue);
+    ConditionContextKey<TInputId> conditionContextKey =
+        new ConditionContextKey<>(
+            engineContextService.getInputIdGetter().apply(input), rule.getId());
+    engineContextService
+        .getConditionEvaluationContext()
+        .getConditionContextMap()
+        .put(
+            conditionContextKey,
+            RuleContextValue.builder()
+                .id(rule.getId())
+                .result(result ? 1 : 0)
+                .maximumResult(1)
+                .fieldValue(fieldValue)
+                .valueValue(valueValue)
+                .operator(rule.getOperator().getClass().getName())
+                .build());
+  }
+
+  private void traceRuleGroup(
+      TInput input,
+      RuleGroup<TInput> ruleGroup,
+      EngineContextService<TInput, TInputId> engineContextService) {
+    if (ruleGroup.getConditions().isEmpty()) {
+      traceEmptyRuleGroup(input, ruleGroup, engineContextService);
+    }
+
+    ruleGroup.getConditions().stream()
+        .sorted(
+            (c1, c2) -> {
+              if (c1 instanceof Rule && c2 instanceof Rule) {
+                return 0; // Both are rules, no specific order
+              } else if (c1 instanceof RuleGroup && c2 instanceof RuleGroup) {
+                return 0; // Both are rule groups, no specific order
+              } else if (c1 instanceof Rule) {
+                return -1; // Rule comes before RuleGroup
+              } else {
+                return 1; // RuleGroup comes after Rule
+              }
+            })
+        .forEach(
+            condition -> {
+              switch (condition) {
+                case Rule<TInput, ?> rule -> traceRule(input, rule, engineContextService);
+                case RuleGroup<TInput> nestedRuleGroup ->
+                    traceRuleGroup(input, nestedRuleGroup, engineContextService);
+              }
+            });
+    // After all conditions are traced, update parent RuleGroup context
+    ConditionContextKey<TInputId> ruleGroupConditionKey =
+        new ConditionContextKey<>(
+            engineContextService.getInputIdGetter().apply(input), ruleGroup.getId());
+    Integer ruleGroupResult =
+        ruleGroup.getConditions().stream()
+            .map(
+                cond ->
+                    engineContextService
+                        .getConditionEvaluationContext()
+                        .getConditionContextMap()
+                        .get(
+                            new ConditionContextKey<>(
+                                engineContextService.getInputIdGetter().apply(input), cond.getId()))
+                        .getResult())
+            .reduce(0, Integer::sum);
+    Integer ruleGroupMaximumResult =
+        ruleGroup.getConditions().stream()
+            .map(
+                cond ->
+                    engineContextService
+                        .getConditionEvaluationContext()
+                        .getConditionContextMap()
+                        .get(
+                            new ConditionContextKey<>(
+                                engineContextService.getInputIdGetter().apply(input), cond.getId()))
+                        .getMaximumResult())
+            .reduce(0, Integer::sum);
+    engineContextService
+        .getConditionEvaluationContext()
+        .getConditionContextMap()
+        .put(
+            ruleGroupConditionKey,
+            RuleGroupContextValue.builder()
+                .id(ruleGroup.getId())
+                .bias(ruleGroup.getBias())
+                .combinator(ruleGroup.getCombinator())
+                .result(ruleGroupResult)
+                .maximumResult(ruleGroupMaximumResult)
+                .build());
+  }
+
+  private void traceEmptyRuleGroup(
+      TInput input,
+      RuleGroup<TInput> ruleGroup,
+      EngineContextService<TInput, TInputId> engineContextService) {
+    ConditionContextKey<TInputId> conditionContextKey =
+        new ConditionContextKey<>(
+            engineContextService.getInputIdGetter().apply(input), ruleGroup.getId());
+    boolean result = ruleGroup.getBias().isBiasResult() ^ ruleGroup.isInverted();
+    engineContextService
+        .getConditionEvaluationContext()
+        .getConditionContextMap()
+        .put(
+            conditionContextKey,
+            RuleGroupContextValue.builder()
+                .bias(ruleGroup.getBias())
+                .result(result ? 1 : 0)
+                .combinator(ruleGroup.getCombinator())
+                .build());
+  }
+
   /**
    * Evaluates a single condition, dispatching to the appropriate evaluation method based on the
    * condition type.
@@ -183,10 +321,12 @@ public class DeterministicEvaluationService<TInput, TInputId>
             conditionContextKey,
             RuleGroupContextValue.builder()
                 .bias(ruleGroup.getBias())
-                .result(result ? 1 : 0)
-                // Deterministic evaluation doesn't need to account for the weight of the conditions
-                .maximumResult(ruleGroup.getConditions().size())
                 .combinator(ruleGroup.getCombinator())
+                .id(ruleGroup.getId())
+                .result(result ? 1 : 0)
+                .maximumResult(
+                    ruleGroup.getWeight()
+                        * ruleGroup.getConditions().stream().mapToInt(Condition::getWeight).sum())
                 .build());
     return result;
   }
@@ -232,7 +372,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
         .put(
             conditionContextKey,
             RuleContextValue.builder()
-                .ruleId(rule.getId())
+                .id(rule.getId())
                 .result(result ? 1 : 0)
                 .fieldValue(fieldValue)
                 .valueValue(valueValue)

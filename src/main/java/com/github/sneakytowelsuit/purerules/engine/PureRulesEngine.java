@@ -5,6 +5,7 @@ import com.github.sneakytowelsuit.purerules.context.EngineContextService;
 import com.github.sneakytowelsuit.purerules.evaluation.DeterministicEvaluationService;
 import com.github.sneakytowelsuit.purerules.evaluation.EvaluationService;
 import com.github.sneakytowelsuit.purerules.evaluation.ProbabilisticEvaluationService;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -12,25 +13,6 @@ import java.util.stream.Collectors;
 
 public class PureRulesEngine<TInput, TInputId> {
   private final List<Condition<TInput>> conditions;
-
-  /**
-   * The mode of the engine, which can be either DETERMINISTIC or PROBABILISTIC. This determines how
-   * the rules are evaluated and the results are combined.
-   *
-   * <ul>
-   *   <li>{@link EngineMode#DETERMINISTIC}: The engine evaluates rules and returns a boolean result
-   *       based on the conditions defined in the rule groups.
-   *   <li>{@link EngineMode#PROBABILISTIC}: The engine evaluates rules and returns a probability
-   *       score based on the conditions defined in the rule groups.
-   * </ul>
-   */
-  private final EngineMode engineMode;
-
-  /**
-   * The minimum probability threshold for the PROBABILISTIC engine mode. If the calculated
-   * probability is below this threshold, the result will be considered false.
-   */
-  private Float minimumProbabilityThreshold;
 
   /**
    * The evaluation service used to evaluate the rules based on the engine mode. This service
@@ -60,8 +42,10 @@ public class PureRulesEngine<TInput, TInputId> {
       Float minimumProbabilityThreshold,
       List<Condition<TInput>> conditions) {
     this.conditions = conditions;
-    this.engineMode = EngineMode.PROBABILISTIC;
-    this.minimumProbabilityThreshold = minimumProbabilityThreshold;
+    /**
+     * The minimum probability threshold for the PROBABILISTIC engine mode. If the calculated
+     * probability is below this threshold, the result will be considered false.
+     */
     this.evaluationService =
         new ProbabilisticEvaluationService<>(conditions, minimumProbabilityThreshold);
     this.engineContextService = new EngineContextService<>(inputIdGetter);
@@ -75,7 +59,6 @@ public class PureRulesEngine<TInput, TInputId> {
   private PureRulesEngine(
       Function<TInput, TInputId> inputIdGetter, List<Condition<TInput>> conditions) {
     this.conditions = conditions;
-    this.engineMode = EngineMode.DETERMINISTIC;
     this.evaluationService = new DeterministicEvaluationService<>(conditions);
     this.engineContextService = new EngineContextService<>(inputIdGetter);
   }
@@ -89,7 +72,14 @@ public class PureRulesEngine<TInput, TInputId> {
   }
 
   public Map<String, Boolean> evaluate(TInput input) {
-    return this.getEvaluationService().evaluate(input, this.getEngineContextService());
+    Map<String, Boolean> results =
+        this.getEvaluationService().evaluate(input, this.getEngineContextService());
+    if (results == null) {
+      return Collections.emptyMap();
+    }
+    // Clear the context after evaluation to avoid memory leaks
+    this.getEngineContextService().flush(input);
+    return results;
   }
 
   public Map<TInputId, Map<String, Boolean>> evaluateAll(List<TInput> inputs) {

@@ -53,6 +53,7 @@ jobs:
   generate-docs:
     runs-on: ubuntu-latest
     needs: check 
+    if: github.ref_protected # Only run if the branch is protected
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -73,6 +74,7 @@ jobs:
           path: build/docs/javadoc
   deploy-docs:
     runs-on: ubuntu-latest
+    if: github.ref_protected # Only run if the branch is protected
     needs: generate-docs
     environment:
       name: github-pages

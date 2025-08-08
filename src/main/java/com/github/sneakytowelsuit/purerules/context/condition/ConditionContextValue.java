@@ -4,4 +4,6 @@ public sealed interface ConditionContextValue permits RuleContextValue, RuleGrou
   public Integer getResult();
 
   public Integer getMaximumResult();
+
+  public String getId();
 }

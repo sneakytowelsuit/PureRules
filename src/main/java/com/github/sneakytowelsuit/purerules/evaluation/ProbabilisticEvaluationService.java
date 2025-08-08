@@ -159,7 +159,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
             new ConditionContextKey<>(
                 engineContextService.getInputIdGetter().apply(input), rule.getId()),
             RuleContextValue.builder()
-                .ruleId(rule.getId())
+                .id(rule.getId())
                 .operator(rule.getOperator().getClass().getName())
                 .result(result ? 1 : 0)
                 // Rules are weighed based solely on their weight since they are leaf nodes
@@ -364,5 +364,130 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
                     .maximumResult(0)
                     .build())
         .getResult();
+  }
+
+  @Override
+  public void trace(TInput input, EngineContextService<TInput, TInputId> engineContextService) {
+    for (Condition<TInput> condition : this.conditions) {
+      traceCondition(input, condition, engineContextService);
+    }
+  }
+
+  private void traceCondition(
+      TInput input,
+      Condition<TInput> condition,
+      EngineContextService<TInput, TInputId> engineContextService) {
+    switch (condition) {
+      case Rule<TInput, ?> rule -> traceRule(input, rule, engineContextService);
+      case RuleGroup<TInput> ruleGroup -> traceRuleGroup(input, ruleGroup, engineContextService);
+    }
+  }
+
+  private <V> void traceRule(
+      TInput input,
+      Rule<TInput, V> rule,
+      EngineContextService<TInput, TInputId> engineContextService) {
+    assert rule.getField() != null;
+    assert rule.getOperator() != null;
+    assert rule.getValue() != null;
+    V fieldValue = this.getFieldValue(input, rule, engineContextService);
+    V ruleValue = rule.getValue();
+    boolean result = rule.getOperator().test(fieldValue, ruleValue);
+    int weightedResult = (result ? 1 : 0) * rule.getWeight();
+    engineContextService
+        .getConditionEvaluationContext()
+        .getConditionContextMap()
+        .put(
+            new ConditionContextKey<>(
+                engineContextService.getInputIdGetter().apply(input), rule.getId()),
+            RuleContextValue.builder()
+                .id(rule.getId())
+                .operator(rule.getOperator().getClass().getName())
+                .result(weightedResult)
+                .maximumResult(rule.getWeight())
+                .fieldValue(fieldValue)
+                .valueValue(ruleValue)
+                .build());
+  }
+
+  private void traceRuleGroup(
+      TInput input,
+      RuleGroup<TInput> ruleGroup,
+      EngineContextService<TInput, TInputId> engineContextService) {
+    if (ruleGroup.getConditions().isEmpty()) {
+      traceEmptyRuleGroup(input, ruleGroup, engineContextService);
+      return;
+    }
+    int totalResult = 0;
+    int totalWeight = 0;
+    for (Condition<TInput> condition : ruleGroup.getConditions()) {
+      switch (condition) {
+        case Rule<TInput, ?> rule -> {
+          traceRule(input, rule, engineContextService);
+          ConditionContextValue ctx =
+              engineContextService
+                  .getConditionEvaluationContext()
+                  .getConditionContextMap()
+                  .get(
+                      new ConditionContextKey<>(
+                          engineContextService.getInputIdGetter().apply(input), rule.getId()));
+          int ruleWeight = rule.getWeight();
+          totalWeight += ruleWeight;
+          totalResult += ctx != null ? ctx.getResult() * ruleWeight : 0;
+        }
+        case RuleGroup<TInput> nestedGroup -> {
+          traceRuleGroup(input, nestedGroup, engineContextService);
+          ConditionContextValue ctx =
+              engineContextService
+                  .getConditionEvaluationContext()
+                  .getConditionContextMap()
+                  .get(
+                      new ConditionContextKey<>(
+                          engineContextService.getInputIdGetter().apply(input),
+                          nestedGroup.getId()));
+          if (ctx instanceof RuleGroupContextValue nestedCtx) {
+            totalWeight += nestedCtx.getMaximumResult();
+            totalResult += nestedCtx.getResult();
+          }
+        }
+      }
+    }
+    int groupWeight = ruleGroup.getWeight() != null ? ruleGroup.getWeight() : 1;
+    int weightedTotalResult = totalResult * groupWeight;
+    int weightedTotalWeight = totalWeight * groupWeight;
+    engineContextService
+        .getConditionEvaluationContext()
+        .getConditionContextMap()
+        .put(
+            new ConditionContextKey<>(
+                engineContextService.getInputIdGetter().apply(input), ruleGroup.getId()),
+            RuleGroupContextValue.builder()
+                .id(ruleGroup.getId())
+                .bias(ruleGroup.getBias())
+                .result(weightedTotalResult)
+                .combinator(ruleGroup.getCombinator())
+                .maximumResult(weightedTotalWeight)
+                .build());
+  }
+
+  private void traceEmptyRuleGroup(
+      TInput input,
+      RuleGroup<TInput> ruleGroup,
+      EngineContextService<TInput, TInputId> engineContextService) {
+    ConditionContextKey<TInputId> conditionContextKey =
+        new ConditionContextKey<>(
+            engineContextService.getInputIdGetter().apply(input), ruleGroup.getId());
+    int result = ruleGroup.getBias().isBiasResult() ^ ruleGroup.isInverted() ? 1 : 0;
+    engineContextService
+        .getConditionEvaluationContext()
+        .getConditionContextMap()
+        .put(
+            conditionContextKey,
+            RuleGroupContextValue.builder()
+                .bias(ruleGroup.getBias())
+                .result(result)
+                .combinator(ruleGroup.getCombinator())
+                .maximumResult(0)
+                .build());
   }
 }
