@@ -1,0 +1,20 @@
+---
+import type { GetStaticPaths } from 'astro';
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import { getCollection } from 'astro:content';
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const refs = await getCollection('reference');
+  if (!refs.length) return [];
+  return refs.map((p) => ({ params: { slug: p.slug } }));
+};
+
+const all = await getCollection('reference');
+const slug = (Astro.params.slug as string | undefined) ?? '';
+const entry = all.find((p) => p.slug === slug) ?? all[0];
+if (!entry) throw new Error('No reference entry found');
+const { Content } = await entry.render();
+---
+<DocsLayout title={entry.data.title}>
+  <Content />
+</DocsLayout>
