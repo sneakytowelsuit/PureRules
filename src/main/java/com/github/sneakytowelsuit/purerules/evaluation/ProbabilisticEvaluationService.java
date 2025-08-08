@@ -39,7 +39,10 @@ import java.util.stream.Collectors;
  */
 public class ProbabilisticEvaluationService<TInput, TInputId>
     implements EvaluationService<TInput, TInputId> {
-  /** The minimum probability threshold for considering a condition as passing. This is applied at the root of each condition in the list of conditions provided */
+  /**
+   * The minimum probability threshold for considering a condition as passing. This is applied at
+   * the root of each condition in the list of conditions provided
+   */
   private final Float minimumProbability;
 
   /** The list of conditions to evaluate against input data. */
