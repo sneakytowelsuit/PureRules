@@ -178,7 +178,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
         .put(
             ruleGroupConditionKey,
             RuleGroupContextValue.builder()
-                    .id(ruleGroup.getId())
+                .id(ruleGroup.getId())
                 .bias(ruleGroup.getBias())
                 .combinator(ruleGroup.getCombinator())
                 .result(ruleGroupResult)
