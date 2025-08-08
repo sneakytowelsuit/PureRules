@@ -9,7 +9,7 @@ const sorted = pages.sort((a: any,b: any) => (a.data.order ?? 0) - (b.data.order
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
-    <link rel="icon" href="/favicon.svg" />
+    <link rel="icon" href={`${import.meta.env.BASE_URL}favicon.svg`} />
     <title>{title} · PureRules</title>
     <meta name="description" content={description} />
     <style>
@@ -57,9 +57,9 @@ const sorted = pages.sort((a: any,b: any) => (a.data.order ?? 0) - (b.data.order
         <span>PureRules</span>
       </div>
       <nav class="nav">
-        <a href="/docs/">Docs</a>
-        <a href="/reference/">Reference</a>
-        <a href="/about">About</a>
+        <a href={`${import.meta.env.BASE_URL}docs/`}>Docs</a>
+        <a href={`${import.meta.env.BASE_URL}reference/`}>Reference</a>
+        <a href={`${import.meta.env.BASE_URL}about`}>About</a>
         <a href="https://github.com/sneakytowelsuit/PureRules" rel="noreferrer" target="_blank">GitHub</a>
       </nav>
     </header>
@@ -67,7 +67,7 @@ const sorted = pages.sort((a: any,b: any) => (a.data.order ?? 0) - (b.data.order
       <aside>
         <div class="toc">
           {sorted.map((p: any) => (
-            <SidebarLink href={`/docs/${p.slug}/`} label={p.data.title} />
+            <SidebarLink href={`${import.meta.env.BASE_URL}docs/${p.slug}/`} label={p.data.title} />
           ))}
         </div>
       </aside>

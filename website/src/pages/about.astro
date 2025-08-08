@@ -4,7 +4,7 @@ const pageTitle: string = 'About PureRules';
 ---
 <head>
   <meta charset="utf-8"/>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+  <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`}/>
   <meta name="viewport" content="width=device-width"/>
   <meta name="generator" content={Astro.generator}/>
   <title>{pageTitle}</title>
@@ -23,7 +23,7 @@ const pageTitle: string = 'About PureRules';
       <h1>{pageTitle}</h1>
       <p>PureRules is built for clarity, composability, and speed. It supports deterministic
       and probabilistic evaluation modes, and a small set of extensible operators.</p>
-      <p><a class="btn" href="/docs/">Read the docs</a></p>
+      <p><a class="btn" href={`${import.meta.env.BASE_URL}docs/`}>Read the docs</a></p>
     </div>
   </div>
 </body>

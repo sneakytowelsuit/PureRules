@@ -32,9 +32,14 @@ function JavaDocSyncPlugin() {
 
 const base = process.env.PAGES_BASE_PATH || '/';
 
+// Compute site for GitHub Pages. Example: https://<owner>.github.io[/<repo>/]
+const owner = process.env.GITHUB_REPOSITORY_OWNER || 'sneakytowelsuit';
+const origin = `https://${owner}.github.io`;
+const site = origin.replace(/\/$/, '') + (base === '/' ? '' : base);
+
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://example.com',
+  site,
   base,
   integrations: [],
   markdown: {
