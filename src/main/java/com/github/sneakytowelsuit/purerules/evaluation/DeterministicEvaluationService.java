@@ -325,10 +325,8 @@ public class DeterministicEvaluationService<TInput, TInputId>
                 .id(ruleGroup.getId())
                 .result(result ? 1 : 0)
                 .maximumResult(
-                    ruleGroup.getWeight() *
-                        ruleGroup.getConditions().stream()
-                            .mapToInt(Condition::getWeight)
-                            .sum())
+                    ruleGroup.getWeight()
+                        * ruleGroup.getConditions().stream().mapToInt(Condition::getWeight).sum())
                 .build());
     return result;
   }
