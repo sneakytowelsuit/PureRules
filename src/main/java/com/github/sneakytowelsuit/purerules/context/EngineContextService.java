@@ -62,11 +62,11 @@ public class EngineContextService<TInput, TInputId> {
   public void flush(TInput input) {
     List<ConditionContextKey<TInputId>> conditionContextKeysToRemove =
         conditionEvaluationContext.getConditionContextMap().keySet().stream()
-            .filter(key -> key.inputId() == inputIdGetter.apply(input))
+            .filter(key -> key.inputId().equals(inputIdGetter.apply(input)))
             .toList();
     List<FieldContextKey<TInputId>> fieldContextKeysToRemove =
         fieldContext.getFieldContextMap().keySet().stream()
-            .filter(key -> key.inputId() == inputIdGetter.apply(input))
+            .filter(key -> key.inputId().equals(inputIdGetter.apply(input)))
             .toList();
 
     // Remove condition context keys associated with the input ID

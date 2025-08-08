@@ -433,7 +433,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
                           engineContextService.getInputIdGetter().apply(input), rule.getId()));
           int ruleWeight = rule.getWeight();
           totalWeight += ruleWeight;
-          totalResult += ctx != null ? ruleWeight : 0;
+          totalResult += ctx != null ? ctx.getResult() * ruleWeight : 0;
         }
         case RuleGroup<TInput> nestedGroup -> {
           traceRuleGroup(input, nestedGroup, engineContextService);

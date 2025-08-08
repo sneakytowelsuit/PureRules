@@ -321,7 +321,14 @@ public class DeterministicEvaluationService<TInput, TInputId>
             conditionContextKey,
             RuleGroupContextValue.builder()
                 .bias(ruleGroup.getBias())
+                .combinator(ruleGroup.getCombinator())
+                .id(ruleGroup.getId())
                 .result(result ? 1 : 0)
+                .maximumResult(
+                    ruleGroup.getWeight() *
+                        ruleGroup.getConditions().stream()
+                            .mapToInt(Condition::getWeight)
+                            .sum())
                 .build());
     return result;
   }
