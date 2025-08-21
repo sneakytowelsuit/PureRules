@@ -1,3 +1,4 @@
+// spotless:off
 /**
  * Evaluation service implementations for different engine modes.
  *
@@ -30,4 +31,5 @@
  * @see com.github.sneakytowelsuit.purerules.evaluation.DeterministicEvaluationService
  * @see com.github.sneakytowelsuit.purerules.evaluation.ProbabilisticEvaluationService
  */
+// spotless:on
 package com.github.sneakytowelsuit.purerules.evaluation;

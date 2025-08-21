@@ -2,6 +2,7 @@ package com.github.sneakytowelsuit.purerules.operators;
 
 import com.github.sneakytowelsuit.purerules.conditions.Operator;
 
+// spotless:off
 /**
  * An operator that tests for string equality while ignoring case differences.
  *
@@ -22,8 +23,10 @@ import com.github.sneakytowelsuit.purerules.conditions.Operator;
  *   <li>Status or category validation
  * </ul>
  */
+// spotless:on
 public class StringEqualsIgnoreCaseOperator implements Operator<String> {
 
+  // spotless:off
   /**
    * Tests whether the input string equals the comparison string, ignoring case.
    *
@@ -32,6 +35,7 @@ public class StringEqualsIgnoreCaseOperator implements Operator<String> {
    * @return true if the strings are equal ignoring case, false otherwise (including when either
    *     value is null)
    */
+  // spotless:on
   @Override
   public boolean test(String input, String value) {
     if (input == null || value == null) {

@@ -1,3 +1,4 @@
+// spotless:off
 /**
  * PureRules: A flexible JVM-based rules engine for modern engineering teams.
  *
@@ -34,4 +35,5 @@
  * @see com.github.sneakytowelsuit.purerules.conditions.RuleGroup
  * @see com.github.sneakytowelsuit.purerules.evaluation.IEvaluationService
  */
+// spotless:on
 package com.github.sneakytowelsuit.purerules;

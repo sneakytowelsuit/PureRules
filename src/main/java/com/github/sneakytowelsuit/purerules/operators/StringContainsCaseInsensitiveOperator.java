@@ -2,6 +2,7 @@ package com.github.sneakytowelsuit.purerules.operators;
 
 import com.github.sneakytowelsuit.purerules.conditions.Operator;
 
+// spotless:off
 /**
  * An operator that tests whether a string contains another string, ignoring case differences.
  *
@@ -24,8 +25,10 @@ import com.github.sneakytowelsuit.purerules.conditions.Operator;
  * <p>For case-sensitive containment checking, use a custom operator or combine {@link
  * String#contains(CharSequence)} with {@link EqualsOperator}.
  */
+// spotless:on
 public class StringContainsCaseInsensitiveOperator implements Operator<String> {
 
+  // spotless:off
   /**
    * Tests whether the input string contains the comparison string, ignoring case.
    *
@@ -34,6 +37,7 @@ public class StringContainsCaseInsensitiveOperator implements Operator<String> {
    * @return true if input contains value (case-insensitive), false otherwise (including when either
    *     value is null)
    */
+  // spotless:on
   @Override
   public boolean test(String input, String value) {
     if (input == null || value == null) {

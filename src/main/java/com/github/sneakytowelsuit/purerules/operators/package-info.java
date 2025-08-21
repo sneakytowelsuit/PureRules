@@ -1,3 +1,4 @@
+// spotless:off
 /**
  * Built-in comparison operators for rule evaluation.
  *
@@ -27,4 +28,5 @@
  *
  * @see com.github.sneakytowelsuit.purerules.conditions.Operator
  */
+// spotless:on
 package com.github.sneakytowelsuit.purerules.operators;

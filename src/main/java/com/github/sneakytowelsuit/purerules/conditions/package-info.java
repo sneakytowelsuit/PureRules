@@ -1,3 +1,4 @@
+// spotless:off
 /**
  * Core rule and condition definitions for building evaluation logic.
  *
@@ -37,4 +38,5 @@
  * @see com.github.sneakytowelsuit.purerules.conditions.Rule
  * @see com.github.sneakytowelsuit.purerules.conditions.RuleGroup
  */
+// spotless:on
 package com.github.sneakytowelsuit.purerules.conditions;

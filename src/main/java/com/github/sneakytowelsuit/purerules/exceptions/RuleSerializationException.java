@@ -1,5 +1,6 @@
 package com.github.sneakytowelsuit.purerules.exceptions;
 
+// spotless:off
 /**
  * Exception thrown when a {@link com.github.sneakytowelsuit.purerules.conditions.Rule} cannot be
  * serialized to JSON.
@@ -17,14 +18,17 @@ package com.github.sneakytowelsuit.purerules.exceptions;
  * <p>This exception is typically thrown by serialization utilities when processing individual rules
  * within rule groups or standalone rule serialization operations.
  */
+// spotless:on
 public class RuleSerializationException extends RuntimeException {
 
+  // spotless:off
   /**
    * Creates a new exception with the specified error message and underlying cause.
    *
    * @param message description of the rule serialization error
    * @param cause the underlying exception that caused this serialization failure
    */
+  // spotless:on
   public RuleSerializationException(String message, Throwable cause) {
     super(message, cause);
   }

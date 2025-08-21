@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.function.Function;
 import lombok.Getter;
 
+// spotless:off
 /**
  * Manages evaluation context for the PureRules engine, including field value caching and condition
  * evaluation state tracking.
@@ -35,30 +36,69 @@ import lombok.Getter;
  * @param <TInput> the type of input data being evaluated
  * @param <TInputId> the type used to uniquely identify input instances
  */
+// spotless:on
 @Getter
 public class EngineContextService<TInput, TInputId> {
 
+  // spotless:off
   /** Context for tracking condition evaluation results and metadata. */
+  // spotless:on
   private final ConditionContext<TInputId> conditionEvaluationContext;
 
+  // spotless:off
   /** Context for caching extracted field values to improve performance. */
+  // spotless:on
   private final FieldContext<TInputId> fieldContext;
 
+  // spotless:off
   /** Function to extract unique identifiers from input instances for context management. */
+  // spotless:on
   private final Function<TInput, TInputId> inputIdGetter;
 
+  // spotless:off
   /**
    * Creates a new engine context service with the specified input ID extraction function.
    *
    * @param inputIdGetter function that extracts a unique identifier from input instances, used for
    *     context key generation and caching
    */
+  // spotless:on
   public EngineContextService(Function<TInput, TInputId> inputIdGetter) {
     this.conditionEvaluationContext = new ConditionContext<>();
     this.fieldContext = new FieldContext<>();
     this.inputIdGetter = inputIdGetter;
   }
 
+  // spotless:off
+  /**
+   * Flushes cached context information for a specific input instance.
+   *
+   * <p>This method removes all cached field values and condition evaluation context associated
+   * with the specified input instance. This is typically called automatically after evaluation
+   * to prevent memory leaks, but can also be used manually for fine-grained context management.
+   *
+   * <p><strong>What gets flushed:</strong>
+   * <ul>
+   *   <li>All field values cached for this input ID</li>
+   *   <li>All condition evaluation results for this input ID</li>
+   *   <li>Associated metadata and timing information</li>
+   * </ul>
+   *
+   * <p><strong>Usage Example:</strong>
+   * <pre>{@code
+   * // Evaluate multiple people
+   * Map<String, Boolean> results1 = engine.evaluate(person1);
+   * Map<String, Boolean> results2 = engine.evaluate(person2);
+   * 
+   * // Context for person1 and person2 is automatically flushed after each evaluation
+   * 
+   * // Manual flush for specific person (advanced usage)
+   * contextService.flush(person1);  // Only person1's context is cleared
+   * }</pre>
+   *
+   * @param input the input instance whose context should be flushed
+   */
+  // spotless:on
   public void flush(TInput input) {
     List<ConditionContextKey<TInputId>> conditionContextKeysToRemove =
         conditionEvaluationContext.getConditionContextMap().keySet().stream()
@@ -76,6 +116,45 @@ public class EngineContextService<TInput, TInputId> {
     fieldContextKeysToRemove.forEach(fieldContext.getFieldContextMap()::remove);
   }
 
+  // spotless:off
+  /**
+   * Clears all cached context information for all input instances.
+   *
+   * <p>This method provides a complete reset of the context service, removing all cached field
+   * values and condition evaluation context for every input instance that has been processed.
+   * Use this method when you need to completely clear the context state.
+   *
+   * <p><strong>When to use:</strong>
+   * <ul>
+   *   <li>Between different evaluation sessions</li>
+   *   <li>When switching to evaluate a completely different set of inputs</li>
+   *   <li>For memory cleanup in long-running applications</li>
+   *   <li>During testing to ensure clean state between test cases</li>
+   * </ul>
+   *
+   * <p><strong>Performance Note:</strong>
+   * Clearing all context will require field values to be re-extracted on the next evaluation,
+   * which may temporarily impact performance until the cache is rebuilt.
+   *
+   * <p><strong>Usage Example:</strong>
+   * <pre>{@code
+   * // Process a batch of evaluations
+   * for (Person person : largeBatch) {
+   *     Map<String, Boolean> results = engine.evaluate(person);
+   *     processResults(results);
+   * }
+   * 
+   * // Clear all context before processing next batch
+   * contextService.flushAll();
+   * 
+   * // Process next batch with clean context
+   * for (Person person : nextBatch) {
+   *     Map<String, Boolean> results = engine.evaluate(person);
+   *     processResults(results);
+   * }
+   * }</pre>
+   */
+  // spotless:on
   public void flushAll() {
     // Clear the condition evaluation context to reset state for the next evaluation
     conditionEvaluationContext.getConditionContextMap().clear();
