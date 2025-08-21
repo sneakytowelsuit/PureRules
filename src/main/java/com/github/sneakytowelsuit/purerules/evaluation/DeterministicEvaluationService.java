@@ -121,14 +121,14 @@ public class DeterministicEvaluationService<TInput, TInputId>
     }
 
     ruleGroup.getConditions().stream()
-    .forEach(
-      condition -> {
-        switch (condition) {
-          case Rule<TInput, ?> rule -> traceRule(input, rule, engineContextService);
-          case RuleGroup<TInput> nestedRuleGroup ->
-              traceRuleGroup(input, nestedRuleGroup, engineContextService);
-        }
-      });
+        .forEach(
+            condition -> {
+              switch (condition) {
+                case Rule<TInput, ?> rule -> traceRule(input, rule, engineContextService);
+                case RuleGroup<TInput> nestedRuleGroup ->
+                    traceRuleGroup(input, nestedRuleGroup, engineContextService);
+              }
+            });
     // After all conditions are traced, update parent RuleGroup context
     ConditionContextKey<TInputId> ruleGroupConditionKey =
         new ConditionContextKey<>(

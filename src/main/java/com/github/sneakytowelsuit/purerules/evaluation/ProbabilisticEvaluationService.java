@@ -243,7 +243,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
         case RuleGroup<TInput> nestedGroup -> {
           // Recursively evaluate nested group
           evaluateRuleGroup(
-                  input, (RuleGroup<TInput>) nestedGroup, engineContextService, minProbability);
+              input, (RuleGroup<TInput>) nestedGroup, engineContextService, minProbability);
           // Retrieve the nested group's actual result and maximumResult from its context
           ConditionContextValue ctx =
               engineContextService
@@ -269,7 +269,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
     // Apply combinator-specific logic for probabilistic evaluation
     int finalTotalResult = 0;
     int finalTotalWeight = totalWeight.get();
-    
+
     switch (ruleGroup.getCombinator()) {
       case OR -> {
         // For OR: if any condition passes, group gets full possible weight
@@ -316,14 +316,11 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
    *
    * @param <V> the type of value that the rule operates on
    * @param input the input data to evaluate
-   * @param rule the rule to evaluate
-  /**
-   * Evaluates an empty rule group based on its bias setting and inversion flag.
-   *
-   * <p>Empty rule groups have no conditions to evaluate, so their result is determined entirely by
-   * their bias configuration. Since there are no conditions to contribute weight, the maximum
-   * result is set to 0.
-   *
+   * @param rule the rule to evaluate /** Evaluates an empty rule group based on its bias setting
+   *     and inversion flag.
+   *     <p>Empty rule groups have no conditions to evaluate, so their result is determined entirely
+   *     by their bias configuration. Since there are no conditions to contribute weight, the
+   *     maximum result is set to 0.
    * @param input the input data (used for context key generation)
    * @param ruleGroup the empty rule group to evaluate
    * @param engineContextService the context service for storing evaluation results
@@ -408,7 +405,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
     }
     int totalResult = 0;
     int totalWeight = 0;
-    
+
     for (Condition<TInput> condition : ruleGroup.getConditions()) {
       switch (condition) {
         case Rule<TInput, ?> rule -> {
@@ -424,14 +421,13 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
               .getConditionContextMap()
               .get(
                   new ConditionContextKey<>(
-                      engineContextService.getInputIdGetter().apply(input),
-                      condition.getId()));
+                      engineContextService.getInputIdGetter().apply(input), condition.getId()));
       if (ctx != null) {
         totalResult += ctx.getResult();
         totalWeight += ctx.getMaximumResult();
       }
     }
-    
+
     int groupWeight = ruleGroup.getWeight() != null ? ruleGroup.getWeight() : 1;
     int weightedTotalResult = totalResult * groupWeight;
     int weightedTotalWeight = totalWeight * groupWeight;
