@@ -322,17 +322,13 @@ public class RuleGroupSerde<InputType> {
   }
 
   private <T> T deserializeJsonNodeToValue(JsonNode jsonNode) {
-    JsonNode valueNode = jsonNode.get(RuleGroupJsonKeys.VALUE.getKey());
-    if (valueNode == null || !valueNode.isObject()) {
-      throw new RuleGroupDeserializationException("Invalid or missing 'value' in Rule JSON");
-    }
-    JsonNode valueClassNode = valueNode.get(RuleGroupJsonKeys.VALUE_CLASS.getKey());
-    JsonNode valueValueNode = valueNode.get(RuleGroupJsonKeys.VALUE_VALUE.getKey());
-    if (valueClassNode == null || !valueClassNode.isTextual() || valueValueNode == null) {
+    JsonNode datatypeNode = jsonNode.get(RuleGroupJsonKeys.DATATYPE.getKey());
+    JsonNode valueValueNode = jsonNode.get(RuleGroupJsonKeys.VALUE.getKey());
+    if (datatypeNode == null || !datatypeNode.isTextual() || valueValueNode == null) {
       throw new RuleGroupDeserializationException(
-          "Invalid or missing 'value' class or value in Rule JSON");
+          "Invalid or missing 'datatype' class or value in Rule JSON");
     }
-    String valueClassName = valueClassNode.asText();
+    String valueClassName = datatypeNode.asText();
     try {
       Class<?> clazz = Class.forName(valueClassName);
       return (T) MAPPER.convertValue(valueValueNode, clazz);
@@ -349,6 +345,7 @@ public class RuleGroupSerde<InputType> {
   private boolean isRule(JsonNode jsonNode) {
     return jsonNode.has(RuleGroupJsonKeys.FIELD.getKey())
         && jsonNode.has(RuleGroupJsonKeys.OPERATOR.getKey())
+        && jsonNode.has(RuleGroupJsonKeys.DATATYPE.getKey())
         && jsonNode.has(RuleGroupJsonKeys.VALUE.getKey());
   }
 

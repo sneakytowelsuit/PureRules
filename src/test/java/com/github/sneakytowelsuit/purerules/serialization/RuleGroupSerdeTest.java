@@ -75,10 +75,8 @@ class RuleGroupSerdeTest {
             + "    \"operator\": \""
             + operatorClass
             + "\","
-            + "    \"value\": {"
-            + "      \"class\": \"java.lang.String\","
+            + "    \"datatype\": \"java.lang.String\","
             + "      \"value\": \"test-value\""
-            + "    }"
             + "  }"
             + "]"
             + "}";
@@ -192,7 +190,8 @@ class RuleGroupSerdeTest {
             + "\"operator\": \""
             + operatorClass
             + "\","
-            + "\"value\": {\"class\": \"java.lang.String\", \"value\": \"foo\"}"
+            + "\"datatype\": \"java.lang.String\","
+            + "\"value\": \"foo\""
             + "}";
     Rule<String, ?> rule = serde.deserializeRule(json);
     assertNotNull(rule);
@@ -215,7 +214,8 @@ class RuleGroupSerdeTest {
             + "\"operator\": \""
             + operatorClass
             + "\","
-            + "\"value\": {\"class\": \"java.lang.String\", \"value\": \"foo\"}"
+            + "\"datatype\": \"java.lang.String\","
+            + "\"value\": \"foo\""
             + "},"
             + "{"
             + "\"field\": \""
@@ -224,7 +224,8 @@ class RuleGroupSerdeTest {
             + "\"operator\": \""
             + operatorClass
             + "\","
-            + "\"value\": {\"class\": \"java.lang.String\", \"value\": \"bar\"}"
+            + "\"datatype\": \"java.lang.String\","
+            + "\"value\": \"bar\""
             + "}"
             + "]";
     var rules = serde.deserializeRuleList(json);
@@ -246,7 +247,7 @@ class RuleGroupSerdeTest {
             + "\"operator\": \""
             + operatorClass
             + "\","
-            + "\"value\": {\"class\": \"java.lang.String\", \"value\": \"baz\"}"
+            + "\"datatype\": \"java.lang.String\", \"value\": \"baz\""
             + "}";
     var rules = serde.deserializeRuleList(json);
     assertEquals(1, rules.size());

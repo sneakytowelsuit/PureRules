@@ -34,8 +34,7 @@ class RuleSerializerTest {
     assertTrue(json.contains("\"field\":\"" + TestUtils.DummyField.class.getName() + "\""));
     assertTrue(
         json.contains("\"operator\":\"" + TestUtils.AlwaysTrueOperator.class.getName() + "\""));
-    assertTrue(json.contains("\"value\""));
-    assertTrue(json.contains("\"" + Integer.class.getName() + "\""));
+    assertTrue(json.contains("\"datatype\":\"" + Integer.class.getName() + "\""));
     assertTrue(json.contains("1234"));
   }
 

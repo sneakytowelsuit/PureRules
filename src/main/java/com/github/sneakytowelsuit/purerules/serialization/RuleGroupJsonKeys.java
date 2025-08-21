@@ -35,14 +35,11 @@ public enum RuleGroupJsonKeys {
   /** Value specification for rules. */
   VALUE("value"),
 
-  /** Class name for type information during deserialization. */
-  VALUE_CLASS("class"),
+  /** Class name for datatype of the field and value of a rule. */
+  DATATYPE("datatype"),
 
   /** Array of conditions within a rule group. */
   CONDITIONS("conditions"),
-
-  /** The actual value within a value specification. */
-  VALUE_VALUE("value"),
 
   /** Inversion flag for rule groups. */
   INVERTED("inverted"),
