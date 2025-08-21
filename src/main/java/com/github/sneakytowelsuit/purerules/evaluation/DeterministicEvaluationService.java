@@ -42,6 +42,41 @@ public class DeterministicEvaluationService<TInput, TInputId>
   /**
    * Creates a new deterministic evaluation service with the specified conditions.
    *
+   * <p>The deterministic evaluation service processes conditions using strict boolean logic,
+   * where each condition must either completely pass or completely fail. There is no partial
+   * matching or confidence scoring.
+   *
+   * <p><strong>Evaluation Behavior:</strong>
+   * <ul>
+   *   <li><strong>Rules:</strong> Must exactly match field values using their operators</li>
+   *   <li><strong>Rule Groups (AND):</strong> All child conditions must pass</li>
+   *   <li><strong>Rule Groups (OR):</strong> At least one child condition must pass</li>
+   *   <li><strong>Inverted Groups:</strong> Result is negated after combinator logic</li>
+   *   <li><strong>Empty Groups:</strong> Result determined by bias setting</li>
+   * </ul>
+   *
+   * <p><strong>Weight Handling:</strong>
+   * In deterministic mode, condition weights are completely ignored. Only the logical
+   * structure and boolean results matter.
+   *
+   * <p><strong>Example:</strong>
+   * <pre>{@code
+   * List<Condition<Person>> businessRules = Arrays.asList(
+   *     Rule.<Person, Integer>builder()
+   *         .field(new AgeField())
+   *         .operator(new GreaterThanOperator<>())
+   *         .value(18)
+   *         .build(),
+   *     RuleGroup.<Person>builder()
+   *         .combinator(Combinator.AND)
+   *         .conditions(locationRules)
+   *         .build()
+   * );
+   * 
+   * DeterministicEvaluationService<Person, String> service = 
+   *     new DeterministicEvaluationService<>(businessRules);
+   * }</pre>
+   *
    * @param conditions the list of conditions (rules and rule groups) to evaluate
    */
   public DeterministicEvaluationService(final List<Condition<TInput>> conditions) {
@@ -51,12 +86,35 @@ public class DeterministicEvaluationService<TInput, TInputId>
   /**
    * Evaluates all configured conditions against the input using deterministic boolean logic.
    *
-   * <p>Each condition is evaluated independently and the results are collected into a map. The
-   * evaluation maintains context information including field values and intermediate results.
+   * <p>Each condition is evaluated independently using strict boolean logic and the results are
+   * collected into a map. The evaluation process:
+   * <ol>
+   *   <li>Processes each condition in the configured list</li>
+   *   <li>For rules: extracts field value, applies operator, returns boolean result</li>
+   *   <li>For rule groups: recursively evaluates child conditions and applies combinator logic</li>
+   *   <li>Stores evaluation context for debugging and performance analysis</li>
+   *   <li>Returns a map linking condition IDs to their boolean results</li>
+   * </ol>
    *
-   * @param input the input data to evaluate
-   * @param engineContextService the context service for caching and state management
-   * @return a map of condition IDs to their boolean evaluation results
+   * <p><strong>Result Interpretation:</strong>
+   * <pre>{@code
+   * Map<String, Boolean> results = service.evaluate(person, contextService);
+   * 
+   * // Check individual rule results
+   * Boolean ageCheckPassed = results.get("age-rule-id");
+   * Boolean locationGroupPassed = results.get("location-group-id");
+   * 
+   * // All conditions must pass for overall approval
+   * boolean overallApproval = results.values().stream()
+   *     .allMatch(Boolean::booleanValue);
+   * }</pre>
+   *
+   * <p>The evaluation maintains context information including field values and intermediate
+   * results, which can be accessed through the context service for debugging purposes.
+   *
+   * @param input the input data to evaluate against all configured conditions
+   * @param engineContextService the context service for field value caching and state management
+   * @return a map where keys are condition IDs and values are their boolean evaluation results
    */
   @Override
   public Map<String, Boolean> evaluate(
@@ -68,6 +126,42 @@ public class DeterministicEvaluationService<TInput, TInputId>
                 condition -> evaluationConditions(input, condition, engineContextService)));
   }
 
+  /**
+   * Traces the evaluation process for all configured conditions without returning results.
+   *
+   * <p>This method performs the same evaluation logic as {@link #evaluate} but focuses on
+   * populating the evaluation context for debugging and analysis purposes. It's useful for:
+   * <ul>
+   *   <li>Understanding why certain conditions passed or failed</li>
+   *   <li>Analyzing field value extraction and caching behavior</li>
+   *   <li>Performance profiling of rule evaluation</li>
+   *   <li>Debugging complex rule group logic</li>
+   * </ul>
+   *
+   * <p><strong>Usage Example:</strong>
+   * <pre>{@code
+   * // Trace evaluation for debugging
+   * service.trace(person, contextService);
+   * 
+   * // Examine context for specific conditions
+   * ConditionContext<String> conditionContext = 
+   *     contextService.getConditionEvaluationContext();
+   *     
+   * // Access detailed evaluation information
+   * ConditionContextKey<String> key = 
+   *     new ConditionContextKey<>(person.getId(), ageRule);
+   * RuleContextValue ruleContext = (RuleContextValue) 
+   *     conditionContext.getConditionContextMap().get(key);
+   *     
+   * if (ruleContext != null) {
+   *     System.out.println("Field extracted: " + ruleContext.getFieldValue());
+   *     System.out.println("Operator result: " + ruleContext.getOperatorResult());
+   * }
+   * }</pre>
+   *
+   * @param input the input data to trace evaluation for
+   * @param engineContextService the context service for storing trace information
+   */
   @Override
   public void trace(TInput input, EngineContextService<TInput, TInputId> engineContextService) {
     conditions.forEach(condition -> traceCondition(input, condition, engineContextService));
