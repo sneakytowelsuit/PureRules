@@ -7,12 +7,30 @@ package com.github.sneakytowelsuit.purerules.conditions;
  * conditions (rules or nested rule groups):
  *
  * <ul>
- *   <li>{@link #AND}: All conditions must evaluate to true for the group to pass
- *   <li>{@link #OR}: At least one condition must evaluate to true for the group to pass
+ *   <li>{@link #AND}: All conditions must evaluate to true for the group to pass</li>
+ *   <li>{@link #OR}: At least one condition must evaluate to true for the group to pass</li>
  * </ul>
  *
  * <p>The combinator works in conjunction with the group's inversion flag - the combined result can
  * be inverted after applying the combinator logic.
+ *
+ * <p><strong>Examples:</strong>
+ * <pre>{@code
+ * // AND: person must be both adult AND US citizen
+ * RuleGroup<Person> adultUSCitizen = RuleGroup.<Person>builder()
+ *     .combinator(Combinator.AND)
+ *     .conditions(Arrays.asList(ageRule, citizenshipRule))
+ *     .build();
+ *
+ * // OR: person can be either veteran OR senior citizen  
+ * RuleGroup<Person> veteranOrSenior = RuleGroup.<Person>builder()
+ *     .combinator(Combinator.OR)
+ *     .conditions(Arrays.asList(veteranRule, seniorRule))
+ *     .build();
+ * }</pre>
+ *
+ * @see RuleGroup
+ * @see Bias
  */
 public enum Combinator {
   /**
