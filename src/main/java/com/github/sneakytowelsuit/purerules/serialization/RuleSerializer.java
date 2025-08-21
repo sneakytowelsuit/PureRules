@@ -39,7 +39,6 @@ public class RuleSerializer extends StdSerializer<Rule<?, ?>> {
       if (value.getValue() == null) {
         throw new NullPointerException("Value cannot be null");
       }
-      gen.writeFieldName(RuleGroupJsonKeys.VALUE.getKey());
       gen.writeStringField(
           RuleGroupJsonKeys.DATATYPE.getKey(), value.getValue().getClass().getName());
       gen.writePOJOField(RuleGroupJsonKeys.VALUE.getKey(), value.getValue());
