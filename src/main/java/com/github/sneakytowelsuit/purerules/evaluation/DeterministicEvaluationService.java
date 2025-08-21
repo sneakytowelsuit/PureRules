@@ -97,14 +97,11 @@ public class DeterministicEvaluationService<TInput, TInputId>
     V fieldValue = this.getFieldValue(input, rule, engineContextService);
     V valueValue = rule.getValue();
     boolean result = rule.getOperator().test(fieldValue, valueValue);
-    ConditionContextKey<TInputId> conditionContextKey =
-        new ConditionContextKey<>(
-            engineContextService.getInputIdGetter().apply(input), rule.getId());
     engineContextService
         .getConditionEvaluationContext()
         .getConditionContextMap()
         .put(
-            conditionContextKey,
+            contextKey,
             RuleContextValue.builder()
                 .id(rule.getId())
                 .result(result ? 1 : 0)
@@ -124,26 +121,14 @@ public class DeterministicEvaluationService<TInput, TInputId>
     }
 
     ruleGroup.getConditions().stream()
-        .sorted(
-            (c1, c2) -> {
-              if (c1 instanceof Rule && c2 instanceof Rule) {
-                return 0; // Both are rules, no specific order
-              } else if (c1 instanceof RuleGroup && c2 instanceof RuleGroup) {
-                return 0; // Both are rule groups, no specific order
-              } else if (c1 instanceof Rule) {
-                return -1; // Rule comes before RuleGroup
-              } else {
-                return 1; // RuleGroup comes after Rule
-              }
-            })
-        .forEach(
-            condition -> {
-              switch (condition) {
-                case Rule<TInput, ?> rule -> traceRule(input, rule, engineContextService);
-                case RuleGroup<TInput> nestedRuleGroup ->
-                    traceRuleGroup(input, nestedRuleGroup, engineContextService);
-              }
-            });
+    .forEach(
+      condition -> {
+        switch (condition) {
+          case Rule<TInput, ?> rule -> traceRule(input, rule, engineContextService);
+          case RuleGroup<TInput> nestedRuleGroup ->
+              traceRuleGroup(input, nestedRuleGroup, engineContextService);
+        }
+      });
     // After all conditions are traced, update parent RuleGroup context
     ConditionContextKey<TInputId> ruleGroupConditionKey =
         new ConditionContextKey<>(
@@ -201,6 +186,8 @@ public class DeterministicEvaluationService<TInput, TInputId>
             conditionContextKey,
             RuleGroupContextValue.builder()
                 .bias(ruleGroup.getBias())
+                .maximumResult(0)
+                .id(ruleGroup.getId())
                 .result(result ? 1 : 0)
                 .combinator(ruleGroup.getCombinator())
                 .build());
