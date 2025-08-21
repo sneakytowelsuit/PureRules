@@ -10,7 +10,7 @@
  * </ul>
  *
  * <p>All evaluation services implement the {@link
- * com.github.sneakytowelsuit.purerules.evaluation.EvaluationService} interface and work with the
+ * com.github.sneakytowelsuit.purerules.evaluation.IEvaluationService} interface and work with the
  * {@link com.github.sneakytowelsuit.purerules.context.EngineContextService} to manage field value
  * caching and evaluation state tracking.
  *
@@ -26,7 +26,7 @@
  * <p>Evaluation services are designed to be thread-safe and reusable across multiple evaluation
  * operations.
  *
- * @see com.github.sneakytowelsuit.purerules.evaluation.EvaluationService
+ * @see com.github.sneakytowelsuit.purerules.evaluation.IEvaluationService
  * @see com.github.sneakytowelsuit.purerules.evaluation.DeterministicEvaluationService
  * @see com.github.sneakytowelsuit.purerules.evaluation.ProbabilisticEvaluationService
  */

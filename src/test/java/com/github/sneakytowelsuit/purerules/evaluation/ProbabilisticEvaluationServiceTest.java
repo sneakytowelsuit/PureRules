@@ -235,4 +235,199 @@ class ProbabilisticEvaluationServiceTest {
     System.out.println("testComplexRuleGroupTree result: " + result);
     assertTrue(result.get(rootGroup.getId()));
   }
+
+  @Test
+  void testTraceUpdatesContextWeightedRule() {
+    Rule<TestHelpers.Something, String> rule =
+        Rule.<TestHelpers.Something, String>builder()
+            .field(new TestHelpers.SomethingNameField())
+            .operator(new TestHelpers.StringEqualsCaseInsensitiveOperator())
+            .value("Alice")
+            .weight(3)
+            .build();
+    ProbabilisticEvaluationService<TestHelpers.Something, Integer> service =
+        new ProbabilisticEvaluationService<>(List.of(rule), 0.0f);
+    TestHelpers.Something alice = new TestHelpers.Something(1, "Alice");
+    TestHelpers.Something bob = new TestHelpers.Something(2, "Bob");
+    EngineContextService<TestHelpers.Something, Integer> ctx =
+        new EngineContextService<>(TestHelpers.Something::getId);
+    service.trace(alice, ctx);
+    service.trace(bob, ctx);
+    var contextMap = ctx.getConditionEvaluationContext().getConditionContextMap();
+    assertTrue(
+        contextMap.containsKey(
+            new com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey<>(
+                alice.getId(), rule.getId())));
+    assertEquals(
+        3,
+        contextMap
+            .get(
+                new com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey<>(
+                    alice.getId(), rule.getId()))
+            .getResult());
+    assertTrue(
+        contextMap.containsKey(
+            new com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey<>(
+                bob.getId(), rule.getId())));
+    assertEquals(
+        0,
+        contextMap
+            .get(
+                new com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey<>(
+                    bob.getId(), rule.getId()))
+            .getResult());
+  }
+
+  @Test
+  void testTraceUpdatesContextNestedGroups() {
+    Rule<TestHelpers.Something, String> ruleA =
+        Rule.<TestHelpers.Something, String>builder()
+            .field(new TestHelpers.SomethingNameField())
+            .operator(new TestHelpers.StringEqualsCaseInsensitiveOperator())
+            .value("Alice")
+            .weight(2)
+            .id("ruleA")
+            .build();
+    Rule<TestHelpers.Something, String> ruleB =
+        Rule.<TestHelpers.Something, String>builder()
+            .field(new TestHelpers.SomethingNameField())
+            .operator(new TestHelpers.StringEqualsCaseInsensitiveOperator())
+            .value("Bob")
+            .weight(1)
+            .id("ruleB")
+            .build();
+    RuleGroup<TestHelpers.Something> innerGroup =
+        RuleGroup.<TestHelpers.Something>builder()
+            .id("innerGroup")
+            .combinator(Combinator.OR)
+            .weight(2)
+            .conditions(List.of(ruleA, ruleB))
+            .build();
+    Rule<TestHelpers.Something, String> ruleC =
+        Rule.<TestHelpers.Something, String>builder()
+            .field(new TestHelpers.SomethingNameField())
+            .operator(new TestHelpers.StringEqualsCaseInsensitiveOperator())
+            .value("Charlie")
+            .weight(1)
+            .id("ruleC")
+            .build();
+    RuleGroup<TestHelpers.Something> outerGroup =
+        RuleGroup.<TestHelpers.Something>builder()
+            .id("outerGroup")
+            .combinator(Combinator.AND)
+            .weight(1)
+            .conditions(List.of(innerGroup, ruleC))
+            .build();
+    ProbabilisticEvaluationService<TestHelpers.Something, Integer> service =
+        new ProbabilisticEvaluationService<>(List.of(outerGroup), 0.0f);
+    TestHelpers.Something alice = new TestHelpers.Something(1, "Alice");
+    TestHelpers.Something charlie = new TestHelpers.Something(3, "Charlie");
+    EngineContextService<TestHelpers.Something, Integer> ctx =
+        new EngineContextService<>(TestHelpers.Something::getId);
+    service.trace(alice, ctx);
+    service.trace(charlie, ctx);
+    var contextMap = ctx.getConditionEvaluationContext().getConditionContextMap();
+    // Alice: ruleA matches (2), ruleB (0), innerGroup = (2+0)*2=4, ruleC (0), outerGroup =
+    // (4+0)*1=0, max: (2+1)*2=6, outer max=(6+1)*1=7
+    assertEquals(
+        2,
+        contextMap
+            .get(
+                new com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey<>(
+                    alice.getId(), "ruleA"))
+            .getResult());
+    assertEquals(
+        0,
+        contextMap
+            .get(
+                new com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey<>(
+                    alice.getId(), "ruleB"))
+            .getResult());
+    assertEquals(
+        4,
+        contextMap
+            .get(
+                new com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey<>(
+                    alice.getId(), "innerGroup"))
+            .getResult());
+    assertEquals(
+        6,
+        contextMap
+            .get(
+                new com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey<>(
+                    alice.getId(), "innerGroup"))
+            .getMaximumResult());
+    assertEquals(
+        0,
+        contextMap
+            .get(
+                new com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey<>(
+                    alice.getId(), "ruleC"))
+            .getResult());
+    assertEquals(
+        4,
+        contextMap
+            .get(
+                new com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey<>(
+                    alice.getId(), "outerGroup"))
+            .getResult());
+    assertEquals(
+        7,
+        contextMap
+            .get(
+                new com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey<>(
+                    alice.getId(), "outerGroup"))
+            .getMaximumResult());
+    // Charlie: ruleA (0), ruleB (0), innerGroup (0), ruleC (1), outerGroup (0+1)*1=1, max:
+    // (2+1)*2=6, outer max=(6+1)*1=7
+    assertEquals(
+        0,
+        contextMap
+            .get(
+                new com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey<>(
+                    charlie.getId(), "ruleA"))
+            .getResult());
+    assertEquals(
+        0,
+        contextMap
+            .get(
+                new com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey<>(
+                    charlie.getId(), "ruleB"))
+            .getResult());
+    assertEquals(
+        0,
+        contextMap
+            .get(
+                new com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey<>(
+                    charlie.getId(), "innerGroup"))
+            .getResult());
+    assertEquals(
+        6,
+        contextMap
+            .get(
+                new com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey<>(
+                    charlie.getId(), "innerGroup"))
+            .getMaximumResult());
+    assertEquals(
+        1,
+        contextMap
+            .get(
+                new com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey<>(
+                    charlie.getId(), "ruleC"))
+            .getResult());
+    assertEquals(
+        1,
+        contextMap
+            .get(
+                new com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey<>(
+                    charlie.getId(), "outerGroup"))
+            .getResult());
+    assertEquals(
+        7,
+        contextMap
+            .get(
+                new com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKey<>(
+                    charlie.getId(), "outerGroup"))
+            .getMaximumResult());
+  }
 }

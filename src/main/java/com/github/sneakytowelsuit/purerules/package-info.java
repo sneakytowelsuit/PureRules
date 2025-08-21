@@ -32,6 +32,6 @@
  *
  * @see com.github.sneakytowelsuit.purerules.engine.PureRulesEngine
  * @see com.github.sneakytowelsuit.purerules.conditions.RuleGroup
- * @see com.github.sneakytowelsuit.purerules.evaluation.EvaluationService
+ * @see com.github.sneakytowelsuit.purerules.evaluation.IEvaluationService
  */
 package com.github.sneakytowelsuit.purerules;

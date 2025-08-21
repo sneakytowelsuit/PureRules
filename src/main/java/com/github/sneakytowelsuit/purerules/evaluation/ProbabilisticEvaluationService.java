@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
  * @param <TInputId> the type used to uniquely identify input instances
  */
 public class ProbabilisticEvaluationService<TInput, TInputId>
-    implements EvaluationService<TInput, TInputId> {
+    implements IEvaluationService<TInput, TInputId> {
   /**
    * The minimum probability threshold for considering a condition as passing. This is applied at
    * the root of each condition in the list of conditions provided
@@ -159,7 +159,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
             new ConditionContextKey<>(
                 engineContextService.getInputIdGetter().apply(input), rule.getId()),
             RuleContextValue.builder()
-                .ruleId(rule.getId())
+                .id(rule.getId())
                 .operator(rule.getOperator().getClass().getName())
                 .result(result ? 1 : 0)
                 // Rules are weighed based solely on their weight since they are leaf nodes
@@ -227,17 +227,23 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
 
     AtomicInteger totalResult = new AtomicInteger(0);
     AtomicInteger totalWeight = new AtomicInteger(0);
+    AtomicInteger passingConditions = new AtomicInteger(0);
 
     for (Condition<TInput> condition : ruleGroup.getConditions()) {
       switch (condition) {
         case Rule<TInput, ?> rule -> {
-          evaluateRuleGroupRule(input, rule, engineContextService, totalResult, totalWeight);
+          boolean ruleResult = evaluateRule(input, rule, engineContextService);
+          int ruleWeight = rule.getWeight();
+          totalWeight.addAndGet(ruleWeight);
+          if (ruleResult) {
+            totalResult.addAndGet(ruleWeight);
+            passingConditions.incrementAndGet();
+          }
         }
         case RuleGroup<TInput> nestedGroup -> {
           // Recursively evaluate nested group
-          boolean nestedResult =
-              evaluateRuleGroup(
-                  input, (RuleGroup<TInput>) nestedGroup, engineContextService, minProbability);
+          evaluateRuleGroup(
+              input, (RuleGroup<TInput>) nestedGroup, engineContextService, minProbability);
           // Retrieve the nested group's actual result and maximumResult from its context
           ConditionContextValue ctx =
               engineContextService
@@ -253,16 +259,32 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
           }
           totalWeight.addAndGet(nestedCtx.getMaximumResult());
           totalResult.addAndGet(nestedCtx.getResult());
+          if (nestedCtx.getResult() > 0) {
+            passingConditions.incrementAndGet();
+          }
         }
       }
     }
 
-    if (totalWeight.get() == 0) {
-      totalResult.set(0);
+    // Apply combinator-specific logic for probabilistic evaluation
+    int finalTotalResult = 0;
+    int finalTotalWeight = totalWeight.get();
+
+    switch (ruleGroup.getCombinator()) {
+      case OR -> {
+        // For OR: if any condition passes, group gets full possible weight
+        finalTotalResult = passingConditions.get() > 0 ? finalTotalWeight : 0;
+      }
+      case AND -> {
+        // For AND in probabilistic mode: if any meaningful contribution exists, give full credit
+        // This makes probabilistic evaluation more generous than deterministic evaluation
+        finalTotalResult = totalResult.get() > 0 ? finalTotalWeight : 0;
+      }
     }
 
-    int finalTotalResult = totalResult.get();
-    int finalTotalWeight = totalWeight.get();
+    if (finalTotalWeight == 0) {
+      finalTotalResult = 0;
+    }
     // Apply RuleGroup weight to totalResult and totalWeight
     int groupWeight = ruleGroup.getWeight() != null ? ruleGroup.getWeight() : 1;
     int weightedTotalResult = finalTotalResult * groupWeight;
@@ -294,48 +316,11 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
    *
    * @param <V> the type of value that the rule operates on
    * @param input the input data to evaluate
-   * @param rule the rule to evaluate
-   * @param engineContextService the context service for accessing evaluation results
-   * @param totalResult accumulator for the weighted sum of passing conditions
-   * @param totalWeight accumulator for the total possible weight
-   */
-  private <V> void evaluateRuleGroupRule(
-      TInput input,
-      Rule<TInput, V> rule,
-      EngineContextService<TInput, TInputId> engineContextService,
-      AtomicInteger totalResult,
-      AtomicInteger totalWeight) {
-    evaluateRule(input, rule, engineContextService);
-    ConditionContextValue ctx =
-        engineContextService
-            .getConditionEvaluationContext()
-            .getConditionContextMap()
-            .get(
-                new ConditionContextKey<>(
-                    engineContextService.getInputIdGetter().apply(input), rule.getId()));
-    if (ctx == null) {
-      throw new IllegalStateException("Condition context not found for rule: " + rule.getId());
-    }
-    switch (ctx) {
-      case RuleContextValue<?> ruleContextValue -> {
-        int ruleWeight = rule.getWeight();
-        totalWeight.addAndGet(ruleWeight);
-        totalResult.addAndGet(ctx.getResult() == 1 ? ruleWeight : 0);
-      }
-      case RuleGroupContextValue ruleGroupContextValue -> {
-        throw new IllegalStateException(
-            "Expected RuleContextValue but got RuleGroupContextValue for rule: " + rule.getId());
-      }
-    }
-  }
-
-  /**
-   * Evaluates an empty rule group based on its bias setting and inversion flag.
-   *
-   * <p>Empty rule groups have no conditions to evaluate, so their result is determined entirely by
-   * their bias configuration. Since there are no conditions to contribute weight, the maximum
-   * result is set to 0.
-   *
+   * @param rule the rule to evaluate /** Evaluates an empty rule group based on its bias setting
+   *     and inversion flag.
+   *     <p>Empty rule groups have no conditions to evaluate, so their result is determined entirely
+   *     by their bias configuration. Since there are no conditions to contribute weight, the
+   *     maximum result is set to 0.
    * @param input the input data (used for context key generation)
    * @param ruleGroup the empty rule group to evaluate
    * @param engineContextService the context service for storing evaluation results
@@ -364,5 +349,121 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
                     .maximumResult(0)
                     .build())
         .getResult();
+  }
+
+  @Override
+  public void trace(TInput input, EngineContextService<TInput, TInputId> engineContextService) {
+    for (Condition<TInput> condition : this.conditions) {
+      traceCondition(input, condition, engineContextService);
+    }
+  }
+
+  private void traceCondition(
+      TInput input,
+      Condition<TInput> condition,
+      EngineContextService<TInput, TInputId> engineContextService) {
+    switch (condition) {
+      case Rule<TInput, ?> rule -> traceRule(input, rule, engineContextService);
+      case RuleGroup<TInput> ruleGroup -> traceRuleGroup(input, ruleGroup, engineContextService);
+    }
+  }
+
+  private <V> void traceRule(
+      TInput input,
+      Rule<TInput, V> rule,
+      EngineContextService<TInput, TInputId> engineContextService) {
+    assert rule.getField() != null;
+    assert rule.getOperator() != null;
+    assert rule.getValue() != null;
+    V fieldValue = this.getFieldValue(input, rule, engineContextService);
+    V ruleValue = rule.getValue();
+    boolean result = rule.getOperator().test(fieldValue, ruleValue);
+    int weightedResult = (result ? 1 : 0) * rule.getWeight();
+    engineContextService
+        .getConditionEvaluationContext()
+        .getConditionContextMap()
+        .put(
+            new ConditionContextKey<>(
+                engineContextService.getInputIdGetter().apply(input), rule.getId()),
+            RuleContextValue.builder()
+                .id(rule.getId())
+                .operator(rule.getOperator().getClass().getName())
+                .result(weightedResult)
+                .maximumResult(rule.getWeight())
+                .fieldValue(fieldValue)
+                .valueValue(ruleValue)
+                .build());
+  }
+
+  private void traceRuleGroup(
+      TInput input,
+      RuleGroup<TInput> ruleGroup,
+      EngineContextService<TInput, TInputId> engineContextService) {
+    if (ruleGroup.getConditions().isEmpty()) {
+      traceEmptyRuleGroup(input, ruleGroup, engineContextService);
+      return;
+    }
+    int totalResult = 0;
+    int totalWeight = 0;
+
+    for (Condition<TInput> condition : ruleGroup.getConditions()) {
+      switch (condition) {
+        case Rule<TInput, ?> rule -> {
+          traceRule(input, rule, engineContextService);
+        }
+        case RuleGroup<TInput> nestedGroup -> {
+          traceRuleGroup(input, nestedGroup, engineContextService);
+        }
+      }
+      ConditionContextValue ctx =
+          engineContextService
+              .getConditionEvaluationContext()
+              .getConditionContextMap()
+              .get(
+                  new ConditionContextKey<>(
+                      engineContextService.getInputIdGetter().apply(input), condition.getId()));
+      if (ctx != null) {
+        totalResult += ctx.getResult();
+        totalWeight += ctx.getMaximumResult();
+      }
+    }
+
+    int groupWeight = ruleGroup.getWeight() != null ? ruleGroup.getWeight() : 1;
+    int weightedTotalResult = totalResult * groupWeight;
+    int weightedTotalWeight = totalWeight * groupWeight;
+    engineContextService
+        .getConditionEvaluationContext()
+        .getConditionContextMap()
+        .put(
+            new ConditionContextKey<>(
+                engineContextService.getInputIdGetter().apply(input), ruleGroup.getId()),
+            RuleGroupContextValue.builder()
+                .id(ruleGroup.getId())
+                .bias(ruleGroup.getBias())
+                .result(weightedTotalResult)
+                .combinator(ruleGroup.getCombinator())
+                .maximumResult(weightedTotalWeight)
+                .build());
+  }
+
+  private void traceEmptyRuleGroup(
+      TInput input,
+      RuleGroup<TInput> ruleGroup,
+      EngineContextService<TInput, TInputId> engineContextService) {
+    ConditionContextKey<TInputId> conditionContextKey =
+        new ConditionContextKey<>(
+            engineContextService.getInputIdGetter().apply(input), ruleGroup.getId());
+    int result = ruleGroup.getBias().isBiasResult() ^ ruleGroup.isInverted() ? 1 : 0;
+    engineContextService
+        .getConditionEvaluationContext()
+        .getConditionContextMap()
+        .put(
+            conditionContextKey,
+            RuleGroupContextValue.builder()
+                .bias(ruleGroup.getBias())
+                .result(result)
+                .combinator(ruleGroup.getCombinator())
+                .maximumResult(0)
+                .build());
   }
 }
