@@ -1,3 +1,4 @@
+// spotless:off
 /**
  * Context management for evaluation state tracking and field value caching.
  *
@@ -84,4 +85,5 @@
  * @see com.github.sneakytowelsuit.purerules.context.field
  * @see com.github.sneakytowelsuit.purerules.context.condition
  */
+// spotless:on
 package com.github.sneakytowelsuit.purerules.context;

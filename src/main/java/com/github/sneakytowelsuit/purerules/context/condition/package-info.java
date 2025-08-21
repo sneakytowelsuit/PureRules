@@ -1,3 +1,4 @@
+// spotless:off
 /**
  * Condition evaluation result tracking for debugging and analysis.
  *
@@ -111,4 +112,5 @@
  * @see com.github.sneakytowelsuit.purerules.conditions.Condition
  * @see com.github.sneakytowelsuit.purerules.evaluation.IEvaluationService
  */
+// spotless:on
 package com.github.sneakytowelsuit.purerules.context.condition;

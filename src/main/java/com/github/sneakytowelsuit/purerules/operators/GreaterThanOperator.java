@@ -2,6 +2,7 @@ package com.github.sneakytowelsuit.purerules.operators;
 
 import com.github.sneakytowelsuit.purerules.conditions.Operator;
 
+// spotless:off
 /**
  * An operator that tests whether the input value is greater than the comparison value.
  *
@@ -50,8 +51,10 @@ import com.github.sneakytowelsuit.purerules.conditions.Operator;
  * @see EqualsOperator
  * @see Comparable
  */
+// spotless:on
 public class GreaterThanOperator<T extends Comparable<T>> implements Operator<T> {
 
+  // spotless:off
   /**
    * Tests whether the input value is greater than the comparison value.
    *
@@ -59,6 +62,7 @@ public class GreaterThanOperator<T extends Comparable<T>> implements Operator<T>
    * @param value the target value to compare against
    * @return true if input is greater than value, false otherwise (including when either value is null)
    */
+  // spotless:on
   @Override
   public boolean test(T input, T value) {
     if (input == null || value == null) {

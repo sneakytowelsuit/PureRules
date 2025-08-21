@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 import lombok.*;
 
+// spotless:off
 /**
  * Represents a group of conditions (rules or nested rule groups) that are evaluated together using
  * a specified combinator (AND/OR), with optional inversion and bias. Each group is uniquely
@@ -181,6 +182,7 @@ import lombok.*;
  * @see Bias
  * @see com.github.sneakytowelsuit.purerules.engine.PureRulesEngine
  */
+// spotless:on
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -195,6 +197,8 @@ public final class RuleGroup<TInput> implements Condition<TInput> {
   @Builder.Default private final boolean isInverted = false;
   @Builder.Default private final Integer weight = 1;
 
+  // spotless:off
   /** Bias to use when the group contains no conditions. Defaults to EXCLUSIVE (pessimistic). */
+  // spotless:on
   @Builder.Default private final Bias bias = Bias.EXCLUSIVE;
 }

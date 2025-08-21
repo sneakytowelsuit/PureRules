@@ -1,3 +1,4 @@
+// spotless:off
 /**
  * Field value caching infrastructure for performance optimization.
  *
@@ -88,4 +89,5 @@
  * @see com.github.sneakytowelsuit.purerules.conditions.Field
  * @see com.github.sneakytowelsuit.purerules.evaluation.IEvaluationService
  */
+// spotless:on
 package com.github.sneakytowelsuit.purerules.context.field;

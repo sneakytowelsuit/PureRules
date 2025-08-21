@@ -2,6 +2,7 @@ package com.github.sneakytowelsuit.purerules.operators;
 
 import com.github.sneakytowelsuit.purerules.conditions.Operator;
 
+// spotless:off
 /**
  * An operator that tests whether a string ends with a specific suffix.
  *
@@ -23,8 +24,10 @@ import com.github.sneakytowelsuit.purerules.conditions.Operator;
  * <p>For case-insensitive suffix matching, consider using {@link
  * StringContainsCaseInsensitiveOperator} or converting both values to lowercase before comparison.
  */
+// spotless:on
 public class StringEndsWithOperator implements Operator<String> {
 
+  // spotless:off
   /**
    * Tests whether the input string ends with the comparison string.
    *
@@ -32,6 +35,7 @@ public class StringEndsWithOperator implements Operator<String> {
    * @param value the suffix to check for at the end of the input string
    * @return true if input ends with value, false otherwise (including when either value is null)
    */
+  // spotless:on
   @Override
   public boolean test(String input, String value) {
     if (input == null || value == null) {

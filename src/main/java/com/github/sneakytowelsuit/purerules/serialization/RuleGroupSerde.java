@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.Getter;
 
+// spotless:off
 /**
  * Provides JSON serialization and deserialization capabilities for {@link RuleGroup} instances.
  *
@@ -50,6 +51,7 @@ import lombok.Getter;
  *
  * @param <InputType> the type of input data that the rules will be evaluated against
  */
+// spotless:on
 public class RuleGroupSerde<InputType> {
   private final ObjectMapper MAPPER =
       new ObjectMapper()

@@ -1,5 +1,6 @@
 package com.github.sneakytowelsuit.purerules.conditions;
 
+// spotless:off
 /**
  * Defines how multiple conditions within a {@link RuleGroup} are logically combined.
  *
@@ -32,16 +33,21 @@ package com.github.sneakytowelsuit.purerules.conditions;
  * @see RuleGroup
  * @see Bias
  */
+// spotless:on
 public enum Combinator {
+  // spotless:off
   /**
    * AND combinator - requires all conditions in the group to evaluate to true. If any condition
    * fails, the entire group fails.
    */
+  // spotless:on
   AND,
 
+  // spotless:off
   /**
    * OR combinator - requires at least one condition in the group to evaluate to true. The group
    * succeeds if any condition passes.
    */
+  // spotless:on
   OR;
 }

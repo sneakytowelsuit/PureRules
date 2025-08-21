@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+// spotless:off
 /**
  * Implementation of {@link IEvaluationService} that performs probabilistic evaluation of rules and
  * conditions using weighted scoring and probability thresholds.
@@ -114,17 +115,23 @@ import java.util.stream.Collectors;
  * @see IEvaluationService
  * @see com.github.sneakytowelsuit.purerules.engine.PureRulesEngine#getProbabilisticEngine
  */
+// spotless:on
 public class ProbabilisticEvaluationService<TInput, TInputId>
     implements IEvaluationService<TInput, TInputId> {
+  // spotless:off
   /**
    * The minimum probability threshold for considering a condition as passing. This is applied at
    * the root of each condition in the list of conditions provided
    */
+  // spotless:on
   private final Float minimumProbability;
 
+  // spotless:off
   /** The list of conditions to evaluate against input data. */
+  // spotless:on
   private final List<Condition<TInput>> conditions;
 
+  // spotless:off
   /**
    * Creates a new probabilistic evaluation service with the specified conditions and minimum
    * probability threshold.
@@ -159,18 +166,21 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
    *     condition to be considered as passing. Values outside this range may produce
    *     unexpected results.
    */
+  // spotless:on
   public ProbabilisticEvaluationService(
       List<Condition<TInput>> conditions, Float minimumProbability) {
     this.conditions = conditions;
     this.minimumProbability = minimumProbability;
   }
 
+  // spotless:off
   /**
    * Validates and returns the minimum probability threshold.
    *
    * @return the validated minimum probability threshold
    * @throws IllegalArgumentException if the minimum probability is null or outside the range [0, 1]
    */
+  // spotless:on
   private Float getMinimumProbability() {
     if (this.minimumProbability == null
         || this.minimumProbability < 0f
@@ -180,6 +190,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
     return this.minimumProbability;
   }
 
+  // spotless:off
   /**
    * Evaluates all configured conditions against the input using probabilistic scoring.
    *
@@ -192,6 +203,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
    * @return a map of condition IDs to their boolean evaluation results (after threshold
    *     application)
    */
+  // spotless:on
   @Override
   public Map<String, Boolean> evaluate(
       TInput input, EngineContextService<TInput, TInputId> engineContextService) {
@@ -204,6 +216,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
                         input, condition, engineContextService, this.getMinimumProbability())));
   }
 
+  // spotless:off
   /**
    * Evaluates a single condition, dispatching to the appropriate evaluation method based on the
    * condition type.
@@ -214,6 +227,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
    * @param minProbability the minimum probability threshold for boolean conversion
    * @return the boolean result of the condition evaluation
    */
+  // spotless:on
   private boolean evaluateCondition(
       TInput input,
       Condition<TInput> condition,
@@ -226,6 +240,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
     };
   }
 
+  // spotless:off
   /**
    * Evaluates a single rule against the input and stores the result in the evaluation context.
    *
@@ -240,6 +255,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
    *     evaluation contexts
    * @return true if the rule evaluates to true, false otherwise
    */
+  // spotless:on
   private <V> boolean evaluateRule(
       TInput input,
       Rule<TInput, V> rule,
@@ -271,6 +287,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
     return result;
   }
 
+  // spotless:off
   /**
    * Extracts and caches the field value from the input for the specified rule.
    *
@@ -284,6 +301,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
    * @param engineContextService the context service for caching field values
    * @return the extracted field value
    */
+  // spotless:on
   private <V> V getFieldValue(
       TInput input,
       Rule<TInput, V> rule,
@@ -298,6 +316,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
                 _ignored -> rule.getField().getFieldValueFunction().apply(input));
   }
 
+  // spotless:off
   /**
    * Evaluates a rule group using probabilistic scoring with weighted contributions from member
    * conditions.
@@ -319,6 +338,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
    * @param minProbability the minimum probability threshold for boolean conversion
    * @return true if the calculated probability meets or exceeds the threshold, false otherwise
    */
+  // spotless:on
   private boolean evaluateRuleGroup(
       TInput input,
       RuleGroup<TInput> ruleGroup,
@@ -410,6 +430,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
     return score >= minProbability;
   }
 
+  // spotless:off
   /**
    * Evaluates a rule within the context of a rule group and accumulates its weighted contribution
    * to the group's total score.
@@ -429,6 +450,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
    * @param engineContextService the context service for storing evaluation results
    * @return 1 if the bias evaluation results in true, 0 otherwise
    */
+  // spotless:on
   private Integer evaluateEmptyRuleGroup(
       TInput input,
       RuleGroup<TInput> ruleGroup,

@@ -2,6 +2,7 @@ package com.github.sneakytowelsuit.purerules.operators;
 
 import com.github.sneakytowelsuit.purerules.conditions.Operator;
 
+// spotless:off
 /**
  * An operator that tests for equality between two values using their {@code equals} method.
  *
@@ -17,8 +18,10 @@ import com.github.sneakytowelsuit.purerules.conditions.Operator;
  *
  * @param <T> the type of values to compare
  */
+// spotless:on
 public class EqualsOperator<T> implements Operator<T> {
 
+  // spotless:off
   /**
    * Tests whether the input value equals the comparison value.
    *
@@ -26,6 +29,7 @@ public class EqualsOperator<T> implements Operator<T> {
    * @param value the target value to compare against
    * @return true if the values are equal (including both being null), false otherwise
    */
+  // spotless:on
   @Override
   public boolean test(T input, T value) {
     if (input == null && value == null) {

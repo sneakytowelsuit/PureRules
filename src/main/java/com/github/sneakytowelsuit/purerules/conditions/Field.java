@@ -2,6 +2,7 @@ package com.github.sneakytowelsuit.purerules.conditions;
 
 import java.util.function.Function;
 
+// spotless:off
 /**
  * Represents a field extractor that provides a function to extract a value of type {@code TValue}
  * from an input of type {@code TInput}. Used by rules to obtain the value to be compared.
@@ -74,7 +75,9 @@ import java.util.function.Function;
  * @see Rule
  * @see Operator
  */
+// spotless:on
 public interface Field<TInput, TValue> {
+  // spotless:off
   /**
    * Returns a function that extracts the field value from the input.
    *
@@ -111,5 +114,6 @@ public interface Field<TInput, TValue> {
    *
    * @return a function mapping input to the field value, should return null for invalid inputs
    */
+  // spotless:on
   Function<TInput, TValue> getFieldValueFunction();
 }

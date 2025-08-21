@@ -1,3 +1,4 @@
+// spotless:off
 /**
  * Core engine implementation and configuration for the PureRules engine.
  *
@@ -24,4 +25,5 @@
  *
  * @see com.github.sneakytowelsuit.purerules.engine.PureRulesEngine
  */
+// spotless:on
 package com.github.sneakytowelsuit.purerules.engine;

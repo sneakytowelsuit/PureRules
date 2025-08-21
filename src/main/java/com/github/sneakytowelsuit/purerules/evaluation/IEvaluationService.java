@@ -3,6 +3,7 @@ package com.github.sneakytowelsuit.purerules.evaluation;
 import com.github.sneakytowelsuit.purerules.context.EngineContextService;
 import java.util.Map;
 
+// spotless:off
 /**
  * Core evaluation service interface that defines how rules and conditions are processed against
  * input data in the PureRules engine.
@@ -23,8 +24,10 @@ import java.util.Map;
  * @param <TInput> the type of input data to be evaluated against the rules
  * @param <TInputId> the type used to uniquely identify input instances for context management
  */
+// spotless:on
 public interface IEvaluationService<TInput, TInputId> {
 
+  // spotless:off
   /**
    * Evaluates all configured conditions against the provided input and returns a map of condition
    * results.
@@ -38,9 +41,11 @@ public interface IEvaluationService<TInput, TInputId> {
    * @return a map where keys are condition IDs and values are boolean results indicating whether
    *     each condition was satisfied by the input
    */
+  // spotless:on
   public Map<String, Boolean> evaluate(
       TInput input, EngineContextService<TInput, TInputId> engineContextService);
 
+  // spotless:off
   /**
    * Traces the evaluation process for the given input, calculating the context and field values
    * without returning a result map. This method is useful for debugging or logging the evaluation
@@ -49,5 +54,6 @@ public interface IEvaluationService<TInput, TInputId> {
    * @param input the input data to trace the evaluation for
    * @param engineContextService the context service for managing field values and evaluation state
    */
+  // spotless:on
   public void trace(TInput input, EngineContextService<TInput, TInputId> engineContextService);
 }

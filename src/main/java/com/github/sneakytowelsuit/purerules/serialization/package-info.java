@@ -1,3 +1,4 @@
+// spotless:off
 /**
  * JSON serialization support for rules and rule groups.
  *
@@ -111,4 +112,5 @@
  * @see com.github.sneakytowelsuit.purerules.conditions.RuleGroup
  * @see com.github.sneakytowelsuit.purerules.exceptions
  */
+// spotless:on
 package com.github.sneakytowelsuit.purerules.serialization;

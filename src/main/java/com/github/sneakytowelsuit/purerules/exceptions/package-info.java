@@ -1,3 +1,4 @@
+// spotless:off
 /**
  * Exception types for error handling throughout the PureRules engine.
  *
@@ -43,4 +44,5 @@
  * @see com.github.sneakytowelsuit.purerules.serialization
  * @see com.github.sneakytowelsuit.purerules.engine.PureRulesEngine
  */
+// spotless:on
 package com.github.sneakytowelsuit.purerules.exceptions;

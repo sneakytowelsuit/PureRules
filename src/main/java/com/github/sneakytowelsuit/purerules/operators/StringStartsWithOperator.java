@@ -2,6 +2,7 @@ package com.github.sneakytowelsuit.purerules.operators;
 
 import com.github.sneakytowelsuit.purerules.conditions.Operator;
 
+// spotless:off
 /**
  * An operator that tests whether a string starts with a specific prefix.
  *
@@ -23,8 +24,10 @@ import com.github.sneakytowelsuit.purerules.conditions.Operator;
  * <p>For case-insensitive prefix matching, consider using {@link
  * StringContainsCaseInsensitiveOperator} or converting both values to lowercase before comparison.
  */
+// spotless:on
 public class StringStartsWithOperator implements Operator<String> {
 
+  // spotless:off
   /**
    * Tests whether the input string starts with the comparison string.
    *
@@ -32,6 +35,7 @@ public class StringStartsWithOperator implements Operator<String> {
    * @param value the prefix to check for at the beginning of the input string
    * @return true if input starts with value, false otherwise (including when either value is null)
    */
+  // spotless:on
   @Override
   public boolean test(String input, String value) {
     if (input == null || value == null) {

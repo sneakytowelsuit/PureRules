@@ -2,6 +2,7 @@ package com.github.sneakytowelsuit.purerules.conditions;
 
 import com.github.sneakytowelsuit.purerules.engine.EngineMode;
 
+// spotless:off
 /**
  * Represents a logical condition that can be evaluated. This interface is sealed and only permits
  * {@link Rule} and {@link RuleGroup} as implementations.
@@ -75,7 +76,9 @@ import com.github.sneakytowelsuit.purerules.engine.EngineMode;
  * @see com.github.sneakytowelsuit.purerules.engine.PureRulesEngine
  * @see com.github.sneakytowelsuit.purerules.engine.EngineMode
  */
+// spotless:on
 public sealed interface Condition<InputType> permits Rule, RuleGroup {
+  // spotless:off
   /**
    * Gets the unique identifier for this condition.
    * 
@@ -87,8 +90,10 @@ public sealed interface Condition<InputType> permits Rule, RuleGroup {
    *
    * @return the unique identifier string for this condition
    */
+  // spotless:on
   public String getId();
 
+  // spotless:off
   /**
    * Gets the priority of this condition. Higher priority conditions are weighted heavier when
    * evaluating in probabilistic mode.
@@ -122,5 +127,6 @@ public sealed interface Condition<InputType> permits Rule, RuleGroup {
    *
    * @return the priority weight of this condition, or 1 to represent baseline priority
    */
+  // spotless:on
   public Integer getWeight();
 }

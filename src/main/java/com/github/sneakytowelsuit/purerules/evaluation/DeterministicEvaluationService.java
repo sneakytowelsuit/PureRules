@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+// spotless:off
 /**
  * Implementation of {@link IEvaluationService} that performs deterministic boolean evaluation of
  * rules and conditions.
@@ -33,12 +34,16 @@ import java.util.stream.Collectors;
  * @param <TInput> the type of input data to be evaluated
  * @param <TInputId> the type used to uniquely identify input instances
  */
+// spotless:on
 public class DeterministicEvaluationService<TInput, TInputId>
     implements IEvaluationService<TInput, TInputId> {
 
+  // spotless:off
   /** List of conditions to evaluate, defaulting to an empty list. */
+  // spotless:on
   private List<Condition<TInput>> conditions = List.of();
 
+  // spotless:off
   /**
    * Creates a new deterministic evaluation service with the specified conditions.
    *
@@ -79,10 +84,12 @@ public class DeterministicEvaluationService<TInput, TInputId>
    *
    * @param conditions the list of conditions (rules and rule groups) to evaluate
    */
+  // spotless:on
   public DeterministicEvaluationService(final List<Condition<TInput>> conditions) {
     this.conditions = conditions;
   }
 
+  // spotless:off
   /**
    * Evaluates all configured conditions against the input using deterministic boolean logic.
    *
@@ -116,6 +123,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
    * @param engineContextService the context service for field value caching and state management
    * @return a map where keys are condition IDs and values are their boolean evaluation results
    */
+  // spotless:on
   @Override
   public Map<String, Boolean> evaluate(
       TInput input, EngineContextService<TInput, TInputId> engineContextService) {
@@ -126,6 +134,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
                 condition -> evaluationConditions(input, condition, engineContextService)));
   }
 
+  // spotless:off
   /**
    * Traces the evaluation process for all configured conditions without returning results.
    *
@@ -162,6 +171,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
    * @param input the input data to trace evaluation for
    * @param engineContextService the context service for storing trace information
    */
+  // spotless:on
   @Override
   public void trace(TInput input, EngineContextService<TInput, TInputId> engineContextService) {
     conditions.forEach(condition -> traceCondition(input, condition, engineContextService));
@@ -287,6 +297,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
                 .build());
   }
 
+  // spotless:off
   /**
    * Evaluates a single condition, dispatching to the appropriate evaluation method based on the
    * condition type.
@@ -296,6 +307,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
    * @param engineContextService the context service for state management
    * @return the boolean result of the condition evaluation
    */
+  // spotless:on
   private boolean evaluationConditions(
       TInput input,
       Condition<TInput> condition,
@@ -306,6 +318,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
     };
   }
 
+  // spotless:off
   /**
    * Evaluates a rule group by processing its conditions according to the specified combinator
    * logic.
@@ -324,6 +337,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
    * @param engineContextService the context service for state management
    * @return the boolean result of the rule group evaluation
    */
+  // spotless:on
   private boolean evaluateRuleGroup(
       TInput input,
       RuleGroup<TInput> ruleGroup,
@@ -375,6 +389,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
     return result;
   }
 
+  // spotless:off
   /**
    * Evaluates an empty rule group based on its bias setting and inversion flag.
    *
@@ -387,6 +402,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
    * @param engineContextService the context service for storing evaluation results
    * @return the boolean result based on bias and inversion settings
    */
+  // spotless:on
   private boolean evaluateEmptyRuleGroup(
       TInput input,
       RuleGroup<TInput> ruleGroup,
@@ -412,6 +428,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
     return result;
   }
 
+  // spotless:off
   /**
    * Evaluates a single rule by extracting the field value, applying the operator, and comparing
    * against the rule's target value.
@@ -430,6 +447,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
    * @param engineContextService the context service for caching field values and results
    * @return true if the rule passes, false otherwise
    */
+  // spotless:on
   private <V> boolean evaluateRule(
       TInput input,
       Rule<TInput, V> rule,
@@ -462,6 +480,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
     return result;
   }
 
+  // spotless:off
   /**
    * Extracts and caches the field value from the input for the specified rule.
    *
@@ -475,6 +494,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
    * @param engineContextService the context service for caching field values
    * @return the extracted field value
    */
+  // spotless:on
   private <V> V getFieldValue(
       TInput input,
       Rule<TInput, V> rule,

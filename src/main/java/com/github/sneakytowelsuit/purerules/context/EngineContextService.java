@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.function.Function;
 import lombok.Getter;
 
+// spotless:off
 /**
  * Manages evaluation context for the PureRules engine, including field value caching and condition
  * evaluation state tracking.
@@ -35,30 +36,40 @@ import lombok.Getter;
  * @param <TInput> the type of input data being evaluated
  * @param <TInputId> the type used to uniquely identify input instances
  */
+// spotless:on
 @Getter
 public class EngineContextService<TInput, TInputId> {
 
+  // spotless:off
   /** Context for tracking condition evaluation results and metadata. */
+  // spotless:on
   private final ConditionContext<TInputId> conditionEvaluationContext;
 
+  // spotless:off
   /** Context for caching extracted field values to improve performance. */
+  // spotless:on
   private final FieldContext<TInputId> fieldContext;
 
+  // spotless:off
   /** Function to extract unique identifiers from input instances for context management. */
+  // spotless:on
   private final Function<TInput, TInputId> inputIdGetter;
 
+  // spotless:off
   /**
    * Creates a new engine context service with the specified input ID extraction function.
    *
    * @param inputIdGetter function that extracts a unique identifier from input instances, used for
    *     context key generation and caching
    */
+  // spotless:on
   public EngineContextService(Function<TInput, TInputId> inputIdGetter) {
     this.conditionEvaluationContext = new ConditionContext<>();
     this.fieldContext = new FieldContext<>();
     this.inputIdGetter = inputIdGetter;
   }
 
+  // spotless:off
   /**
    * Flushes cached context information for a specific input instance.
    *
@@ -87,6 +98,7 @@ public class EngineContextService<TInput, TInputId> {
    *
    * @param input the input instance whose context should be flushed
    */
+  // spotless:on
   public void flush(TInput input) {
     List<ConditionContextKey<TInputId>> conditionContextKeysToRemove =
         conditionEvaluationContext.getConditionContextMap().keySet().stream()
@@ -104,6 +116,7 @@ public class EngineContextService<TInput, TInputId> {
     fieldContextKeysToRemove.forEach(fieldContext.getFieldContextMap()::remove);
   }
 
+  // spotless:off
   /**
    * Clears all cached context information for all input instances.
    *
@@ -141,6 +154,7 @@ public class EngineContextService<TInput, TInputId> {
    * }
    * }</pre>
    */
+  // spotless:on
   public void flushAll() {
     // Clear the condition evaluation context to reset state for the next evaluation
     conditionEvaluationContext.getConditionContextMap().clear();

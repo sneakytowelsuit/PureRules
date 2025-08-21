@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+// spotless:off
 /**
  * The main rules engine for evaluating conditions against input data.
  *
@@ -72,21 +73,29 @@ import java.util.stream.Collectors;
  * @see com.github.sneakytowelsuit.purerules.conditions.RuleGroup
  * @see com.github.sneakytowelsuit.purerules.conditions.Condition
  */
+// spotless:on
 public class PureRulesEngine<TInput, TInputId> {
+  // spotless:off
   /** The list of conditions (rules and rule groups) configured for this engine. */
+  // spotless:on
   private final List<Condition<TInput>> conditions;
 
+  // spotless:off
   /**
    * The evaluation service used to evaluate the rules based on the engine mode. This service
    * encapsulates the logic for evaluating conditions and combining results.
    */
+  // spotless:on
   private final IEvaluationService<TInput, TInputId> evaluationService;
 
+  // spotless:off
   /** 
    * The context service for managing field value caching and evaluation state tracking.
    */
+  // spotless:on
   private final EngineContextService<TInput, TInputId> engineContextService;
 
+  // spotless:off
   /**
    * Creates a new probabilistic rules engine with weighted scoring evaluation.
    *
@@ -124,6 +133,7 @@ public class PureRulesEngine<TInput, TInputId> {
    * @param conditions the list of conditions to evaluate
    * @return a new probabilistic rules engine
    */
+  // spotless:on
   public static <T, I> PureRulesEngine<T, I> getProbabilisticEngine(
       Function<T, I> inputIdGetter,
       Float minimumProbabilityThreshold,
@@ -131,6 +141,7 @@ public class PureRulesEngine<TInput, TInputId> {
     return new PureRulesEngine<>(inputIdGetter, minimumProbabilityThreshold, conditions);
   }
 
+  // spotless:off
   /**
    * Creates a new instance of PureRulesEngine with the specified rule groups and minimum
    * probability threshold for PROBABILISTIC mode.
@@ -140,20 +151,24 @@ public class PureRulesEngine<TInput, TInputId> {
    *     engine mode. Results below this threshold will be considered false
    * @param conditions the list of conditions to be evaluated by the engine
    */
+  // spotless:on
   private PureRulesEngine(
       Function<TInput, TInputId> inputIdGetter,
       Float minimumProbabilityThreshold,
       List<Condition<TInput>> conditions) {
     this.conditions = conditions;
+    // spotless:off
     /**
      * The minimum probability threshold for the PROBABILISTIC engine mode. If the calculated
      * probability is below this threshold, the result will be considered false.
      */
+    // spotless:on
     this.evaluationService =
         new ProbabilisticEvaluationService<>(conditions, minimumProbabilityThreshold);
     this.engineContextService = new EngineContextService<>(inputIdGetter);
   }
 
+  // spotless:off
   /**
    * Creates a new deterministic rules engine with boolean evaluation.
    *
@@ -188,17 +203,20 @@ public class PureRulesEngine<TInput, TInputId> {
    * @param conditions the list of conditions to evaluate
    * @return a new deterministic rules engine
    */
+  // spotless:on
   public static <T, I> PureRulesEngine<T, I> getDeterministicEngine(
       Function<T, I> inputIdGetter, List<Condition<T>> conditions) {
     return new PureRulesEngine<>(inputIdGetter, conditions);
   }
 
+  // spotless:off
   /**
    * Creates a new instance of PureRulesEngine for DETERMINISTIC mode.
    *
    * @param inputIdGetter function to extract unique identifiers from input instances for context management
    * @param conditions the list of conditions to be evaluated by the engine
    */
+  // spotless:on
   private PureRulesEngine(
       Function<TInput, TInputId> inputIdGetter, List<Condition<TInput>> conditions) {
     this.conditions = conditions;
@@ -206,24 +224,29 @@ public class PureRulesEngine<TInput, TInputId> {
     this.engineContextService = new EngineContextService<>(inputIdGetter);
   }
 
+  // spotless:off
   /**
    * Gets the evaluation service configured for this engine.
    *
    * @return the evaluation service handling rule processing logic
    */
+  // spotless:on
   private IEvaluationService<TInput, TInputId> getEvaluationService() {
     return this.evaluationService;
   }
 
+  // spotless:off
   /**
    * Gets the context service for field value caching and evaluation tracking.
    *
    * @return the engine context service managing evaluation state
    */
+  // spotless:on
   private EngineContextService<TInput, TInputId> getEngineContextService() {
     return this.engineContextService;
   }
 
+  // spotless:off
   /**
    * Evaluates all configured conditions against the provided input data.
    *
@@ -254,6 +277,7 @@ public class PureRulesEngine<TInput, TInputId> {
    *         was satisfied (true) or not satisfied (false). Returns an empty map if evaluation
    *         fails or no conditions are configured.
    */
+  // spotless:on
   public Map<String, Boolean> evaluate(TInput input) {
     Map<String, Boolean> results =
         this.getEvaluationService().evaluate(input, this.getEngineContextService());
@@ -265,6 +289,7 @@ public class PureRulesEngine<TInput, TInputId> {
     return results;
   }
 
+  // spotless:off
   /**
    * Evaluates all configured conditions against a list of input data items.
    *
@@ -290,6 +315,7 @@ public class PureRulesEngine<TInput, TInputId> {
    * @return a map where keys are input IDs (extracted using the configured inputIdGetter function)
    *         and values are the evaluation results for each input (same format as {@link #evaluate(Object)})
    */
+  // spotless:on
   public Map<TInputId, Map<String, Boolean>> evaluateAll(List<TInput> inputs) {
     return inputs.stream()
         .collect(

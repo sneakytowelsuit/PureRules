@@ -2,6 +2,7 @@ package com.github.sneakytowelsuit.purerules.conditions;
 
 import lombok.Getter;
 
+// spotless:off
 /**
  * Specifies the default result (bias) for a RuleGroup when it contains no conditions.
  *
@@ -35,12 +36,15 @@ import lombok.Getter;
  * @see RuleGroup
  * @see Combinator
  */
+// spotless:on
 @Getter
 public enum Bias {
   INCLUSIVE(true),
   EXCLUSIVE(false);
 
+  // spotless:off
   /** The default result of the RuleGroup when it contains no conditions. */
+  // spotless:on
   private final boolean biasResult;
 
   Bias(boolean biasResult) {

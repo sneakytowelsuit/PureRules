@@ -3,6 +3,7 @@ package com.github.sneakytowelsuit.purerules.conditions;
 import java.util.UUID;
 import lombok.*;
 
+// spotless:off
 /**
  * Represents a single rule condition that evaluates an input using a field extractor, an operator,
  * and a comparison value. The rule is uniquely identified and can be evaluated in the context of a
@@ -105,6 +106,7 @@ import lombok.*;
  * @see RuleGroup
  * @see com.github.sneakytowelsuit.purerules.engine.PureRulesEngine
  */
+// spotless:on
 @Builder
 @NoArgsConstructor(force = true)
 @AllArgsConstructor

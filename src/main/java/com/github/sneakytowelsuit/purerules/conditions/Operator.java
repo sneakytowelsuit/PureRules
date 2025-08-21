@@ -1,5 +1,6 @@
 package com.github.sneakytowelsuit.purerules.conditions;
 
+// spotless:off
 /**
  * Represents a comparison operator that tests a value extracted from input against an expected
  * value. Used by rules to perform logical comparisons.
@@ -87,7 +88,9 @@ package com.github.sneakytowelsuit.purerules.conditions;
  * @see Rule
  * @see Field
  */
+// spotless:on
 public interface Operator<TValue> {
+  // spotless:off
   /**
    * Tests the input value against the expected value using this operator's logic.
    *
@@ -123,5 +126,6 @@ public interface Operator<TValue> {
    * @param value the target value from the rule definition to compare against
    * @return true if the comparison is satisfied according to this operator's logic, false otherwise
    */
+  // spotless:on
   boolean test(TValue input, TValue value);
 }
