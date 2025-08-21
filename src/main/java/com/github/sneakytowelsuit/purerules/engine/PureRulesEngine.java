@@ -3,7 +3,7 @@ package com.github.sneakytowelsuit.purerules.engine;
 import com.github.sneakytowelsuit.purerules.conditions.Condition;
 import com.github.sneakytowelsuit.purerules.context.EngineContextService;
 import com.github.sneakytowelsuit.purerules.evaluation.DeterministicEvaluationService;
-import com.github.sneakytowelsuit.purerules.evaluation.EvaluationService;
+import com.github.sneakytowelsuit.purerules.evaluation.IEvaluationService;
 import com.github.sneakytowelsuit.purerules.evaluation.ProbabilisticEvaluationService;
 import java.util.Collections;
 import java.util.List;
@@ -18,7 +18,7 @@ public class PureRulesEngine<TInput, TInputId> {
    * The evaluation service used to evaluate the rules based on the engine mode. This service
    * encapsulates the logic for evaluating conditions and combining results.
    */
-  private final EvaluationService<TInput, TInputId> evaluationService;
+  private final IEvaluationService<TInput, TInputId> evaluationService;
 
   private final EngineContextService<TInput, TInputId> engineContextService;
 
@@ -63,7 +63,7 @@ public class PureRulesEngine<TInput, TInputId> {
     this.engineContextService = new EngineContextService<>(inputIdGetter);
   }
 
-  private EvaluationService<TInput, TInputId> getEvaluationService() {
+  private IEvaluationService<TInput, TInputId> getEvaluationService() {
     return this.evaluationService;
   }
 

@@ -23,7 +23,7 @@ import java.util.Map;
  * @param <TInput> the type of input data to be evaluated against the rules
  * @param <TInputId> the type used to uniquely identify input instances for context management
  */
-public interface EvaluationService<TInput, TInputId> {
+public interface IEvaluationService<TInput, TInputId> {
 
   /**
    * Evaluates all configured conditions against the provided input and returns a map of condition

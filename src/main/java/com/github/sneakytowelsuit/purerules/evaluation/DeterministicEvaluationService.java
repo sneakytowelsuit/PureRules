@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Implementation of {@link EvaluationService} that performs deterministic boolean evaluation of
+ * Implementation of {@link IEvaluationService} that performs deterministic boolean evaluation of
  * rules and conditions.
  *
  * <p>This service evaluates each condition as a strict boolean operation, returning true or false
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
  * @param <TInputId> the type used to uniquely identify input instances
  */
 public class DeterministicEvaluationService<TInput, TInputId>
-    implements EvaluationService<TInput, TInputId> {
+    implements IEvaluationService<TInput, TInputId> {
 
   /** List of conditions to evaluate, defaulting to an empty list. */
   private List<Condition<TInput>> conditions = List.of();
