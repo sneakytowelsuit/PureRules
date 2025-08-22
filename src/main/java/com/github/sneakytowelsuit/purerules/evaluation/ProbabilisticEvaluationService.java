@@ -406,14 +406,13 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
     int weightedTotalResult = totalResult.get() * ruleGroup.getWeight();
     int weightedTotalWeight = totalWeight.get() * ruleGroup.getWeight();
     float score = (float) weightedTotalResult / (float) weightedTotalWeight;
-    engineContextService
-    float score;
     if (weightedTotalWeight == 0) {
       score = 0.0f;
     } else {
       score = (float) weightedTotalResult / (float) weightedTotalWeight;
     }
     engineContextService
+        .getConditionEvaluationContext()
         .getConditionContextMap()
         .computeIfAbsent(
             new ConditionContextKey<>(
