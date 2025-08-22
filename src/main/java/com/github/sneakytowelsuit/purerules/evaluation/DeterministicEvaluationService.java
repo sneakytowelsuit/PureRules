@@ -8,7 +8,6 @@ import com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKe
 import com.github.sneakytowelsuit.purerules.context.condition.RuleContextValue;
 import com.github.sneakytowelsuit.purerules.context.condition.RuleGroupContextValue;
 import com.github.sneakytowelsuit.purerules.context.field.FieldContextKey;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;

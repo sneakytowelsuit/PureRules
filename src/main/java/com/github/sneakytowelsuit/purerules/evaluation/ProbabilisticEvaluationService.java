@@ -9,7 +9,6 @@ import com.github.sneakytowelsuit.purerules.context.condition.ConditionContextVa
 import com.github.sneakytowelsuit.purerules.context.condition.RuleContextValue;
 import com.github.sneakytowelsuit.purerules.context.condition.RuleGroupContextValue;
 import com.github.sneakytowelsuit.purerules.context.field.FieldContextKey;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -399,9 +398,9 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
           }
           totalWeight.addAndGet(nestedCtx.getMaximumResult());
           totalResult.addAndGet(nestedCtx.getResult());
-          }
         }
       }
+    }
     Instant endTime = Instant.now();
 
     int weightedTotalResult = totalResult.get() * ruleGroup.getWeight();

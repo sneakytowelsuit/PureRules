@@ -1,9 +1,8 @@
 package com.github.sneakytowelsuit.purerules.context.condition;
 
-import java.time.Duration;
-
 import com.github.sneakytowelsuit.purerules.conditions.Bias;
 import com.github.sneakytowelsuit.purerules.conditions.Combinator;
+import java.time.Duration;
 import lombok.Builder;
 import lombok.Getter;
 
