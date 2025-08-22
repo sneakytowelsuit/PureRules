@@ -1,5 +1,7 @@
 package com.github.sneakytowelsuit.purerules.context.condition;
 
+import java.time.Duration;
+
 import lombok.Builder;
 import lombok.Getter;
 
@@ -12,4 +14,5 @@ public final class RuleContextValue<V> implements ConditionContextValue {
   private String operator;
   private Integer result;
   private Integer maximumResult;
+  private Duration evaluationDuration;
 }
