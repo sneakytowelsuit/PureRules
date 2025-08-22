@@ -9,6 +9,8 @@ import com.github.sneakytowelsuit.purerules.context.condition.ConditionContextVa
 import com.github.sneakytowelsuit.purerules.context.condition.RuleContextValue;
 import com.github.sneakytowelsuit.purerules.context.condition.RuleGroupContextValue;
 import com.github.sneakytowelsuit.purerules.context.field.FieldContextKey;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -260,8 +262,22 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
       TInput input,
       Rule<TInput, V> rule,
       EngineContextService<TInput, TInputId> engineContextService) {
+    Instant startTime = Instant.now();
     if (rule == null) {
+      Instant endTime = Instant.now();
       // Default to false if the rule is null
+      engineContextService
+          .getConditionEvaluationContext()
+          .getConditionContextMap()
+          .put(
+              new ConditionContextKey<>(
+                  engineContextService.getInputIdGetter().apply(input), rule.getId()),
+              RuleContextValue.builder()
+                  .id(rule.getId())
+                  .result(0)
+                  .evaluationDuration(Duration.between(startTime, endTime))
+                  .maximumResult(rule.getWeight())
+                  .build());
       return false;
     }
     assert rule.getField() != null;
@@ -271,6 +287,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
     V fieldValue = this.getFieldValue(input, rule, engineContextService);
     V ruleValue = rule.getValue();
     boolean result = rule.getOperator().test(fieldValue, ruleValue);
+    Instant endTime = Instant.now();
     engineContextService
         .getConditionEvaluationContext()
         .getConditionContextMap()
@@ -281,6 +298,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
                 .id(rule.getId())
                 .operator(rule.getOperator().getClass().getName())
                 .result(result ? 1 : 0)
+                .evaluationDuration(Duration.between(startTime, endTime))
                 // Rules are weighed based solely on their weight since they are leaf nodes
                 .maximumResult(rule.getWeight())
                 .build());
@@ -347,10 +365,9 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
     if (ruleGroup.getConditions().isEmpty()) {
       return evaluateEmptyRuleGroup(input, ruleGroup, engineContextService) == 1;
     }
-
+    Instant startTime = Instant.now();
     AtomicInteger totalResult = new AtomicInteger(0);
     AtomicInteger totalWeight = new AtomicInteger(0);
-    AtomicInteger passingConditions = new AtomicInteger(0);
 
     for (Condition<TInput> condition : ruleGroup.getConditions()) {
       switch (condition) {
@@ -360,7 +377,6 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
           totalWeight.addAndGet(ruleWeight);
           if (ruleResult) {
             totalResult.addAndGet(ruleWeight);
-            passingConditions.incrementAndGet();
           }
         }
         case RuleGroup<TInput> nestedGroup -> {
@@ -382,36 +398,19 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
           }
           totalWeight.addAndGet(nestedCtx.getMaximumResult());
           totalResult.addAndGet(nestedCtx.getResult());
-          if (nestedCtx.getResult() > 0) {
-            passingConditions.incrementAndGet();
-          }
         }
       }
     }
+    Instant endTime = Instant.now();
 
-    // Apply combinator-specific logic for probabilistic evaluation
-    int finalTotalResult = 0;
-    int finalTotalWeight = totalWeight.get();
-
-    switch (ruleGroup.getCombinator()) {
-      case OR -> {
-        // For OR: if any condition passes, group gets full possible weight
-        finalTotalResult = passingConditions.get() > 0 ? finalTotalWeight : 0;
-      }
-      case AND -> {
-        // For AND in probabilistic mode: if any meaningful contribution exists, give full credit
-        // This makes probabilistic evaluation more generous than deterministic evaluation
-        finalTotalResult = totalResult.get() > 0 ? finalTotalWeight : 0;
-      }
+    int weightedTotalResult = totalResult.get() * ruleGroup.getWeight();
+    int weightedTotalWeight = totalWeight.get() * ruleGroup.getWeight();
+    float score = (float) weightedTotalResult / (float) weightedTotalWeight;
+    if (weightedTotalWeight == 0) {
+      score = 0.0f;
+    } else {
+      score = (float) weightedTotalResult / (float) weightedTotalWeight;
     }
-
-    if (finalTotalWeight == 0) {
-      finalTotalResult = 0;
-    }
-    // Apply RuleGroup weight to totalResult and totalWeight
-    int groupWeight = ruleGroup.getWeight() != null ? ruleGroup.getWeight() : 1;
-    int weightedTotalResult = finalTotalResult * groupWeight;
-    int weightedTotalWeight = finalTotalWeight * groupWeight;
     engineContextService
         .getConditionEvaluationContext()
         .getConditionContextMap()
@@ -422,11 +421,10 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
                 RuleGroupContextValue.builder()
                     .bias(ruleGroup.getBias())
                     .result(weightedTotalResult)
+                    .evaluationDuration(Duration.between(startTime, endTime))
                     .combinator(ruleGroup.getCombinator())
                     .maximumResult(weightedTotalWeight)
                     .build());
-
-    float score = weightedTotalWeight == 0 ? 0f : (float) weightedTotalResult / weightedTotalWeight;
     return score >= minProbability;
   }
 
@@ -455,10 +453,12 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
       TInput input,
       RuleGroup<TInput> ruleGroup,
       EngineContextService<TInput, TInputId> engineContextService) {
+    Instant startTime = Instant.now();
     ConditionContextKey<TInputId> conditionContextKey =
         new ConditionContextKey<>(
             engineContextService.getInputIdGetter().apply(input), ruleGroup.getId());
     int result = ruleGroup.getBias().isBiasResult() ^ ruleGroup.isInverted() ? 1 : 0;
+    Instant endTime = Instant.now();
     return engineContextService
         .getConditionEvaluationContext()
         .getConditionContextMap()
@@ -467,6 +467,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
             _ignored ->
                 RuleGroupContextValue.builder()
                     .bias(ruleGroup.getBias())
+                    .evaluationDuration(Duration.between(startTime, endTime))
                     .result(result)
                     // Empty rule groups inherently cannot have any conditions that contribute to
                     // the result,
@@ -497,12 +498,14 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
       TInput input,
       Rule<TInput, V> rule,
       EngineContextService<TInput, TInputId> engineContextService) {
+    Instant startTime = Instant.now();
     assert rule.getField() != null;
     assert rule.getOperator() != null;
     assert rule.getValue() != null;
     V fieldValue = this.getFieldValue(input, rule, engineContextService);
     V ruleValue = rule.getValue();
     boolean result = rule.getOperator().test(fieldValue, ruleValue);
+    Instant endTime = Instant.now();
     int weightedResult = (result ? 1 : 0) * rule.getWeight();
     engineContextService
         .getConditionEvaluationContext()
@@ -514,6 +517,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
                 .id(rule.getId())
                 .operator(rule.getOperator().getClass().getName())
                 .result(weightedResult)
+                .evaluationDuration(Duration.between(startTime, endTime))
                 .maximumResult(rule.getWeight())
                 .fieldValue(fieldValue)
                 .valueValue(ruleValue)
@@ -530,7 +534,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
     }
     int totalResult = 0;
     int totalWeight = 0;
-
+    Instant startTime = Instant.now();
     for (Condition<TInput> condition : ruleGroup.getConditions()) {
       switch (condition) {
         case Rule<TInput, ?> rule -> {
@@ -552,7 +556,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
         totalWeight += ctx.getMaximumResult();
       }
     }
-
+    Instant endTime = Instant.now();
     int groupWeight = ruleGroup.getWeight() != null ? ruleGroup.getWeight() : 1;
     int weightedTotalResult = totalResult * groupWeight;
     int weightedTotalWeight = totalWeight * groupWeight;
@@ -567,6 +571,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
                 .bias(ruleGroup.getBias())
                 .result(weightedTotalResult)
                 .combinator(ruleGroup.getCombinator())
+                .evaluationDuration(Duration.between(startTime, endTime))
                 .maximumResult(weightedTotalWeight)
                 .build());
   }
@@ -578,7 +583,9 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
     ConditionContextKey<TInputId> conditionContextKey =
         new ConditionContextKey<>(
             engineContextService.getInputIdGetter().apply(input), ruleGroup.getId());
+    Instant startTime = Instant.now();
     int result = ruleGroup.getBias().isBiasResult() ^ ruleGroup.isInverted() ? 1 : 0;
+    Instant endTime = Instant.now();
     engineContextService
         .getConditionEvaluationContext()
         .getConditionContextMap()
@@ -586,6 +593,7 @@ public class ProbabilisticEvaluationService<TInput, TInputId>
             conditionContextKey,
             RuleGroupContextValue.builder()
                 .bias(ruleGroup.getBias())
+                .evaluationDuration(Duration.between(startTime, endTime))
                 .result(result)
                 .combinator(ruleGroup.getCombinator())
                 .maximumResult(0)

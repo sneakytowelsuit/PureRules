@@ -8,6 +8,8 @@ import com.github.sneakytowelsuit.purerules.context.condition.ConditionContextKe
 import com.github.sneakytowelsuit.purerules.context.condition.RuleContextValue;
 import com.github.sneakytowelsuit.purerules.context.condition.RuleGroupContextValue;
 import com.github.sneakytowelsuit.purerules.context.field.FieldContextKey;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -197,10 +199,11 @@ public class DeterministicEvaluationService<TInput, TInputId>
     assert rule.getOperator() != null;
     assert rule.getField() != null;
     assert rule.getValue() != null;
-
+    Instant startTime = Instant.now();
     V fieldValue = this.getFieldValue(input, rule, engineContextService);
     V valueValue = rule.getValue();
     boolean result = rule.getOperator().test(fieldValue, valueValue);
+    Instant endTime = Instant.now();
     engineContextService
         .getConditionEvaluationContext()
         .getConditionContextMap()
@@ -213,6 +216,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
                 .fieldValue(fieldValue)
                 .valueValue(valueValue)
                 .operator(rule.getOperator().getClass().getName())
+                .evaluationDuration(Duration.between(startTime, endTime))
                 .build());
   }
 
@@ -223,7 +227,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
     if (ruleGroup.getConditions().isEmpty()) {
       traceEmptyRuleGroup(input, ruleGroup, engineContextService);
     }
-
+    Instant startTime = Instant.now();
     ruleGroup.getConditions().stream()
         .forEach(
             condition -> {
@@ -233,6 +237,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
                     traceRuleGroup(input, nestedRuleGroup, engineContextService);
               }
             });
+    Instant endTime = Instant.now();
     // After all conditions are traced, update parent RuleGroup context
     ConditionContextKey<TInputId> ruleGroupConditionKey =
         new ConditionContextKey<>(
@@ -272,6 +277,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
                 .combinator(ruleGroup.getCombinator())
                 .result(ruleGroupResult)
                 .maximumResult(ruleGroupMaximumResult)
+                .evaluationDuration(Duration.between(startTime, endTime))
                 .build());
   }
 
@@ -282,7 +288,9 @@ public class DeterministicEvaluationService<TInput, TInputId>
     ConditionContextKey<TInputId> conditionContextKey =
         new ConditionContextKey<>(
             engineContextService.getInputIdGetter().apply(input), ruleGroup.getId());
+    Instant startTime = Instant.now();
     boolean result = ruleGroup.getBias().isBiasResult() ^ ruleGroup.isInverted();
+    Instant endTime = Instant.now();
     engineContextService
         .getConditionEvaluationContext()
         .getConditionContextMap()
@@ -291,6 +299,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
             RuleGroupContextValue.builder()
                 .bias(ruleGroup.getBias())
                 .maximumResult(0)
+                .evaluationDuration(Duration.between(startTime, endTime))
                 .id(ruleGroup.getId())
                 .result(result ? 1 : 0)
                 .combinator(ruleGroup.getCombinator())
@@ -357,6 +366,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
     ConditionContextKey<TInputId> contextKey =
         new ConditionContextKey<TInputId>(
             engineContextService.getInputIdGetter().apply(input), ruleGroup.getId());
+    Instant startTime = Instant.now();
     boolean result =
         switch (ruleGroup.getCombinator()) {
               case AND ->
@@ -375,6 +385,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
                                       input, ruleGroupCondition, engineContextService));
             }
             ^ ruleGroup.isInverted();
+    Instant endTime = Instant.now();
     engineContextService
         .getConditionEvaluationContext()
         .getConditionContextMap()
@@ -385,6 +396,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
                 .combinator(ruleGroup.getCombinator())
                 .maximumResult(ruleGroup.getConditions().size())
                 .bias(ruleGroup.getBias())
+                .evaluationDuration(Duration.between(startTime, endTime))
                 .build());
     return result;
   }
@@ -407,10 +419,12 @@ public class DeterministicEvaluationService<TInput, TInputId>
       TInput input,
       RuleGroup<TInput> ruleGroup,
       EngineContextService<TInput, TInputId> engineContextService) {
+    Instant startTime = Instant.now();
     ConditionContextKey<TInputId> conditionContextKey =
         new ConditionContextKey<>(
             engineContextService.getInputIdGetter().apply(input), ruleGroup.getId());
     boolean result = ruleGroup.getBias().isBiasResult() ^ ruleGroup.isInverted();
+    Instant endTime = Instant.now();
     engineContextService
         .getConditionEvaluationContext()
         .getConditionContextMap()
@@ -421,6 +435,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
                 .combinator(ruleGroup.getCombinator())
                 .id(ruleGroup.getId())
                 .result(result ? 1 : 0)
+                .evaluationDuration(Duration.between(startTime, endTime))
                 .maximumResult(
                     ruleGroup.getWeight()
                         * ruleGroup.getConditions().stream().mapToInt(Condition::getWeight).sum())
@@ -458,10 +473,12 @@ public class DeterministicEvaluationService<TInput, TInputId>
     assert rule.getOperator() != null;
     assert rule.getField() != null;
     assert rule.getValue() != null;
+    Instant startTime = Instant.now();
 
     V fieldValue = this.getFieldValue(input, rule, engineContextService);
     V valueValue = rule.getValue();
     boolean result = rule.getOperator().test(fieldValue, valueValue);
+    Instant endTime = Instant.now();
     ConditionContextKey<TInputId> conditionContextKey =
         new ConditionContextKey<>(
             engineContextService.getInputIdGetter().apply(input), rule.getId());
@@ -476,6 +493,7 @@ public class DeterministicEvaluationService<TInput, TInputId>
                 .fieldValue(fieldValue)
                 .valueValue(valueValue)
                 .operator(rule.getOperator().getClass().getName())
+                .evaluationDuration(Duration.between(startTime, endTime))
                 .build());
     return result;
   }

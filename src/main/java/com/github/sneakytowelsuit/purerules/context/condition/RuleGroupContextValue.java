@@ -2,6 +2,7 @@ package com.github.sneakytowelsuit.purerules.context.condition;
 
 import com.github.sneakytowelsuit.purerules.conditions.Bias;
 import com.github.sneakytowelsuit.purerules.conditions.Combinator;
+import java.time.Duration;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -13,4 +14,5 @@ public final class RuleGroupContextValue implements ConditionContextValue {
   private Bias bias;
   private Integer maximumResult;
   private Integer result;
+  private Duration evaluationDuration;
 }
